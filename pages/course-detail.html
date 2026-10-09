@@ -54,12 +54,24 @@
         </div>
       </div>
 
-      <div class="write-review-header">
-        <span> Write some reviews </span>
+      <!-- Write some Review Section -->
+      <div class="section-title-wrap">
+        <div class="section-accent-bar"></div>
+        <h2 class="section-title-text">Write some Review</h2>
       </div>
-      <!-- Write Review button -->
-      <a href="write-review.html" id="write-btn" class="btn btn-primary btn-full mb-16">
-        ✏️ เขียนรีวิว
+
+      <!-- Write Review Card -->
+      <a href="write-review.html" id="write-btn" class="write-review-card">
+        <div class="write-review-card-text">
+          <div>คุณได้รับสิทธิ์แบ่งปันประสบการณ์</div>
+          <div>รายวิชา <span id="write-course-code"></span></div>
+        </div>
+        <div class="write-review-card-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+          </svg>
+        </div>
       </a>
 
       <!-- Reviews -->
@@ -119,8 +131,10 @@
       if (btn) btn.classList.toggle("open", isHidden);
     }
 
-    // Pass code to write-review
+    // Pass code to write-review & update card
     document.getElementById("write-btn").href = `write-review.html?code=${code}`;
+    const writeCourseCode = document.getElementById("write-course-code");
+    if (writeCourseCode) writeCourseCode.textContent = code;
 
     // Render reviews
     const reviews = getReviews(code);

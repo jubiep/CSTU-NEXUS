@@ -104,12 +104,81 @@
   margin-bottom: 18px;
 }
 
-/* Write review header prompt */
-.write-review-header {
-  margin-bottom: 12px;
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--gray-600);
+/* ── Section Title with Accent Bar (Reusable) ── */
+.section-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.section-accent-bar {
+  width: 4px;
+  height: 18px;
+  background: #F5C518;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.section-title-text {
+  font-size: 18px;
+  font-weight: 700;
+  color: #111111;
+  line-height: 1.2;
+}
+
+/* ── Write Review Card ── */
+.write-review-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #FFFFFF;
+  border-radius: 18px;
+  padding: 18px 20px;
+  border: 1px solid #F0F0F0;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+  text-decoration: none;
+  color: inherit;
+  margin-bottom: 24px;
+  transition: transform 0.15s, box-shadow 0.15s;
+  cursor: pointer;
+}
+
+.write-review-card:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+}
+
+.write-review-card:active {
+  transform: scale(0.99);
+}
+
+.write-review-card-text {
+  font-size: 13.5px;
+  color: #71717A;
+  line-height: 1.45;
+  font-weight: 500;
+}
+
+.write-review-card-icon {
+  color: #71717A;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-left: 12px;
+}
+
+.write-review-card-icon svg {
+  width: 24px;
+  height: 24px;
+  stroke: #71717A;
+  transition: transform 0.15s, stroke 0.15s;
+}
+
+.write-review-card:hover .write-review-card-icon svg {
+  stroke: #111111;
+  transform: scale(1.05);
 }
 
 /* Review Item */
