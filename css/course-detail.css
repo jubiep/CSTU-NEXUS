@@ -2,36 +2,106 @@
    CSTU NEXUS - Course Detail Page Styles (course-detail.html)
    ========================================== */
 
-/* Course Detail Header */
+/* ── Course Detail Header (UI Section ส่วนบน) ── */
 .course-detail-header {
-  margin-bottom: 18px;
-}
-.course-detail-header .course-code {
-  font-size: 20px;
-  font-weight: 700;
-  color: var(--red);
-}
-.course-detail-header .course-fullname {
-  font-size: 14px;
-  color: var(--gray-600);
-  margin-top: 2px;
-}
-.course-detail-header .course-teacher {
-  font-size: 13px;
-  color: var(--gray-400);
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
   margin-top: 4px;
+  margin-bottom: 24px;
 }
 
-/* Section Badge */
-.section-badge {
-  background: var(--red);
-  color: var(--white);
-  font-size: 12px;
+.course-header-left {
+  display: flex;
+  align-items: stretch;
+  gap: 12px;
+  flex: 1;
+}
+
+/* แถบเส้นสีเหลืองด้านซ้าย */
+.course-accent-bar {
+  width: 4px;
+  background: #F5C518;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.course-header-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.course-header-info .course-code {
+  font-size: 24px;
+  font-weight: 800;
+  color: #111111;
+  line-height: 1.15;
+  letter-spacing: -0.3px;
+}
+
+.course-header-info .course-fullname {
+  font-size: 13.5px;
+  color: #71717A;
+  margin-top: 4px;
+  line-height: 1.35;
+  font-weight: 400;
+  max-width: 230px;
+}
+
+.course-header-info .course-teacher {
+  font-size: 13.5px;
   font-weight: 600;
-  padding: 4px 12px;
-  border-radius: var(--radius-sm);
+  color: #1F2937;
+  margin-top: 8px;
+  line-height: 1.3;
+}
+
+/* ปุ่ม Section สีเหลืองมุมขวาบน */
+.section-pill-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #FFD54F;
+  color: #1E1E1E;
+  font-family: var(--font);
+  font-size: 13px;
+  font-weight: 600;
+  padding: 7px 16px;
+  border-radius: 999px;
+  border: none;
   cursor: pointer;
+  box-shadow: 0 4px 14px rgba(254, 208, 83, 0.55);
+  transition: transform 0.15s, box-shadow 0.15s, filter 0.15s;
+  flex-shrink: 0;
   user-select: none;
+}
+
+.section-pill-btn:hover {
+  filter: brightness(0.96);
+  box-shadow: 0 4px 16px rgba(254, 208, 83, 0.65);
+}
+
+.section-pill-btn:active {
+  transform: scale(0.97);
+}
+
+.section-pill-btn svg {
+  width: 14px;
+  height: 14px;
+  stroke: #1E1E1E;
+  stroke-width: 2.5;
+  transition: transform 0.2s;
+}
+
+.section-pill-btn.open svg {
+  transform: rotate(180deg);
+}
+
+/* แผงเลือก Section */
+.section-panel {
+  margin-top: -12px;
+  margin-bottom: 18px;
 }
 
 /* Write review header prompt */

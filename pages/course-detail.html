@@ -13,21 +13,41 @@
 <body>
   <div class="app-shell">
     <div class="topbar">
-      <a href="courses.html" style="color:var(--white);font-size:22px;text-decoration:none;line-height:1;">‹</a>
-      <span class="topbar-title" id="topbar-code">รายวิชา</span>
-      <span class="section-badge" id="section-badge" onclick="toggleSection()">Section ▾</span>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <a href="courses.html" style="color:var(--white);font-size:22px;text-decoration:none;line-height:1;" title="ย้อนกลับ">‹</a>
+        <span class="topbar-logo">CSTU <span>NEXUS</span></span>
+      </div>
+      <button class="btn-logout" onclick="logout()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/>
+          <polyline points="16 17 21 12 16 7"/>
+          <line x1="21" y1="12" x2="9" y2="12"/>
+        </svg>
+        Log out
+      </button>
     </div>
 
     <div class="page-content">
-      <!-- Course header -->
+      <!-- Course header (UI Section ส่วนบน) -->
       <div class="course-detail-header">
-        <div class="course-code" id="detail-code"></div>
-        <div class="course-fullname" id="detail-name"></div>
-        <div class="course-teacher" id="detail-teacher"></div>
+        <div class="course-header-left">
+          <div class="course-accent-bar"></div>
+          <div class="course-header-info">
+            <h1 class="course-code" id="detail-code"></h1>
+            <div class="course-fullname" id="detail-name"></div>
+            <div class="course-teacher" id="detail-teacher"></div>
+          </div>
+        </div>
+        <button class="section-pill-btn" id="section-badge" onclick="toggleSection()" type="button">
+          <span>Section</span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
+        </button>
       </div>
 
       <!-- Section selector (hidden by default) -->
-      <div id="section-panel" style="display:none;margin-bottom:14px;">
+      <div id="section-panel" class="section-panel" style="display:none;">
         <div class="card" style="padding:12px;">
           <div style="font-size:13px;font-weight:600;margin-bottom:8px;color:var(--gray-600);">เลือก Section</div>
           <div id="section-list" style="display:flex;flex-wrap:wrap;gap:8px;"></div>
@@ -71,7 +91,8 @@
     }
 
     // Fill header
-    document.getElementById("topbar-code").textContent = code;
+    const topbarCode = document.getElementById("topbar-code");
+    if (topbarCode) topbarCode.textContent = code;
     document.getElementById("detail-code").textContent = code;
     document.getElementById("detail-name").textContent = course.name;
     document.getElementById("detail-teacher").textContent = course.teacher;
@@ -82,12 +103,20 @@
       const btn = document.createElement("button");
       btn.className = "btn btn-outline btn-sm";
       btn.textContent = "Section " + s;
+      btn.onclick = () => {
+        const badgeText = document.querySelector("#section-badge span");
+        if (badgeText) badgeText.textContent = "Section " + s;
+        toggleSection();
+      };
       sectionList.appendChild(btn);
     });
 
     function toggleSection() {
       const panel = document.getElementById("section-panel");
-      panel.style.display = panel.style.display === "none" ? "block" : "none";
+      const btn = document.getElementById("section-badge");
+      const isHidden = panel.style.display === "none" || !panel.style.display;
+      panel.style.display = isHidden ? "block" : "none";
+      if (btn) btn.classList.toggle("open", isHidden);
     }
 
     // Pass code to write-review
