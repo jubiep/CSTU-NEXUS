@@ -67,20 +67,17 @@
           <div>รายวิชา <span id="write-course-code"></span></div>
         </div>
         <div class="write-review-card-icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-          </svg>
+          <img src="../src/edit-icon.png" alt="edit icon" height="30" width="30"/>
         </div>
       </a>
 
-      <!-- Reviews -->
-      <div class="section-header">
-        <span class="section-title">รีวิวทั้งหมด</span>
-        <span class="text-muted" id="review-count"></span>
+      <!-- Reviews Section -->
+      <div class="section-title-wrap">
+        <div class="section-accent-bar"></div>
+        <h2 class="section-title-text">Review</h2>
       </div>
 
-      <div id="review-list"></div>
+      <div id="review-list" class="review-list"></div>
 
       <!-- Pagination -->
       <div class="pagination" id="pagination"></div>
@@ -138,28 +135,28 @@
 
     // Render reviews
     const reviews = getReviews(code);
-    document.getElementById("review-count").textContent = `${reviews.length} รีวิว`;
-
     const reviewList = document.getElementById("review-list");
-    if (reviews.length === 0) {
+    if (!reviews || reviews.length === 0) {
       reviewList.innerHTML = `<p style="text-align:center;color:var(--gray-400);padding:32px 0;font-size:14px;">ยังไม่มีรีวิว — เป็นคนแรกที่รีวิวรายวิชานี้!</p>`;
     } else {
       reviews.forEach(r => {
-        const tags = r.tags.map(t =>
-          `<span class="badge-tag tag-ok">${t}</span>`
-        ).join('');
+        const yearText = r.year ? `ชั้นปีที่ ${r.year}` : '';
+        const dateText = r.date || '10/10/2569';
         reviewList.innerHTML += `
-          <div class="review-item">
-            <div class="review-header">
-              <div class="review-avatar">🎓</div>
-              <div class="review-meta">
-                <div class="review-name">Anonymous
-                  <span class="review-anon">รหัส : ${r.studentId}</span>
+          <div class="review-card">
+            <div class="review-card-top">
+              <div class="review-user-info">
+                <div class="review-verified-shield">
+                  <img src="../src/verify-icon.png" alt="verified icon" height="30" width="30"/>
                 </div>
-                <div>${tags}</div>
+                <span class="review-student-id">${r.studentId || '6600000000'}</span>
+                <span class="review-student-year">${yearText}</span>
               </div>
+              <span class="review-date">${dateText}</span>
             </div>
-            <p class="review-text">${r.text}</p>
+            <div class="review-comment-box">
+              <p class="review-comment-text">${r.text}</p>
+            </div>
           </div>`;
       });
     }

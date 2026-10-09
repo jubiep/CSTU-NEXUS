@@ -28,12 +28,12 @@ const mockCourses = [
 // ── Mock reviews ────────────────────────────
 const mockReviews = {
   "CS261": [
-    { id: 1, anonymous: true, studentId: "680xxx1234", tags: ["เน้นทฤษฎี","เน้นคะแนน"], text: "อาจารย์อธิบายมาก สอนเข้าใจ ไม่โกรธกันไป", workload: "ปานกลาง", style: "ทฤษฎี", detail: "ละเอียด" },
-    { id: 2, anonymous: true, studentId: "680xxx5678", tags: ["เน้นทฤษฎี","เน้นคะแนน"], text: "อาจารย์อธิบายมาก สอนเข้าใจ ไม่โกรธกันไป", workload: "น้อย", style: "ปฏิบัติ", detail: "กลาง" },
-    { id: 3, anonymous: true, studentId: "680xxx9012", tags: ["เน้นทฤษฎี","เน้นคะแนน"], text: "อาจารย์อธิบายมาก สอนเข้าใจ ไม่โกรธกันไป", workload: "มาก", style: "ทฤษฎี", detail: "กลาง" },
+    { id: 1, anonymous: true, studentId: "6600000000", year: 4, date: "10/10/2569", tags: ["เน้นทฤษฎี", "เน้นทฤษฎี"], text: "อาจารย์สอนดีมาก สอนเข้าใจ ไม่เร็วเกินไป", workload: "ปานกลาง", style: "ทฤษฎี", detail: "ละเอียด" },
+    { id: 2, anonymous: true, studentId: "6700000000", year: 3, date: "10/10/2569", tags: ["เน้นทฤษฎี", "เน้นทฤษฎี"], text: "อาจารย์สอนดีมาก สอนเข้าใจ ไม่เร็วเกินไป", workload: "น้อย", style: "ปฏิบัติ", detail: "กลาง" },
+    { id: 3, anonymous: true, studentId: "6800000000", year: 2, date: "10/10/2569", tags: ["เน้นทฤษฎี", "เน้นทฤษฎี"], text: "อาจารย์สอนดีมาก สอนเข้าใจ ไม่เร็วเกินไป", workload: "มาก", style: "ทฤษฎี", detail: "กลาง" },
   ],
   "CS262": [
-    { id: 1, anonymous: true, studentId: "680xxx1111", tags: ["เน้นปฏิบัติ"], text: "งาน Lab เยอะ แต่ได้ความรู้จริง", workload: "มาก", style: "ปฏิบัติ", detail: "ละเอียด" },
+    { id: 1, anonymous: true, studentId: "6800000000", year: 2, date: "10/10/2569", tags: ["เน้นปฏิบัติ"], text: "งาน Lab เยอะ แต่ได้ความรู้จริง", workload: "มาก", style: "ปฏิบัติ", detail: "ละเอียด" },
   ],
 };
 
