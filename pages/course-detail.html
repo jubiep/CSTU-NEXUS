@@ -104,6 +104,16 @@
     document.getElementById("detail-name").textContent = course.name;
     document.getElementById("detail-teacher").textContent = course.teacher;
 
+    let selectedSection = getParam("section") || (course.sections && course.sections.length > 0 ? course.sections[0] : "001");
+    const badgeText = document.querySelector("#section-badge span");
+    if (badgeText) badgeText.textContent = "Section " + selectedSection;
+
+    function updateWriteBtn() {
+      const writeBtn = document.getElementById("write-btn");
+      if (writeBtn) writeBtn.href = `write-review.html?code=${code}&section=${selectedSection}`;
+    }
+    updateWriteBtn();
+
     // Section list
     const sectionList = document.getElementById("section-list");
     if (sectionList && course.sections) {
@@ -113,8 +123,9 @@
         btn.className = "section-btn-item";
         btn.textContent = "Section " + s;
         btn.onclick = () => {
-          const badgeText = document.querySelector("#section-badge span");
+          selectedSection = s;
           if (badgeText) badgeText.textContent = "Section " + s;
+          updateWriteBtn();
           toggleSection();
         };
         sectionList.appendChild(btn);
@@ -137,8 +148,6 @@
       }
     }
 
-    // Pass code to write-review & update card
-    document.getElementById("write-btn").href = `write-review.html?code=${code}`;
     const writeCourseCode = document.getElementById("write-course-code");
     if (writeCourseCode) writeCourseCode.textContent = code;
 
