@@ -40,17 +40,15 @@
         </div>
         <button class="section-pill-btn" id="section-badge" onclick="toggleSection()" type="button">
           <span>Section</span>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="6 9 12 15 18 9"></polyline>
-          </svg>
+          <img src="../src/chevron-down-icon.png" alt="chevron down icon" height="14" width="14"/>
         </button>
       </div>
 
       <!-- Section selector (hidden by default) -->
       <div id="section-panel" class="section-panel" style="display:none;">
-        <div class="card" style="padding:12px;">
-          <div style="font-size:13px;font-weight:600;margin-bottom:8px;color:var(--gray-600);">เลือก Section</div>
-          <div id="section-list" style="display:flex;flex-wrap:wrap;gap:8px;"></div>
+        <div class="section-panel-card">
+          <div class="section-panel-title">เลือก Section</div>
+          <div id="section-list" class="section-list-wrap"></div>
         </div>
       </div>
 
@@ -108,24 +106,35 @@
 
     // Section list
     const sectionList = document.getElementById("section-list");
-    course.sections.forEach(s => {
-      const btn = document.createElement("button");
-      btn.className = "btn btn-outline btn-sm";
-      btn.textContent = "Section " + s;
-      btn.onclick = () => {
-        const badgeText = document.querySelector("#section-badge span");
-        if (badgeText) badgeText.textContent = "Section " + s;
-        toggleSection();
-      };
-      sectionList.appendChild(btn);
-    });
+    if (sectionList && course.sections) {
+      course.sections.forEach(s => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "section-btn-item";
+        btn.textContent = "Section " + s;
+        btn.onclick = () => {
+          const badgeText = document.querySelector("#section-badge span");
+          if (badgeText) badgeText.textContent = "Section " + s;
+          toggleSection();
+        };
+        sectionList.appendChild(btn);
+      });
+    }
 
     function toggleSection() {
       const panel = document.getElementById("section-panel");
       const btn = document.getElementById("section-badge");
+      if (!panel) return;
       const isHidden = panel.style.display === "none" || !panel.style.display;
       panel.style.display = isHidden ? "block" : "none";
-      if (btn) btn.classList.toggle("open", isHidden);
+      if (btn) {
+        btn.classList.toggle("open", isHidden);
+        const arrow = btn.querySelector("img");
+        if (arrow) {
+          arrow.src = isHidden ? "../src/chevron-up-icon.png" : "../src/chevron-down-icon.png";
+          arrow.alt = isHidden ? "chevron up icon" : "chevron down icon";
+        }
+      }
     }
 
     // Pass code to write-review & update card
