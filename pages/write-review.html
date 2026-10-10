@@ -36,69 +36,50 @@
         </button>
       </div>
 
-      <p style="font-size:13px;color:var(--gray-400);margin-bottom:16px;">
-        คุณได้รับสิทธิ์เขียนรีวิวรายวิชานี้ประสบการณ์ตรง
-      </p>
-
-      <!-- Text review -->
-      <div class="form-group">
-        <label class="form-label">รายวิชา <span id="inline-code"></span></label>
-        <textarea class="form-input" id="review-text" placeholder="เขียนรีวิวของคุณ..." rows="4"></textarea>
-      </div>
-
-      <!-- แนวทางการสอน -->
-      <div class="rating-group">
-        <span class="rating-label">แนวทางการสอน</span>
-        <div class="checkbox-list">
-          <label class="checkbox-item"><input type="checkbox" name="style" value="เน้นทฤษฎี"/> เน้นทฤษฎี</label>
-          <label class="checkbox-item"><input type="checkbox" name="style" value="สนุก"/> สนุก</label>
-          <label class="checkbox-item"><input type="checkbox" name="style" value="เน้นปฏิบัติ"/> เน้นปฏิบัติ</label>
+      <!-- Section selector (hidden by default) -->
+      <div id="section-panel" class="section-panel" style="display:none;">
+        <div class="card" style="padding:12px;">
+          <div style="font-size:13px;font-weight:600;margin-bottom:8px;color:var(--gray-600);">เลือก Section</div>
+          <div id="section-list" style="display:flex;flex-wrap:wrap;gap:8px;"></div>
         </div>
       </div>
 
-      <!-- สื่อการเรียน -->
-      <div class="rating-group">
-        <span class="rating-label">สื่อการเรียนและสื่อกระตุก</span>
-        <div class="checkbox-list">
-          <label class="checkbox-item"><input type="checkbox" name="media" value="มีสไลด์"/> มีสไลด์</label>
-          <label class="checkbox-item"><input type="checkbox" name="media" value="สนุก"/> สนุก</label>
-          <label class="checkbox-item"><input type="checkbox" name="media" value="ไม่โต้งาน"/> ไม่โต้งาน</label>
-        </div>
+      <!-- Write some Review Section -->
+      <div class="section-title-wrap">
+        <div class="section-accent-bar"></div>
+        <h2 class="section-title-text">Write some Review</h2>
       </div>
 
-      <!-- ปริมาณงาน -->
-      <div class="rating-group">
-        <span class="rating-label">ปริมาณงาน</span>
-        <div class="checkbox-list">
-          <label class="checkbox-item"><input type="radio" name="workload" value="ไม่งาน"/> ไม่งาน</label>
-          <label class="checkbox-item"><input type="radio" name="workload" value="น้อย"/> น้อย</label>
-          <label class="checkbox-item"><input type="radio" name="workload" value="ปริมาณงานกลาง"/> ปริมาณงานกลาง</label>
-          <label class="checkbox-item"><input type="radio" name="workload" value="ปริมาณมาก"/> ปริมาณมาก</label>
+      <!-- Review Input Card -->
+      <div class="review-input-card">
+        <div class="review-input-header">
+          รายละเอียดเพิ่มเติม
         </div>
-      </div>
 
-      <!-- รูปแบบงาน -->
-      <div class="rating-group">
-        <span class="rating-label">รูปแบบงาน</span>
-        <div class="checkbox-list">
-          <label class="checkbox-item"><input type="radio" name="format" value="ส่งเดี่ยว"/> ส่งเดี่ยว</label>
-          <label class="checkbox-item"><input type="radio" name="format" value="กลุ่ม"/> กลุ่ม</label>
-          <label class="checkbox-item"><input type="radio" name="format" value="ส่งทั้งคู่"/> ส่งทั้งคู่</label>
+        <div class="review-textarea-wrap">
+          <textarea id="review-text" class="review-textarea" placeholder="เช่น สอนช้า เร็ว ปานกลาง มีวิดีโอบันทึกย้อนหลัง&#10;มีการเช็คชื่อ หรือมีการสุ่มตอบคำถาม เป็นต้น" rows="3"></textarea>
         </div>
-      </div>
 
-      <!-- หมายเหตุเพิ่มเติม -->
-      <div class="form-group">
-        <label class="form-label">หมายเหตุ</label>
-        <textarea class="form-input" id="extra-note" placeholder="เพิ่ม สิ่งที่ตั้งข้อ ปัญหาที่เจอ หรือเนื้อหาอื่นๆ ที่อยากบอก..." rows="3"></textarea>
+        <div class="review-notice">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#EF4444" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="8" x2="12" y2="12"></line>
+            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+          </svg>
+          <span>กรุณาแบ่งปันประสบการณ์อย่างสุภาพ</span>
+        </div>
       </div>
 
       <!-- Validation error -->
-      <div id="form-error" class="error-msg" style="display:none;background:#FFEBEE;color:var(--red);font-size:13px;padding:10px 14px;border-radius:var(--radius-sm);margin-bottom:14px;">
+      <div id="form-error" class="error-msg" style="display:none;margin-bottom:14px;">
         กรุณาเขียนรีวิวก่อนส่ง
       </div>
 
-      <button class="btn btn-danger btn-full" onclick="submitReview()">ส่ง</button>
+      <!-- Submit button -->
+      <div class="review-submit-wrap">
+        <button class="btn-submit-review" onclick="submitReview()" type="button">ส่ง</button>
+      </div>
+      <span id="inline-code" style="display:none;"></span>
     </div>
 
     <!-- Success modal -->
@@ -128,6 +109,31 @@
     if (course) {
       document.getElementById("detail-name").textContent = course.name;
       document.getElementById("detail-teacher").textContent = course.teacher;
+
+      // Section list
+      const sectionList = document.getElementById("section-list");
+      if (sectionList && course.sections) {
+        course.sections.forEach(s => {
+          const btn = document.createElement("button");
+          btn.className = "btn btn-outline btn-sm";
+          btn.textContent = "Section " + s;
+          btn.onclick = () => {
+            const badgeText = document.querySelector("#section-badge span");
+            if (badgeText) badgeText.textContent = "Section " + s;
+            toggleSection();
+          };
+          sectionList.appendChild(btn);
+        });
+      }
+    }
+
+    function toggleSection() {
+      const panel = document.getElementById("section-panel");
+      const btn = document.getElementById("section-badge");
+      if (!panel) return;
+      const isHidden = panel.style.display === "none" || !panel.style.display;
+      panel.style.display = isHidden ? "block" : "none";
+      if (btn) btn.classList.toggle("open", isHidden);
     }
 
     function submitReview() {

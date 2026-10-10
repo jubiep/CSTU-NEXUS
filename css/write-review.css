@@ -165,3 +165,113 @@
   height: 16px;
   cursor: pointer;
 }
+
+/* ── Review Input Card (รายละเอียดเพิ่มเติม) ── */
+.review-input-card {
+  background: #FFFFFF;
+  border-radius: 20px;
+  padding: 16px;
+  border: 1px solid #F0F0F0;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+  margin-bottom: 16px;
+}
+
+.review-input-header {
+  background: #FFD54F;
+  color: #1E1E1E;
+  font-size: 15px;
+  font-weight: 700;
+  text-align: center;
+  padding: 10px 16px;
+  border-radius: 12px;
+  margin-bottom: 14px;
+  user-select: none;
+}
+
+.review-textarea-wrap {
+  background: #FAFAFA;
+  border: 1.5px solid #E5E7EB;
+  border-radius: 16px;
+  padding: 12px 14px;
+  margin-bottom: 12px;
+  transition: border-color 0.2s, background-color 0.2s;
+}
+
+.review-textarea-wrap:focus-within {
+  border-color: #F5C518;
+  background: #FFFFFF;
+}
+
+.review-textarea {
+  width: 100%;
+  min-height: 85px;
+  background: transparent;
+  border: none;
+  outline: none;
+  resize: vertical;
+  font-family: var(--font);
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: #1E1E1E;
+  display: block;
+}
+
+.review-textarea::placeholder {
+  color: #8E8E93;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+/* Politeness notice */
+.review-notice {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #EF4444;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 2px 4px;
+  user-select: none;
+}
+
+.review-notice svg {
+  width: 18px;
+  height: 18px;
+  stroke: #EF4444;
+  flex-shrink: 0;
+}
+
+/* Submit button wrap */
+.review-submit-wrap {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 14px;
+  margin-bottom: 24px;
+}
+
+.btn-submit-review {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #FFD54F;
+  color: #1E1E1E;
+  font-family: var(--font);
+  font-size: 14px;
+  font-weight: 700;
+  padding: 9px 34px;
+  border-radius: 999px;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(254, 208, 83, 0.55);
+  transition: transform 0.15s, box-shadow 0.15s, filter 0.15s;
+  user-select: none;
+}
+
+.btn-submit-review:hover {
+  filter: brightness(0.96);
+  box-shadow: 0 4px 16px rgba(254, 208, 83, 0.65);
+}
+
+.btn-submit-review:active {
+  transform: scale(0.97);
+}
