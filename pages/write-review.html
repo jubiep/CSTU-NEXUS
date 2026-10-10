@@ -15,15 +15,25 @@
     <div class="topbar">
       <a id="back-btn" href="#" style="color:var(--white);font-size:22px;text-decoration:none;line-height:1;">‹</a>
       <span class="topbar-title" id="topbar-code">เขียนรีวิว</span>
-      <span class="section-badge" id="section-badge">Section ▾</span>
     </div>
 
     <div class="page-content">
       <!-- Course info -->
-      <div class="course-detail-header">
-        <div class="course-code" id="detail-code"></div>
-        <div class="course-fullname" id="detail-name"></div>
-        <div class="course-teacher" id="detail-teacher"></div>
+       <div class="course-detail-header">
+        <div class="course-header-left">
+          <div class="course-accent-bar"></div>
+          <div class="course-header-info">
+            <h1 class="course-code" id="detail-code"></h1>
+            <div class="course-fullname" id="detail-name"></div>
+            <div class="course-teacher" id="detail-teacher"></div>
+          </div>
+        </div>
+        <button class="section-pill-btn" id="section-badge" onclick="toggleSection()" type="button">
+          <span>Section</span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
+        </button>
       </div>
 
       <p style="font-size:13px;color:var(--gray-400);margin-bottom:16px;">
