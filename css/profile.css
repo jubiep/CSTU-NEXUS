@@ -2,54 +2,244 @@
    CSTU NEXUS - Profile Page Styles (profile.html)
    ========================================== */
 
-/* Profile banner */
-.profile-banner {
-  background: var(--yellow);
-  border-radius: var(--radius-md);
-  padding: 16px;
+body {
+  background: #e9e9e9;
+}
+
+.app-shell {
+  max-width: 428px;
+  min-height: 100vh;
+  background: #f4f1ee;
+  border-left: 2px solid rgba(0,0,0,.08);
+  border-right: 2px solid rgba(0,0,0,.08);
+  margin: 0 auto;
+}
+
+.topbar {
+  background: linear-gradient(180deg, #ba2f2a 0%, #be2f2a 100%);
+  box-shadow: inset 0 -1px 0 rgba(0,0,0,.08);
+  min-height: 60px;
+}
+
+.topbar-logo {
+  font-size: 17px;
+  letter-spacing: 0.02em;
+}
+
+.topbar-logo span {
+  color: #f1d28c;
+}
+
+.btn-logout {
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.profile-page {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 14px;
-  margin-bottom: 16px;
+  background: #f5f5f4;
+  padding-top: 20px;
+  padding-bottom: 28px;
+}
+
+.profile-card {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 8px;
 }
 
 .avatar {
-  width: 60px;
-  height: 60px;
+  position: relative;
+  width: 170px;
+  height: 170px;
   border-radius: 50%;
-  background: var(--white);
-  border: 3px solid var(--white);
-  object-fit: cover;
-  flex-shrink: 0;
+  background: linear-gradient(180deg, #6ea9e5 0%, #4e9ae0 100%);
+  overflow: hidden;
+  box-shadow: inset 0 0 0 6px rgba(255,255,255,0.08);
+  margin-bottom: 12px;
+}
+
+.avatar .hair {
+  position: absolute;
+  left: 50%;
+  top: 18px;
+  width: 92px;
+  height: 52px;
+  background: #1f1d1d;
+  border-radius: 56px 56px 40px 40px;
+  transform: translateX(-50%);
+}
+
+.avatar .face {
+  position: absolute;
+  left: 50%;
+  top: 38px;
+  width: 62px;
+  height: 74px;
+  background: #f2d1b5;
+  border-radius: 46% 46% 44% 44% / 44% 44% 52% 52%;
+  transform: translateX(-50%);
+  box-shadow: inset 0 -4px 0 rgba(0,0,0,0.03);
+}
+
+.avatar .face::before,
+.avatar .face::after {
+  content: "";
+  position: absolute;
+  top: 30px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #1d1d1d;
+}
+
+.avatar .face::before {
+  left: 15px;
+}
+
+.avatar .face::after {
+  right: 15px;
+}
+
+.avatar .neck {
+  position: absolute;
+  left: 50%;
+  bottom: 42px;
+  width: 18px;
+  height: 20px;
+  background: #f2d1b5;
+  border-radius: 0 0 8px 8px;
+  transform: translateX(-50%);
+}
+
+.avatar .body {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  width: 104px;
+  height: 58px;
+  background: #f5f0ee;
+  border-radius: 52% 52% 14% 14% / 100% 100% 0 0;
+  transform: translateX(-50%);
+}
+
+.profile-name {
+  font-size: 28px;
+  font-weight: 700;
+  color: #1a1a1a;
+  letter-spacing: 0.02em;
+  text-align: center;
+  line-height: 1.2;
+}
+
+.profile-name span {
+  display: inline-block;
+  margin-left: 0.3em;
+}
+
+.student-id {
+  margin-top: 4px;
+  font-size: 22px;
+  color: #1a1a1a;
+  letter-spacing: 0.04em;
+  font-weight: 500;
+}
+
+.verified-box {
+  width: min(92%, 360px);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: rgba(99, 188, 99, 0.9);
+  border-radius: 18px;
+  padding: 14px 18px;
+  margin-top: 20px;
+  box-shadow: inset 0 0 0 1px rgba(0,0,0,0.04);
+}
+
+.verified-mark {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.2);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 26px;
-  overflow: hidden;
+  color: #fff;
+  flex-shrink: 0;
 }
 
-.profile-info .name {
-  font-size: 17px;
-  font-weight: 700;
-  color: var(--gray-800);
+.verified-mark svg {
+  width: 22px;
+  height: 22px;
 }
 
-.profile-info .student-id {
-  font-size: 13px;
-  color: var(--gray-600);
-  margin-top: 2px;
+.verified-copy {
+  color: #0f1c12;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.4;
 }
 
-.profile-faculty {
-  font-size: 13px;
-  color: var(--gray-400);
-  margin-bottom: 20px;
+.verified-copy p {
+  margin: 0;
 }
 
-/* Empty review state */
-.profile-empty-reviews {
+.preferences-card {
+  width: min(92%, 360px);
+  background: #f4dc7b;
+  border-radius: 18px;
+  padding: 18px 20px;
+  margin-top: 22px;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  box-shadow: inset 0 0 0 1px rgba(0,0,0,0.05);
+  color: #1c1c1c;
+  font-size: 22px;
+  font-weight: 600;
+}
+
+.preferences-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 3px solid rgba(31, 31, 31, 0.9);
+  font-size: 24px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255,255,255,0.15);
+}
+
+.course-reference {
+  margin-top: 34px;
+  font-size: 20px;
+  color: #1b1b1b;
   text-align: center;
-  color: var(--gray-400);
-  padding: 32px 0;
-  font-size: 14px;
 }
+
+@media (max-width: 420px) {
+  .profile-name {
+    font-size: 24px;
+  }
+
+  .student-id {
+    font-size: 18px;
+  }
+
+  .verified-copy {
+    font-size: 14px;
+  }
+
+  .preferences-card {
+    font-size: 18px;
+  }
+}
+

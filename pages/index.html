@@ -9,28 +9,138 @@
   <title>CSTU NEXUS – เข้าสู่ระบบ</title>
   <link rel="stylesheet" href="../css/main.css"/>
   <link rel="stylesheet" href="../css/login.css"/>
+  <style>
+    body {
+      background: #fff;
+    }
+
+    .login-wrap {
+      width: 100%;
+      max-width: none;
+      min-height: 100vh;
+      padding: 24px;
+      justify-content: center;
+    }
+
+    .login-card {
+      position: relative;
+      width: min(304px, 100%);
+      height: 420px;
+      padding: 151px 32px 32px;
+      border: 1px solid #e2e2e2;
+      border-radius: 32px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, .28);
+    }
+
+    .login-logo {
+      position: absolute;
+      top: 43px;
+      left: 0;
+      width: 100%;
+      margin: 0;
+      background: linear-gradient(90deg, #bd2533 0%, #dc6840 55%, #f7cf58 100%);
+      background-clip: text;
+      color: transparent;
+      font-size: 32px;
+      font-weight: 700;
+      letter-spacing: -1.2px;
+      text-align: center;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .login-logo span {
+      color: inherit;
+    }
+
+    .login-logo svg {
+      position: absolute;
+      top: 34px;
+      left: 50%;
+      width: 198px;
+      height: 28px;
+      transform: translateX(-50%);
+      overflow: visible;
+    }
+
+    .login-card .error-msg {
+      margin: 0 0 12px;
+    }
+
+    .login-card .form-group {
+      margin-bottom: 20px;
+    }
+
+    .login-card .form-input {
+      height: 36px;
+      padding: 0 19px;
+      border: 1px solid #dedede;
+      border-radius: 20px;
+      background: #faf9f9;
+      font-size: 12px;
+    }
+
+    .login-card .form-input::placeholder {
+      color: #c9c7c7;
+      opacity: 1;
+    }
+
+    .forgot-link {
+      margin: -7px 0 13px;
+      color: #111;
+      font-size: 14px;
+      font-weight: 600;
+      text-align: center;
+    }
+
+    .login-card .btn {
+      display: block;
+      width: 85px;
+      height: 30px;
+      margin: 0 auto;
+      padding: 0;
+      border-radius: 18px;
+      background: linear-gradient(100deg, #ffe28a, #f8ce50);
+      color: #111;
+      font-size: 14px;
+      line-height: 30px;
+    }
+
+    .login-note {
+      display: none;
+    }
+  </style>
 </head>
 <body>
   <div class="login-wrap">
-    <div class="login-logo">CSTU <span>NEXUS</span></div>
-    <p class="login-tagline">ระบบรีวิวรายวิชา มหาวิทยาลัยธรรมศาสตร์</p>
-
     <div class="login-card">
+      <div class="login-logo">
+        CSTU <span>NEXUS</span>
+        <svg viewBox="0 0 198 28" aria-hidden="true">
+          <defs>
+            <linearGradient id="logo-swoosh" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0" stop-color="#c42132"/>
+              <stop offset=".55" stop-color="#e28a45"/>
+              <stop offset="1" stop-color="#f8d15a"/>
+            </linearGradient>
+          </defs>
+          <path d="M3 24 C20 2, 69 8, 112 10 S183 12, 195 1" fill="none" stroke="url(#logo-swoosh)" stroke-width="2.5"/>
+        </svg>
+      </div>
+
       <div class="error-msg" id="error-msg">ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง</div>
 
       <div class="form-group">
-        <label class="form-label">ชื่อผู้ใช้ (TU NetID)</label>
-        <input class="form-input" type="text" id="username" placeholder="เช่น u6809617407" autocomplete="username"/>
+        <input class="form-input" type="email" id="username" placeholder="email@dome.tu.ac.th" autocomplete="username" aria-label="อีเมล"/>
       </div>
 
       <div class="form-group">
-        <label class="form-label">รหัสผ่าน</label>
-        <input class="form-input" type="password" id="password" placeholder="••••••••" autocomplete="current-password"/>
+        <input class="form-input" type="password" id="password" placeholder="Password" autocomplete="current-password" aria-label="รหัสผ่าน"/>
       </div>
 
-      <a href="#" class="forgot-link">ลืมรหัสผ่าน?</a>
+      <a href="#" class="forgot-link">Forgot Password?</a>
 
-      <button class="btn btn-primary btn-full" onclick="doLogin()">เข้าสู่ระบบ</button>
+      <button class="btn btn-primary" onclick="doLogin()">Log in</button>
 
       <p class="login-note">
         ระบบใช้การยืนยันตัวตนผ่าน TU Authentication<br/>
