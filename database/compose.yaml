@@ -1,0 +1,20 @@
+
+services:
+  db:
+    image: postgres:17
+    container_name: cs261-postgres
+    restart: unless-stopped
+
+    environment:
+      POSTGRES_DB: cs261_db
+      POSTGRES_USER: cs261_user
+      POSTGRES_PASSWORD: dev_password_123
+
+    ports:
+      - "5432:5432"
+
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
