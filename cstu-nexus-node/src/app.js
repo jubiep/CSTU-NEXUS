@@ -18,6 +18,18 @@ app.get('/health', (req, res) => {
     });
 });
 
+
+// Test POST Endpoint
+app.post('/api/test', (req, res) => {
+    const receivedData = req.body;
+
+    res.status(201).json({
+        message: 'POST request received successfully!',
+        data: receivedData
+    });
+});
+
+
 // เริ่มต้นเปิด Server
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
