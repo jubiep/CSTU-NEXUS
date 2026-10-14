@@ -1,0 +1,14 @@
+{
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Spring Boot-CstuCourseNexusApplication<cstu-course-nexus>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "th.ac.tu.cs.cstu_course_nexus.CstuCourseNexusApplication",
+            "projectName": "cstu-course-nexus",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
+        }
+    ]
+}
