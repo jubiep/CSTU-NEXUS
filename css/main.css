@@ -8,9 +8,9 @@
 
 /* ── 1. Design Tokens & CSS Variables ── */
 :root {
-  --red:        #C0392B;
-  --red-dark:   #96281B;
-  --red-light:  #E74C3C;
+  --red:        #C3002F;
+  --red-dark:   #9B0024;
+  --red-light:  #E01B45;
   --yellow:     #F5C518;
   --yellow-dark:#D4AC0D;
   --white:      #FFFFFF;
@@ -131,20 +131,50 @@ optgroup {
 .topbar {
   background: var(--red);
   color: var(--white);
-  padding: 14px 18px;
+  padding: 10px 16px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   position: sticky;
   top: 0;
   z-index: 100;
-  min-height: 52px;
+  min-height: 56px;
+  box-sizing: border-box;
 }
+
+.topbar-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.topbar-right {
+  display: flex;
+  align-items: center;
+}
+
+.topbar-logo-link {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+}
+
+.topbar-logo-img {
+  height: 32px;
+  width: auto;
+  max-width: 170px;
+  object-fit: contain;
+  display: block;
+}
+
+
 .topbar-title {
   font-size: 16px;
   font-weight: 600;
   letter-spacing: .3px;
+  color: var(--white);
 }
+
 .topbar-logo {
   font-size: 18px;
   font-weight: 700;
@@ -154,20 +184,34 @@ optgroup {
 .topbar-logo span {
   color: var(--yellow);
 }
+
 .btn-logout {
   background: none;
   border: none;
   color: var(--white);
   font-family: var(--font);
-  font-size: 13px;
+  font-size: 14px;
+  font-weight: 500;
   cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 4px;
-  opacity: .9;
+  gap: 8px;
+  padding: 6px 8px;
+  border-radius: var(--radius-sm);
+  opacity: 0.95;
+  transition: opacity 0.15s, background-color 0.15s;
 }
+
 .btn-logout:hover {
   opacity: 1;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.logout-icon-img {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+  display: block;
 }
 
 .bottom-nav {
