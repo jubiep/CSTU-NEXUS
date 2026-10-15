@@ -12,8 +12,9 @@
 </head>
 <body>
   <div class="app-shell">
+    <!-- Top bar -->
     <div class="topbar">
-      <span class="topbar-title">ค้นหารายวิชา</span>
+      <a class="topbar-logo" href="dashboard.html">CSTU <span>NEXUS</span></a>
       <button class="btn-logout" onclick="logout()">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/>
@@ -24,19 +25,42 @@
       </button>
     </div>
 
+    <!-- Content -->
     <div class="page-content">
+
+      <!-- Profile banner -->
+      <a class="profile-banner" href="profile.html">
+          <div class="avatar-wrapper">
+            <svg class="avatar-img" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect width="100" height="100" rx="50" fill="#CCCCCC"/>
+              <circle cx="50" cy="45" r="18" fill="#FFFFFF"/>
+              <path d="M16 95C16 75.67 31.2239 60 50 60C68.7761 60 84 75.67 84 95H16Z" fill="#FFFFFF"/>
+            </svg>
+
+            <div class="verified-badge">
+              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 2L4 5V11.09C4 16.14 7.41 20.85 12 22C16.59 20.85 20 16.14 20 11.09V5L12 2Z" fill="#38C172" stroke="#000000" stroke-width="2" stroke-linejoin="round"/>
+                <path d="M9 12L11 14L15 10" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+          </div>
+        <div class="profile-info">
+          <div class="name" id="user-name">มะละกอ ส้มตำ</div>
+          <div class="student-id" id="user-id">6809670670</div>
+        </div>
+      </a>
+
       <!-- Search -->
       <div class="search-wrap">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
         </svg>
-        <input class="search-input" type="text" id="search-input" placeholder="ค้นหารหัสวิชา หรือชื่อวิชา..." oninput="filterCourses()"/>
+        <input class="search-input" type="text" id="search-input" placeholder="ช่องค้นหา" oninput="filterCourses()"/>
       </div>
-
-      <div class="section-header">
-        <span class="section-title">รายวิชาทั้งหมด</span>
+      
+      <!-- <div class="section-header">
         <span class="text-muted" id="count-label"></span>
-      </div>
+      </div> UNUSED -->
 
       <div class="course-grid" id="course-grid"></div>
 
@@ -45,7 +69,7 @@
       </p>
     </div>
 
-    <nav class="bottom-nav" id="bottom-nav"></nav>
+    <!--<nav class="bottom-nav" id="bottom-nav"></nav> UNUSED -->
   </div>
 
   <script src="../app.js"></script>
@@ -53,10 +77,10 @@
     requireAuth();
     renderNav("search");
 
-    function renderCourses(list) {
+function renderCourses(list) {
       const grid = document.getElementById("course-grid");
       const empty = document.getElementById("empty-msg");
-      document.getElementById("count-label").textContent = `${list.length} รายวิชา`;
+      /* document.getElementById("count-label").textContent = `${list.length} รายวิชา`; UNUSED*/
 
       if (list.length === 0) {
         grid.innerHTML = "";
@@ -66,9 +90,11 @@
       empty.style.display = "none";
       grid.innerHTML = list.map(c => `
         <a class="course-card" href="course-detail.html?code=${c.code}">
-          <div class="course-code">${c.code}</div>
-          <div class="course-name">${c.name}</div>
-          <div style="font-size:11px;color:var(--gray-400);margin-top:6px;">${c.teacher}</div>
+          <div class="course-indicator"></div>
+          <div style="flex-grow: 1;">
+            <div class="course-code">${c.code}</div>
+            <div class="course-name">${c.name}</div>
+          </div>
         </a>
       `).join('');
     }
