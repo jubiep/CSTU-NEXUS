@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+  <title>CSTU NEXUS – รายวิชา</title>
+  <link rel="stylesheet" href="../css/main.css"/>
+  <link rel="stylesheet" href="../css/course-detail.css"/>
+</head>
+<body>
+  <div class="app-shell">
+    <!-- Top bar -->
+    <header id="topbar"></header>
+
+    <div class="page-content">
+      <!-- Course header (UI Section ส่วนบน) -->
+      <div class="course-detail-header">
+        <div class="course-header-left">
+          <div class="course-accent-bar"></div>
+          <div class="course-header-info">
+            <h1 class="course-code" id="detail-code"></h1>
+            <div class="course-fullname" id="detail-name"></div>
+            <div class="course-teacher" id="detail-teacher"></div>
+          </div>
+        </div>
+        <button class="section-pill-btn" id="section-badge" onclick="toggleSection()" type="button">
+          <span>Section</span>
+          <img src="../src/chevron-down-icon.png" alt="chevron down icon" height="14" width="14"/>
+        </button>
+      </div>
+
+      <!-- Section selector (hidden by default) -->
+      <div id="section-panel" class="section-panel" style="display:none;">
+        <div class="section-panel-card">
+          <div class="section-panel-title">เลือก Section</div>
+          <div id="section-list" class="section-list-wrap"></div>
+        </div>
+      </div>
+
+      <!-- Write some Review Section -->
+      <div class="section-title-wrap">
+        <div class="section-accent-bar"></div>
+        <h2 class="section-title-text">Write some Review</h2>
+      </div>
+
+      <!-- Write Review Card -->
+      <a href="write-review.html" id="write-btn" class="write-review-card">
+        <div class="write-review-card-text">
+          <div>คุณได้รับสิทธิ์แบ่งปันประสบการณ์</div>
+          <div>รายวิชา <span id="write-course-code"></span></div>
+        </div>
+        <div class="write-review-card-icon">
+          <img src="../src/edit-icon.png" alt="edit icon" height="30" width="30"/>
+        </div>
+      </a>
+
+      <!-- Reviews Section -->
+      <div class="section-title-wrap">
+        <div class="section-accent-bar"></div>
+        <h2 class="section-title-text">Reviews</h2>
+      </div>
+
+      <div id="review-list" class="review-list"></div>
+
+      <!-- Pagination -->
+      <div class="pagination" id="pagination"></div>
+    </div>
+
+  </div>
+
+  <script src="../app.js"></script>
+  <script>
+    requireAuth();
+    renderTopbar();
+
+    const code = getParam("code") || "CS261";
+    const course = getCourse(code);
+
+    if (!course) {
+      document.body.innerHTML = "<p style='padding:40px;text-align:center;'>ไม่พบรายวิชา</p>";
+      throw new Error("Course not found");
+    }
+
+    // Fill header
+    const topbarCode = document.getElementById("topbar-code");
+    if (topbarCode) topbarCode.textContent = code;
+    document.getElementById("detail-code").textContent = code;
+    document.getElementById("detail-name").textContent = course.name;
+    document.getElementById("detail-teacher").textContent = course.teacher;
+
+    let selectedSection = getParam("section") || (course.sections && course.sections.length > 0 ? course.sections[0] : "001");
+    const badgeText = document.querySelector("#section-badge span");
+    if (badgeText) badgeText.textContent = "Section " + selectedSection;
+
+    function updateWriteBtn() {
+      const writeBtn = document.getElementById("write-btn");
+      if (writeBtn) writeBtn.href = `write-review.html?code=${code}&section=${selectedSection}`;
+    }
+    updateWriteBtn();
+
+    // Section list
+    const sectionList = document.getElementById("section-list");
+    if (sectionList && course.sections) {
+      course.sections.forEach(s => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "section-btn-item";
+        btn.textContent = "Section " + s;
+        btn.onclick = () => {
+          selectedSection = s;
+          if (badgeText) badgeText.textContent = "Section " + s;
+          updateWriteBtn();
+          toggleSection();
+        };
+        sectionList.appendChild(btn);
+      });
+    }
+
+    function toggleSection() {
+      const panel = document.getElementById("section-panel");
+      const btn = document.getElementById("section-badge");
+      if (!panel) return;
+      const isHidden = panel.style.display === "none" || !panel.style.display;
+      panel.style.display = isHidden ? "block" : "none";
+      if (btn) {
+        btn.classList.toggle("open", isHidden);
+        const arrow = btn.querySelector("img");
+        if (arrow) {
+          arrow.src = isHidden ? "../src/chevron-up-icon.png" : "../src/chevron-down-icon.png";
+          arrow.alt = isHidden ? "chevron up icon" : "chevron down icon";
+        }
+      }
+    }
+
+    const writeCourseCode = document.getElementById("write-course-code");
+    if (writeCourseCode) writeCourseCode.textContent = code;
+
+    // Render reviews
+    const reviews = getReviews(code);
+    const reviewList = document.getElementById("review-list");
+    if (!reviews || reviews.length === 0) {
+      reviewList.innerHTML = `<p style="text-align:center;color:var(--gray-400);padding:32px 0;font-size:14px;">ยังไม่มีรีวิว — เป็นคนแรกที่รีวิวรายวิชานี้!</p>`;
+    } else {
+      reviews.forEach(r => {
+        const yearText = r.year ? `ชั้นปีที่ ${r.year}` : '';
+        const dateText = r.date || '10/10/2569';
+        reviewList.innerHTML += `
+          <div class="review-card">
+            <div class="review-card-top">
+              <div class="review-user-info">
+                <div class="review-verified-shield">
+                  <img src="../src/verify-icon.png" alt="verified icon" height="30" width="30"/>
+                </div>
+                <span class="review-student-id">${r.studentId || '6600000000'}</span>
+                <span class="review-student-year">${yearText}</span>
+              </div>
+              <span class="review-date">${dateText}</span>
+            </div>
+            <div class="review-comment-box">
+              <p class="review-comment-text">${r.text}</p>
+            </div>
+          </div>`;
+      });
+    }
+
+    // Pagination (static mock)
+    if (reviews.length > 0) {
+      document.getElementById("pagination").innerHTML = `
+        <button class="page-btn arrow">‹</button>
+        <button class="page-btn active">1</button>
+        <button class="page-btn">2</button>
+        <button class="page-btn">3</button>
+        <span style="color:var(--gray-400);font-size:13px;">…</span>
+        <button class="page-btn">6</button>
+        <button class="page-btn arrow">›</button>`;
+    }
+  </script>
+</body>
+</html>

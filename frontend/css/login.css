@@ -1,0 +1,160 @@
+/* ==========================================
+   CSTU NEXUS - Login Page Styles (index.html)
+   ========================================== */
+
+body {
+  background: var(--white);
+}
+
+.login-wrap {
+  width: 100%;
+  min-height: 100vh;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: var(--white);
+}
+
+.login-logo {
+  position: absolute;
+  top: 43px;
+  left: 0;
+  width: 100%;
+  margin: 0;
+  text-align: center;
+  display: flex;
+  justify-content: center;
+}
+
+.login-logo img {
+  max-width: 250px;
+  height: auto;
+  display: block;
+}
+
+.login-tagline {
+  font-size: 13px;
+  color: var(--gray-400);
+  margin-bottom: 40px;
+  text-align: center;
+}
+
+.login-card {
+  position: relative;
+  width: min(304px, 100%);
+  height: 420px;
+  padding: 151px 32px 32px;
+  background: var(--white);
+  border: 1px solid #e2e2e2;
+  border-radius: 32px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, .28);
+}
+
+.login-card .error-msg {
+  margin: 0 0 12px;
+}
+
+.login-card .form-group {
+  margin-bottom: 20px;
+}
+
+.login-card .form-input {
+  height: 36px;
+  padding: 0 19px;
+  border: 1px solid #dedede;
+  border-radius: 20px;
+  background: #faf9f9;
+  font-size: 12px;
+}
+
+.login-card .form-input::placeholder {
+  color: #c9c7c7;
+  opacity: 1;
+}
+
+.login-card .btn {
+  display: block;
+  width: 85px;
+  height: 30px;
+  margin: 0 auto;
+  padding: 0;
+  border-radius: 18px;
+  background: linear-gradient(100deg, #ffe28a, #f8ce50);
+  color: #111;
+  font-size: 14px;
+  line-height: 30px;
+}
+
+.forgot-link {
+  display: block;
+  margin: -7px 0 13px;
+  color: #111;
+  font-size: 14px;
+  font-weight: 600;
+  text-align: center;
+  text-decoration: none;
+}
+
+.forgot-link:hover {
+  color: var(--red);
+}
+
+.login-note {
+  display: none;
+}
+
+@media (max-width: 600px) {
+  .login-wrap {
+    padding: 16px;
+  }
+
+  .login-logo {
+    top: min(61px, 12.5vw);
+    font-size: min(44px, 9vw);
+    letter-spacing: -1.5px;
+    line-height: 1.2;
+  }
+
+  .login-logo svg {
+    top: min(43px, 9vw);
+    width: min(252px, 51.5vw);
+    height: min(36px, 7.4vw);
+  }
+
+  .login-card {
+    width: min(396px, 82vw);
+    height: min(550px, 114vw);
+    padding: min(198px, 41vw) min(40px, 8.3vw) 32px;
+    border-radius: min(40px, 8.2vw);
+    box-shadow: 0 5px 14px rgba(0, 0, 0, .28);
+  }
+
+  .login-card .error-msg {
+    margin-bottom: min(16px, 3.3vw);
+  }
+
+  .login-card .form-group {
+    margin-bottom: min(25px, 5.1vw);
+  }
+
+  .login-card .form-input {
+    height: min(48px, 9.8vw);
+    padding: 0 min(25px, 5.1vw);
+    border-radius: min(20px, 4.1vw);
+    font-size: max(12px, min(15px, 3.1vw));
+  }
+
+  .forgot-link {
+    font-size: max(14px, min(17px, 3.5vw));
+  }
+
+  .login-card .btn {
+    width: min(111px, 22.7vw);
+    height: min(39px, 8vw);
+    font-size: max(14px, min(18px, 3.7vw));
+    line-height: min(39px, 8vw);
+  }
+}

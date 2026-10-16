@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+  <title>CSTU NEXUS – เข้าสู่ระบบ</title>
+  <link rel="stylesheet" href="../css/main.css"/>
+  <link rel="stylesheet" href="../css/login.css"/>
+  
+</head>
+<body>
+  <div class="login-wrap">
+    <div class="login-card">
+      <div class="login-logo">
+      <img src="../src/login-logo.png" alt="CSTU NEXUS logo" width="250"/>
+      </div>
+
+      <div class="error-msg" id="error-msg">ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง</div>
+
+      <div class="form-group">
+        <input class="form-input" type="email" id="username" placeholder="email@dome.tu.ac.th" autocomplete="username" aria-label="อีเมล"/>
+      </div>
+
+      <div class="form-group">
+        <input class="form-input" type="password" id="password" placeholder="Password" autocomplete="current-password" aria-label="รหัสผ่าน"/>
+      </div>
+
+      <button class="btn btn-primary" onclick="doLogin()">Log in</button>
+
+      <p class="login-note">
+        ระบบใช้การยืนยันตัวตนผ่าน TU Authentication<br/>
+        เฉพาะนักศึกษา CSTU มธ. เท่านั้น
+      </p>
+    </div>
+  </div>
+
+  <script src="../app.js"></script>
+  <script>
+    // ถ้า login แล้ว redirect ไป courses.html
+    if (sessionStorage.getItem("cstu_logged_in")) {
+      window.location.href = "courses.html";
+    }
+
+    function doLogin() {
+      const u = document.getElementById("username").value.trim();
+      const p = document.getElementById("password").value;
+      const err = document.getElementById("error-msg");
+
+      if (!u || !p) {
+        err.textContent = "กรุณากรอกชื่อผู้ใช้และรหัสผ่าน";
+        err.classList.add("show");
+        return;
+      }
+
+      // TODO: เชื่อม TU Auth API
+      // Mock: รับทุก credential
+      sessionStorage.setItem("cstu_logged_in", "1");
+      window.location.href = "courses.html";
+    }
+
+    // Enter key
+    document.addEventListener("keydown", e => {
+      if (e.key === "Enter") doLogin();
+    });
+  </script>
+</body>
+</html>

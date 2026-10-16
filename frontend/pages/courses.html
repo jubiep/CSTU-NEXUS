@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+  <title>CSTU NEXUS – รายวิชา</title>
+  <link rel="stylesheet" href="../css/main.css"/>
+  <link rel="stylesheet" href="../css/courses.css"/>
+</head>
+<body>
+  <div class="app-shell">
+    <!-- Top bar -->
+    <header id="topbar"></header>
+
+    <!-- Content -->
+    <div class="page-content">
+
+      <!-- Profile banner -->
+      <a class="profile-banner" href="profile.html">
+        <div class="avatar-wrapper">
+          <img class="avatar" src="../src/profile-pic.jpg" alt="Profile photo" width="136" height="136"/>
+          <div class="verified-badge">
+            <img src="../src/verify-icon.png" alt="verified icon" height="40"/>
+          </div>
+        </div>
+        <div class="profile-info">
+          <div class="name" id="user-name">มะละกอ ส้มตำ</div>
+          <div class="student-id" id="user-id">6809670670</div>
+        </div>
+      </a>
+
+      <!-- Search -->
+      <div class="search-wrap">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+        <input class="search-input" type="text" id="search-input" placeholder="ช่องค้นหา" oninput="filterCourses()"/>
+      </div>
+
+      <div class="course-grid" id="course-grid"></div>
+
+      <p id="empty-msg" style="display:none;text-align:center;color:var(--gray-400);padding:32px 0;font-size:14px;">
+        ไม่พบรายวิชาที่ค้นหา
+      </p>
+    </div>
+  </div>
+
+  <script src="../app.js"></script>
+  <script>
+    requireAuth();
+    renderTopbar();
+
+    function renderCourses(list) {
+      const grid = document.getElementById("course-grid");
+      const empty = document.getElementById("empty-msg");
+
+      if (list.length === 0) {
+        grid.innerHTML = "";
+        empty.style.display = "block";
+        return;
+      }
+      empty.style.display = "none";
+      grid.innerHTML = list.map(c => `
+        <a class="course-card" href="course-detail.html?code=${c.code}">
+          <div class="course-indicator"></div>
+          <div style="flex-grow: 1;">
+            <div class="course-code">${c.code}</div>
+            <div class="course-name">${c.name}</div>
+          </div>
+        </a>
+      `).join('');
+    }
+
+    function filterCourses() {
+      const q = document.getElementById("search-input").value.trim().toLowerCase();
+      const filtered = q
+        ? mockCourses.filter(c =>
+            c.code.toLowerCase().includes(q) ||
+            c.name.toLowerCase().includes(q) ||
+            c.teacher.toLowerCase().includes(q))
+        : mockCourses;
+      renderCourses(filtered);
+    }
+
+    renderCourses(mockCourses);
+  </script>
+</body>
+</html>

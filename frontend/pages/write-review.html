@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+  <title>CSTU NEXUS – เขียนรีวิว</title>
+  <link rel="stylesheet" href="../css/main.css"/>
+  <link rel="stylesheet" href="../css/write-review.css"/>
+</head>
+<body>
+  <div class="app-shell">
+    <!-- Top bar -->
+    <header id="topbar"></header>
+
+    <div class="page-content">
+      <!-- Course info -->
+      <div class="course-detail-header">
+        <div class="course-header-left">
+          <div class="course-accent-bar"></div>
+          <div class="course-header-info">
+            <h1 class="course-code" id="detail-code"></h1>
+            <div class="course-fullname" id="detail-name"></div>
+            <div class="course-teacher" id="detail-teacher"></div>
+          </div>
+        </div>
+        <div class="section-pill-badge" id="section-badge">
+          <span id="section-text">Section</span>
+        </div>
+      </div>
+
+      <!-- Write some Review Section -->
+      <div class="section-title-wrap">
+        <div class="section-accent-bar"></div>
+        <h2 class="section-title-text">Write some Review</h2>
+      </div>
+
+      <!-- Review Input Card -->
+      <div class="review-input-card">
+        <div class="review-input-header">
+          รายละเอียดเพิ่มเติม
+        </div>
+
+        <div class="review-textarea-wrap">
+          <textarea id="review-text" class="review-textarea" placeholder="เช่น สอนช้า เร็ว ปานกลาง มีวิดีโอบันทึกย้อนหลัง&#10;มีการเช็คชื่อ หรือมีการสุ่มตอบคำถาม เป็นต้น" rows="3"></textarea>
+        </div>
+
+        <div class="review-notice">
+          <img src="../src/alert-icon.png" alt="warning icon" height="24" width="24"/>
+          <span>กรุณาแบ่งปันประสบการณ์อย่างสุภาพ</span>
+        </div>
+      </div>
+
+      <!-- Validation error -->
+      <div id="form-error" class="error-msg" style="display:none;margin-bottom:14px;">
+        กรุณาเขียนรีวิวก่อนส่ง
+      </div>
+
+      <!-- Action buttons -->
+      <div class="review-actions-wrap">
+        <button class="btn-back-review" onclick="goBack()" type="button">ย้อนกลับ</button>
+        <button class="btn-submit-review" onclick="submitReview()" type="button">ส่ง</button>
+      </div>
+      <span id="inline-code" style="display:none;"></span>
+    </div>
+
+    <!-- Success modal -->
+    <div class="modal-overlay" id="success-modal">
+      <div class="modal-box">
+        <div class="modal-title">รีวิวเสร็จสิ้น</div>
+        <img class="success-icon" src="../src/success-icon.png" alt="success icon" height="60" width="60"/>
+        <button class="btn btn-primary btn-full" onclick="goBack()">ย้อนกลับ</button>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="../app.js"></script>
+  <script>
+    requireAuth();
+
+    const code = getParam("code") || "CS261";
+    const course = getCourse(code);
+    const section = getParam("section") || (course && course.sections ? course.sections[0] : "001");
+
+    renderTopbar();
+    document.getElementById("detail-code").textContent = code;
+    document.getElementById("inline-code").textContent = code;
+    const sectionText = document.getElementById("section-text");
+    if (sectionText) sectionText.textContent = "Section " + section;
+
+    if (course) {
+      document.getElementById("detail-name").textContent = course.name;
+      document.getElementById("detail-teacher").textContent = course.teacher;
+    }
+
+    function submitReview() {
+      const text = document.getElementById("review-text").value.trim();
+      const errEl = document.getElementById("form-error");
+
+      if (!text) {
+        errEl.style.display = "block";
+        document.getElementById("review-text").focus();
+        return;
+      }
+      errEl.style.display = "none";
+
+      // TODO: POST /api/reviews
+      // Mock: แสดง success modal
+      document.getElementById("success-modal").classList.add("show");
+    }
+
+    function goBack() {
+      window.location.href = `course-detail.html?code=${code}&section=${section}`;
+    }
+  </script>
+</body>
+</html>

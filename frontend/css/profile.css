@@ -1,0 +1,143 @@
+/* ==========================================
+   CSTU NEXUS - Profile Page Styles (profile.html)
+   ========================================== */
+
+body {
+  background: #fff;
+}
+
+.app-shell {
+  width: 100%;
+  max-width: 420px;
+  min-height: 100vh;
+  margin: 0 auto;
+  background: #fff;
+  box-shadow: 0 0 40px rgba(0, 0, 0, .08);
+}
+
+
+
+.profile-page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 36px clamp(20px, 9vw, 44px) 32px;
+  background: #fff;
+}
+
+.profile-card {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 26px 12px 14px;
+  border: 1px solid #e5e5e5;
+  border-radius: 21px;
+  background: #fff;
+  box-shadow: 0 5px 14px rgba(0, 0, 0, .24);
+}
+
+.avatar {
+  width: 156px;
+  height: 156px;
+  flex: 0 0 auto;
+  margin-bottom: 16px;
+  overflow: hidden;
+  border-radius: 50%;
+  background: linear-gradient(145deg, #3984ff 0%, #438cf8 100%);
+  object-fit: cover;
+}
+
+.profile-name {
+  color: #111;
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1.4;
+  text-align: center;
+}
+
+.profile-name span {
+  display: inline-block;
+  margin-left: .45em;
+}
+
+.student-id {
+  margin-top: 2px;
+  color: #111;
+  font-size: 19px;
+  font-weight: 500;
+  letter-spacing: .02em;
+}
+
+.verified-box {
+  width: 100%;
+  min-height: 100px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 12px;
+  padding: 10px 12px;
+  border-radius: 15px;
+  background: linear-gradient(105deg, #ffe58e 0%, #ffd236 100%);
+}
+
+.verified-mark {
+  width: 59px;
+  flex: 0 0 auto;
+  object-fit: contain;
+}
+
+.verified-copy {
+  min-width: 0;
+  color: #111;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.verified-copy p {
+  margin: 0;
+}
+
+.verified-copy p:nth-child(-n+2) {
+  font-size: 15px;
+}
+
+.preferences-card {
+  width: 100%;
+  min-height: 67px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 38px;
+  padding: 12px 22px;
+  border-radius: 20px;
+  background: linear-gradient(105deg, #ffe58e 0%, #ffd236 100%);
+  box-shadow: 0 7px 20px rgba(255, 204, 47, .38);
+  color: #111;
+  font-size: 16px;
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.preferences-icon {
+  width: 40px;
+  height: 40px;
+  flex: 0 0 auto;
+}
+
+.preferences-arrow {
+  width: 24px;
+  height: 24px;
+  margin-left: auto;
+}
+
+.course-reference {
+  display: block;
+  margin-top: 26px;
+  color: #222;
+  font-size: 16px;
+  text-align: center;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
