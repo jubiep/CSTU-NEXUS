@@ -64,7 +64,6 @@ body {
 }
 
 .avatar {
-  position: relative;
   width: 178px;
   height: 178px;
   flex: 0 0 auto;
@@ -72,76 +71,7 @@ body {
   overflow: hidden;
   border-radius: 50%;
   background: linear-gradient(145deg, #3984ff 0%, #438cf8 100%);
-}
-
-.avatar .hair {
-  position: absolute;
-  top: 18px;
-  left: 50%;
-  width: 104px;
-  height: 139px;
-  border-radius: 52% 52% 34% 34% / 38% 38% 28% 28%;
-  background: linear-gradient(90deg, #171519 0%, #292329 50%, #131116 100%);
-  transform: translateX(-50%);
-}
-
-.avatar .face {
-  position: absolute;
-  z-index: 1;
-  top: 29px;
-  left: 50%;
-  width: 65px;
-  height: 83px;
-  border-radius: 46% 46% 47% 47% / 38% 38% 55% 55%;
-  background: linear-gradient(90deg, #e8b99f, #f5d1ba 48%, #dfae96);
-  transform: translateX(-50%);
-  box-shadow: inset 0 -3px 4px rgba(110, 58, 44, .08);
-}
-
-.avatar .face::before {
-  content: "";
-  position: absolute;
-  top: 38px;
-  left: 12px;
-  width: 41px;
-  height: 3px;
-  border-radius: 50%;
-  background: radial-gradient(ellipse, #322522 0 1px, transparent 2px) left center / 12px 3px no-repeat,
-    radial-gradient(ellipse, #322522 0 1px, transparent 2px) right center / 12px 3px no-repeat;
-  box-shadow: 0 16px 0 -1px rgba(159, 73, 76, .55);
-}
-
-.avatar .face::after {
-  content: "";
-  position: absolute;
-  top: -3px;
-  left: 0;
-  width: 65px;
-  height: 26px;
-  border-radius: 50% 50% 25% 25%;
-  background: #201c20;
-}
-
-.avatar .neck {
-  position: absolute;
-  z-index: 1;
-  bottom: 34px;
-  left: 50%;
-  width: 23px;
-  height: 30px;
-  background: #e9bba1;
-  transform: translateX(-50%);
-}
-
-.avatar .body {
-  position: absolute;
-  bottom: -18px;
-  left: 50%;
-  width: 142px;
-  height: 75px;
-  border-radius: 52% 52% 0 0 / 60% 60% 0 0;
-  background: linear-gradient(110deg, #f2f4fa, #fff 50%, #e5eaf4);
-  transform: translateX(-50%);
+  object-fit: cover;
 }
 
 .profile-name {
@@ -274,5 +204,9 @@ body {
     min-width: 0;
     font-size: 13px;
     line-height: 1.4;
+  }
+
+  .verified-copy p:nth-child(-n+2) {
+    font-size: 15px;
   }
 }
