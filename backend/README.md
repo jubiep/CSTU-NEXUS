@@ -1,14 +1,52 @@
-# CSTU-NEXUS-Backend
+# CSTU NEXUS — Backend & Database
 
-Backend และ Database สำหรับโปรเจกต์ **CSTU NEXUS — Course Decision Hub** ซึ่งเป็นระบบสนับสนุนการตัดสินใจเลือกเรียนรายวิชาของนักศึกษา
+ส่วนประมวลผลเซิร์ฟเวอร์ (REST API) และฐานข้อมูลสำหรับระบบ CSTU NEXUS
 
-Repository นี้ประกอบด้วย Spring Boot Backend และ PostgreSQL Database ที่ทำงานผ่าน Docker เพื่อให้สมาชิกในทีมสามารถตั้งค่าสภาพแวดล้อมและพัฒนาโปรเจกต์ร่วมกันได้
-
-เอกสารนี้เขียนขึ้นเพื่อช่วยให้สมาชิกที่เพิ่งเริ่มพัฒนา Backend สามารถตั้งค่าระบบและทดลองรันโปรเจกต์ในเครื่องของตนเองได้ทีละขั้นตอน
+> 📖 สำหรับข้อมูลภาพรวมโปรเจกต์ สมาชิกกลุ่ม และคู่มือรวม สามารถดูได้ที่ [Root README.md](../README.md)
 
 ---
 
-## สารบัญ
+## เทคโนโลยีที่ใช้ (Backend & Database Tech Stack)
+
+- **Java 17:** ภาษาหลักที่ใช้ในการพัฒนา
+- **Spring Boot 4.1.x:** เฟรมเวิร์กหลัก (Spring Web MVC, Spring JDBC)
+- **Lombok:** ลด Boilerplate Code สำหรับ Model/DTO
+- **PostgreSQL 17:** ฐานข้อมูลเชิงสัมพันธ์ (Relational Database) รันบน Docker Container
+- **Docker & Docker Compose:** ควบคุม Container สภาพแวดล้อมฐานข้อมูลให้อยู่ในรูปแบบเดียวกัน
+- **Maven Wrapper (`mvnw`):** จัดการ Dependencies และ Build โปรเจกต์โดยไม่ต้องติดตั้ง Maven แยก
+
+---
+
+## โครงสร้างโฟลเดอร์ Backend
+
+```text
+backend/
+├── cstu-course-nexus/             # Spring Boot Application
+│   ├── src/main/java/             # Source Code หลักภาษา Java
+│   │   └── th/ac/tu/cs/cstu_course_nexus/
+│   │       ├── CstuCourseNexusApplication.java  # Main Application Entry Point
+│   │       └── HealthController.java            # Controller ตรวจสอบสถานะและทดสอบ DB
+│   ├── src/main/resources/
+│   │   └── application.properties # การตั้งค่า Spring Boot และการเชื่อมต่อ PostgreSQL
+│   ├── src/test/                  # Unit / Integration Tests
+│   ├── pom.xml                    # กำหนด Dependencies และ Plugins ของ Maven
+│   └── mvnw / mvnw.cmd            # Maven Wrapper
+│
+├── database/                      # จัดการ PostgreSQL และ Seed Data
+│   ├── compose.yaml               # Docker Compose สำหรับรัน PostgreSQL 17
+│   ├── init.sql                   # Schema โครงสร้างตาราง (mock_user, courses, sections, review)
+│   ├── seed.sql                   # SQL นำเข้าข้อมูลตั้งต้น (38 Courses, 63 Sections)
+│   ├── courses.csv                # ข้อมูลรายวิชาต้นทาง
+│   ├── sections.csv               # ข้อมูล Section ต้นทาง
+│   ├── generate-seed.ps1          # PowerShell Script ตรวจสอบและแปลง CSV สู่ seed.sql
+│   └── migrations/                # ประวัติไฟล์ SQL ปรับปรุง Schema แต่ละช่วง
+│
+└── README.md                      # เอกสารคู่มือ Backend & Database นี้
+```
+
+---
+
+## สารบัญคู่มือการใช้งาน
 
 1. [สิ่งที่ต้องติดตั้งก่อนเริ่มต้น](#1-สิ่งที่ต้องติดตั้งก่อนเริ่มต้น)
 2. [รู้จักโครงสร้างโปรเจกต์](#2-รู้จักโครงสร้างโปรเจกต์)
@@ -57,16 +95,15 @@ docker compose version
 
 หากติดตั้ง Java 17 แล้ว แต่ Terminal ยังแสดง Java เวอร์ชันอื่น ให้ตรวจสอบ `JAVA_HOME` และ `PATH` ให้ชี้ไปยัง JDK 17 ก่อนดำเนินการต่อ
 
-### 1.2 ดาวน์โหลด Repository
+### 1.2 เข้าสู่โฟลเดอร์ Backend
 
-หากยังไม่มี Source Code ในเครื่อง ให้เปิด Git Bash แล้วไปยังโฟลเดอร์ที่ต้องการเก็บโปรเจกต์ จากนั้นรัน:
+เนื่องจากโปรเจกต์เป็น Monorepo ก่อนรันคำสั่งทั้งหมดในคู่มือนี้ ให้เปิด Terminal แล้วเข้าไปที่โฟลเดอร์ `backend/`:
 
 ```bash
-git clone https://github.com/jubiep/CSTU-NEXUS-Backend.git
-cd CSTU-NEXUS-Backend
+cd backend
 ```
 
-หากมี Repository อยู่ในเครื่องแล้ว สามารถเปิดโฟลเดอร์เดิมได้เลย ไม่จำเป็นต้อง Clone ซ้ำ
+คำสั่งทั้งหมดในเอกสารนี้จะอ้างอิงจากโฟลเดอร์ `backend/` เป็นหลัก
 
 ---
 
@@ -127,15 +164,13 @@ cd CSTU-NEXUS-Backend
 
 เปิด Docker Desktop และรอจนกว่า Docker จะพร้อมใช้งาน
 
-### ขั้นตอนที่ 2: ตรวจสอบตำแหน่ง Terminal
+### ขั้นตอนที่ 2: เข้าสู่โฟลเดอร์ Backend
 
-เปิด Git Bash ที่โฟลเดอร์หลักของ Repository:
+เปิด Terminal แล้วเข้าไปที่โฟลเดอร์ `backend/`:
 
-```text
-CSTU-NEXUS-Backend/
+```bash
+cd backend
 ```
-
-คำสั่งในคู่มือนี้อ้างอิงจากโฟลเดอร์หลัก เว้นแต่จะระบุไว้เป็นอย่างอื่น
 
 ### ขั้นตอนที่ 3: เริ่มต้น PostgreSQL
 
@@ -299,7 +334,9 @@ java -version
 
 ตรวจสอบว่าใช้ Java 17
 
-### ขั้นตอนที่ 2: เข้าโฟลเดอร์ Backend
+### ขั้นตอนที่ 2: เข้าโฟลเดอร์ Application
+
+จากโฟลเดอร์ `backend/` ให้เข้าไปที่:
 
 ```bash
 cd cstu-course-nexus
