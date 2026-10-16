@@ -22,12 +22,14 @@
         <div class="profile-name" id="p-name"></div>
         <div class="student-id" id="p-id"></div>
 
-      <hr class="divider"/>
-
-      <!-- My reviews -->
-      <div class="section-header">
-        <span class="section-title">รีวิวของฉัน</span>
-        <span class="text-muted">0 รีวิว</span>
+        <div class="verified-box" aria-label="verified status">
+          <img class="verified-mark" src="../src/verify-icon.png" alt="" aria-hidden="true"/>
+          <div class="verified-copy">
+            <p id="p-faculty"></p>
+            <p id="p-program"></p>
+            <p>ชั้นปีที่ <span id="p-year"></span></p>
+          </div>
+        </div>
       </div>
 
       <a class="preferences-card" href="preferences.html" aria-label="ไปยัง Preferences">
@@ -48,7 +50,6 @@
   <script>
     requireAuth();
     renderTopbar();
-    renderNav("profile");
 
     const nameEl = document.getElementById("p-name");
     const idEl = document.getElementById("p-id");
@@ -57,7 +58,12 @@
     const yearEl = document.getElementById("p-year");
 
     if (currentUser && currentUser.name) {
-      nameEl.textContent = currentUser.name;
+      const parts = currentUser.name.split(" ");
+      if (parts.length > 1) {
+        nameEl.innerHTML = `${parts[0]} <span>${parts.slice(1).join(" ")}</span>`;
+      } else {
+        nameEl.textContent = currentUser.name;
+      }
     }
     if (currentUser && currentUser.studentId) {
       idEl.textContent = currentUser.studentId;
