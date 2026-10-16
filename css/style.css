@@ -1,6 +1,0 @@
-/* ==========================================
-   CSTU NEXUS - Stylesheet Entrypoint
-   นำเข้า Main stylesheet เพื่อ backward-compatibility
-   ========================================== */
-
-@import url('./main.css');

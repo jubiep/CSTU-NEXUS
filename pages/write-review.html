@@ -83,7 +83,6 @@
     const section = getParam("section") || (course && course.sections ? course.sections[0] : "001");
 
     renderTopbar();
-    renderNav("search");
     document.getElementById("detail-code").textContent = code;
     document.getElementById("inline-code").textContent = code;
     const sectionText = document.getElementById("section-text");

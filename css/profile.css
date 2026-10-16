@@ -15,39 +15,13 @@ body {
   box-shadow: 0 0 40px rgba(0, 0, 0, .08);
 }
 
-.topbar {
-  min-height: 56px;
-  padding: 10px 18px;
-  background: #c90035;
-  box-shadow: none;
-}
 
-.topbar-logo {
-  font-size: 19px;
-  letter-spacing: -.3px;
-}
-
-.topbar-logo span {
-  color: #ffd52f;
-}
-
-.btn-logout {
-  gap: 8px;
-  font-size: 15px;
-  font-weight: 600;
-}
-
-.btn-logout img {
-  width: 24px;
-  height: 24px;
-  object-fit: contain;
-}
 
 .profile-page {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 60px clamp(20px, 9vw, 44px) 32px;
+  padding: 36px clamp(20px, 9vw, 44px) 32px;
   background: #fff;
 }
 
@@ -56,7 +30,7 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 34px 14px 16px;
+  padding: 26px 12px 14px;
   border: 1px solid #e5e5e5;
   border-radius: 21px;
   background: #fff;
@@ -64,10 +38,10 @@ body {
 }
 
 .avatar {
-  width: 136px;
-  height: 136px;
+  width: 156px;
+  height: 156px;
   flex: 0 0 auto;
-  margin-bottom: 20px;
+  margin-bottom: 16px;
   overflow: hidden;
   border-radius: 50%;
   background: linear-gradient(145deg, #3984ff 0%, #438cf8 100%);
@@ -100,29 +74,33 @@ body {
   min-height: 100px;
   display: flex;
   align-items: center;
-  gap: 24px;
+  gap: 12px;
   margin-top: 12px;
-  padding: 12px;
+  padding: 10px 12px;
   border-radius: 15px;
   background: linear-gradient(105deg, #ffe58e 0%, #ffd236 100%);
 }
 
 .verified-mark {
-  width: 52px;
-  height: 64px;
+  width: 59px;
   flex: 0 0 auto;
   object-fit: contain;
 }
 
 .verified-copy {
+  min-width: 0;
   color: #111;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 500;
-  line-height: 1.6;
+  line-height: 1.4;
 }
 
 .verified-copy p {
   margin: 0;
+}
+
+.verified-copy p:nth-child(-n+2) {
+  font-size: 15px;
 }
 
 .preferences-card {
@@ -162,40 +140,4 @@ body {
   text-align: center;
   text-decoration: underline;
   text-underline-offset: 3px;
-}
-
-@media (max-width: 480px) {
-  .profile-page {
-    padding-top: 36px;
-  }
-
-  .profile-card {
-    padding: 26px 12px 14px;
-  }
-
-  .avatar {
-    width: 156px;
-    height: 156px;
-    margin-bottom: 16px;
-  }
-
-  .verified-box {
-    gap: 12px;
-    padding: 10px 12px;
-  }
-
-  .verified-mark {
-    width: 42px;
-    height: 52px;
-  }
-
-  .verified-copy {
-    min-width: 0;
-    font-size: 13px;
-    line-height: 1.4;
-  }
-
-  .verified-copy p:nth-child(-n+2) {
-    font-size: 15px;
-  }
 }

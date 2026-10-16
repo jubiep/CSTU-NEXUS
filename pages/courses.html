@@ -10,37 +10,19 @@
 <body>
   <div class="app-shell">
     <!-- Top bar -->
-    <div class="topbar">
-      <a class="topbar-logo" href="courses.html">CSTU <span>NEXUS</span></a>
-      <button class="btn-logout" onclick="logout()">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/>
-          <polyline points="16 17 21 12 16 7"/>
-          <line x1="21" y1="12" x2="9" y2="12"/>
-        </svg>
-        Log out
-      </button>
-    </div>
+    <header id="topbar"></header>
 
     <!-- Content -->
     <div class="page-content">
 
       <!-- Profile banner -->
       <a class="profile-banner" href="profile.html">
-          <div class="avatar-wrapper">
-            <svg class="avatar-img" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <rect width="100" height="100" rx="50" fill="#CCCCCC"/>
-              <circle cx="50" cy="45" r="18" fill="#FFFFFF"/>
-              <path d="M16 95C16 75.67 31.2239 60 50 60C68.7761 60 84 75.67 84 95H16Z" fill="#FFFFFF"/>
-            </svg>
-
-            <div class="verified-badge">
-              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M12 2L4 5V11.09C4 16.14 7.41 20.85 12 22C16.59 20.85 20 16.14 20 11.09V5L12 2Z" fill="#38C172" stroke="#000000" stroke-width="2" stroke-linejoin="round"/>
-                <path d="M9 12L11 14L15 10" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-            </div>
+        <div class="avatar-wrapper">
+          <img class="avatar" src="../src/profile-pic.jpg" alt="Profile photo" width="136" height="136"/>
+          <div class="verified-badge">
+            <img src="../src/verify-icon.png" alt="verified icon" height="40"/>
           </div>
+        </div>
         <div class="profile-info">
           <div class="name" id="user-name">มะละกอ ส้มตำ</div>
           <div class="student-id" id="user-id">6809670670</div>
@@ -61,16 +43,14 @@
         ไม่พบรายวิชาที่ค้นหา
       </p>
     </div>
-
   </div>
 
   <script src="../app.js"></script>
   <script>
     requireAuth();
     renderTopbar();
-    renderNav("search");
 
-function renderCourses(list) {
+    function renderCourses(list) {
       const grid = document.getElementById("course-grid");
       const empty = document.getElementById("empty-msg");
 
