@@ -15,21 +15,12 @@
     <!-- Top bar -->
     <header id="topbar"></header>
 
-    <div class="page-content">
-      <!-- Profile banner -->
-      <div class="profile-banner">
-        <div class="avatar">👩‍💻</div>
-        <div class="profile-info">
-          <div class="name" id="p-name"></div>
-          <div class="student-id" id="p-id"></div>
-          <div class="badge-verified mt-8">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" style="width:13px;height:13px"><polyline points="20 6 9 17 4 12"/></svg>
-            CSTU Verified · ชั้นปีที่ <span id="p-year"></span>
-          </div>
-        </div>
-      </div>
+    <main class="page-content profile-page">
+      <div class="profile-card">
+        <img class="avatar" src="../src/profile-pic.jpg" alt="Profile photo"/>
 
-      <div style="font-size:13px;color:var(--gray-400);margin-bottom:20px;" id="p-faculty"></div>
+        <div class="profile-name" id="p-name"></div>
+        <div class="student-id" id="p-id"></div>
 
       <hr class="divider"/>
 
@@ -39,23 +30,16 @@
         <span class="text-muted">0 รีวิว</span>
       </div>
 
-      <p style="text-align:center;color:var(--gray-400);padding:32px 0;font-size:14px;">
-        ยังไม่มีรีวิว<br/>
-        <a href="courses.html" style="color:var(--red);font-size:13px;text-decoration:none;">เริ่มรีวิวรายวิชาแรก →</a>
-      </p>
-
-      <hr class="divider"/>
-
-      <a href="#" class="pref-row" onclick="logout(); return false;" style="color:var(--red);">
-        <div class="pref-row-left">
-          <div class="pref-icon" style="background:#FFEBEE;">🚪</div>
-          <span class="pref-text" style="color:var(--red);">ออกจากระบบ</span>
-        </div>
+      <a class="preferences-card" href="preferences.html" aria-label="ไปยัง Preferences">
+        <img class="preferences-icon" src="../src/Preferences-logo.png" alt="" aria-hidden="true"/>
+        <span>Preferences</span>
+        <svg class="preferences-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="m9 5 7 7-7 7"/>
+        </svg>
       </a>
 
-    </div>
-
-    <nav class="bottom-nav" id="bottom-nav"></nav>
+      <div class="course-reference">หลักสูตรอ้างอิง</div>
+    </main>
   </div>
 
   <script src="../app.js"></script>
@@ -64,10 +48,26 @@
     renderTopbar();
     renderNav("profile");
 
-    document.getElementById("p-name").textContent    = currentUser.name;
-    document.getElementById("p-id").textContent      = currentUser.studentId;
-    document.getElementById("p-year").textContent    = currentUser.year;
-    document.getElementById("p-faculty").textContent = currentUser.faculty;
+    const nameEl = document.getElementById("p-name");
+    const idEl = document.getElementById("p-id");
+    const facultyEl = document.getElementById("p-faculty");
+    const programEl = document.getElementById("p-program");
+    const yearEl = document.getElementById("p-year");
+
+    if (currentUser && currentUser.name) {
+      nameEl.textContent = currentUser.name;
+    }
+    if (currentUser && currentUser.studentId) {
+      idEl.textContent = currentUser.studentId;
+    }
+    if (currentUser && currentUser.faculty) {
+      const [faculty, ...program] = currentUser.faculty.split(" สาขา");
+      facultyEl.textContent = faculty;
+      programEl.textContent = program.length ? `สาขา${program.join(" สาขา")}` : "";
+    }
+    if (currentUser && currentUser.year) {
+      yearEl.textContent = currentUser.year;
+    }
   </script>
 </body>
 </html>
