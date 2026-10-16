@@ -1,0 +1,39 @@
+course_id,course_name,recommended_year
+CS100,Basic Web Development,1
+CS101,Discrete structures,1
+CS102,Problem solving Basics and Computer Programming,1
+CS111,Object-Oriented Concepts,1
+CS180,Introduction to User Interface and User Experience,1
+EL105,English Communication Skills,1
+EL295,Academic English and Study Skills 1,2
+EL395,Academic English and Study Skills 2,3
+TU100,Civic Engagement,1
+TU101,"Thailand, ASEAN, and the World",1
+TU103,Life and Sustainability,1
+TU106,Creativity and Communication,1
+TU107,Digital Skill and Problem Solving,1
+TU108,Self-Development and Management,1
+TU109,Innovation and Entrepreneurial Mindset,1
+LAS101,"Critical Thinking, Reading, and Writing",1
+ST216,Statistics for Social Science 1,1
+MA211,Calculus 1,1
+CS213,Data Structures,2
+CS221,Introduction to Computer System and Organization,2
+CS240,Principles of Data Science,2
+CS261,Introduction to Software Engineering,2
+ST329,Applied Probability and Statistical Models,2
+CS217,Design and Analysis of Algorithms,2
+CS222,Operating Systems,2
+CS232,Introduction to Cloud Computing Technology,2
+CS242,Python Programming and Applications,2
+CS251,Database Systems 1,2
+CS271,Artificial Intelligence Fundamentals,2
+CS223,Virtualization Technology,3
+CS241,Programming Languages and Paradigms,3
+CS301,Preparation for Senior Projects and Co-operative Education,3
+CS303,Special Projects 1,3
+CS305,Social and Professional Ethics,3
+CS314,Automata Theory,3
+CS331,Net-Centric Computing,3
+CS332,Computer System Security,3
+CS372,Machine Learning,3
