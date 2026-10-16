@@ -1,0 +1,23 @@
+
+services:
+  db:
+    image: postgres:17
+    container_name: cstu-nexus-postgres
+    restart: unless-stopped
+
+    environment:
+      POSTGRES_DB: cstu_nexus_db
+      POSTGRES_USER: cstu_nexus_user
+      POSTGRES_PASSWORD: dev_password_123
+
+    ports:
+      - "5432:5432"
+
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+
+
+volumes:
+  postgres_data:
+    name: database_postgres_data
