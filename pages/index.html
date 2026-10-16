@@ -205,9 +205,9 @@
 
   <script src="../app.js"></script>
   <script>
-    // ถ้า login แล้ว redirect ไป dashboard
+    // Redirect logged-in users to the courses page.
     if (sessionStorage.getItem("cstu_logged_in")) {
-      window.location.href = "dashboard.html";
+      window.location.href = "courses.html";
     }
 
     function doLogin() {
@@ -224,7 +224,7 @@
       // TODO: เชื่อม TU Auth API
       // Mock: รับทุก credential
       sessionStorage.setItem("cstu_logged_in", "1");
-      window.location.href = "dashboard.html";
+      window.location.href = "courses.html";
     }
 
     // Enter key
