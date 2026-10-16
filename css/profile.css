@@ -258,3 +258,21 @@ body {
     font-size: 14px;
   }
 }
+
+@media (max-width: 480px) {
+  .verified-box {
+    gap: 12px;
+    padding: 10px 12px;
+  }
+
+  .verified-mark {
+    width: 42px;
+    height: 52px;
+  }
+
+  .verified-copy {
+    min-width: 0;
+    font-size: 13px;
+    line-height: 1.4;
+  }
+}
