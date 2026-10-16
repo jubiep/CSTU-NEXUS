@@ -3,9 +3,6 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@100;200;300;400;500;600;700&family=Instrument+Sans:ital,wght@0,400..700;1,400..700&display=swap" rel="stylesheet">
   <title>CSTU NEXUS – เข้าสู่ระบบ</title>
   <link rel="stylesheet" href="../css/main.css"/>
   <link rel="stylesheet" href="../css/login.css"/>
@@ -15,17 +12,7 @@
   <div class="login-wrap">
     <div class="login-card">
       <div class="login-logo">
-        CSTU <span>NEXUS</span>
-        <svg viewBox="0 0 198 28" aria-hidden="true">
-          <defs>
-            <linearGradient id="logo-swoosh" x1="0" y1="0" x2="1" y2="0">
-              <stop offset="0" stop-color="#c42132"/>
-              <stop offset=".55" stop-color="#e28a45"/>
-              <stop offset="1" stop-color="#f8d15a"/>
-            </linearGradient>
-          </defs>
-          <path d="M3 24 C20 2, 69 8, 112 10 S183 12, 195 1" fill="none" stroke="url(#logo-swoosh)" stroke-width="2.5"/>
-        </svg>
+      <img src="../src/login-logo.png" alt="CSTU NEXUS logo" width="250"/>
       </div>
 
       <div class="error-msg" id="error-msg">ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง</div>
@@ -37,8 +24,6 @@
       <div class="form-group">
         <input class="form-input" type="password" id="password" placeholder="Password" autocomplete="current-password" aria-label="รหัสผ่าน"/>
       </div>
-
-      <a href="#" class="forgot-link">Forgot Password?</a>
 
       <button class="btn btn-primary" onclick="doLogin()">Log in</button>
 

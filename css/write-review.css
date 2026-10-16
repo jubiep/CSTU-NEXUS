@@ -2,14 +2,12 @@
    CSTU NEXUS - Write Review Page Styles (write-review.html)
    ========================================== */
 
-/* ── Course Detail Header (UI Section ส่วนบน) ── */
 .course-detail-header {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
   gap: 12px;
-  margin-top: 4px;
-  margin-bottom: 24px;
+  margin: 4px 0 24px;
 }
 
 .course-header-left {
@@ -19,12 +17,12 @@
   flex: 1;
 }
 
-/* แถบเส้นสีเหลืองด้านซ้าย */
-.course-accent-bar {
+.course-accent-bar,
+.section-accent-bar {
   width: 4px;
-  background: #F5C518;
-  border-radius: 4px;
   flex-shrink: 0;
+  border-radius: 4px;
+  background: linear-gradient(105deg, #ffe58e 0%, #ffd236 100%);
 }
 
 .course-header-info {
@@ -33,140 +31,48 @@
 }
 
 .course-header-info .course-code {
+  color: #111;
   font-size: 24px;
   font-weight: 800;
-  color: #111111;
   line-height: 1.15;
-  letter-spacing: -0.3px;
+  letter-spacing: -.3px;
 }
 
 .course-header-info .course-fullname {
-  font-size: 13.5px;
-  color: #71717A;
-  margin-top: 4px;
-  line-height: 1.35;
-  font-weight: 400;
   max-width: 230px;
+  margin-top: 4px;
+  color: #71717a;
+  font-size: 13.5px;
+  font-weight: 400;
+  line-height: 1.35;
 }
 
 .course-header-info .course-teacher {
+  margin-top: 8px;
+  color: #1f2937;
   font-size: 13.5px;
   font-weight: 600;
-  color: #1F2937;
-  margin-top: 8px;
   line-height: 1.3;
 }
 
-/* Badge Section สีเหลืองมุมขวาบน (คงที่ / ค้างไว้จากหน้าก่อนหน้า) */
 .section-pill-badge {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: #FFD54F;
-  color: #1E1E1E;
-  font-family: var(--font);
-  font-size: 13px;
-  font-weight: 600;
-  padding: 7px 18px;
-  border-radius: 999px;
-  border: none;
-  cursor: default;
-  box-shadow: 0 4px 14px rgba(254, 208, 83, 0.45);
   flex-shrink: 0;
   align-self: flex-start;
+  padding: 7px 18px;
+  border: 0;
+  border-radius: 999px;
+  background: #ffd54f;
+  box-shadow: 0 4px 14px rgba(254, 208, 83, .45);
+  color: #1e1e1e;
+  font-size: 13px;
+  font-weight: 600;
   white-space: nowrap;
   user-select: none;
 }
 
-.section-pill-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  background: #FFD54F;
-  color: #1E1E1E;
-  font-family: var(--font);
-  font-size: 13px;
-  font-weight: 600;
-  padding: 7px 16px;
-  border-radius: 999px;
-  border: none;
-  cursor: pointer;
-  box-shadow: 0 4px 14px rgba(254, 208, 83, 0.55);
-  transition: transform 0.15s, box-shadow 0.15s, filter 0.15s;
-  flex-shrink: 0;
-  user-select: none;
-}
-
-.section-pill-btn:hover {
-  filter: brightness(0.96);
-  box-shadow: 0 4px 16px rgba(254, 208, 83, 0.65);
-}
-
-.section-pill-btn:active {
-  transform: scale(0.97);
-}
-
-.section-pill-btn img,
-.section-pill-btn svg {
-  width: 14px;
-  height: 14px;
-  object-fit: contain;
-  vertical-align: middle;
-}
-
-/* แผงเลือก Section */
-.section-panel {
-  margin-top: -6px;
-  margin-bottom: 20px;
-}
-
-.section-panel-card {
-  background: #FFFFFF;
-  border: 1.5px solid #F0F0F0;
-  border-radius: 16px;
-  padding: 14px 16px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
-}
-
-.section-panel-title {
-  font-size: 13.5px;
-  font-weight: 600;
-  color: #1E1E1E;
-  margin-bottom: 12px;
-}
-
-.section-list-wrap {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-}
-
-.section-btn-item {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  background: #FFFFFF;
-  color: #B03A2E;
-  border: 1.5px solid #B03A2E;
-  border-radius: 8px;
-  padding: 7px 16px;
-  font-family: var(--font);
-  font-size: 13.5px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.15s ease;
-  user-select: none;
-}
-
-.section-btn-item:hover {
-  background: #FDF2E9;
-}
-
-.section-btn-item:active {
-  transform: scale(0.97);
-}
-
-/* ── Section Title with Accent Bar (Reusable) ── */
 .section-title-wrap {
   display: flex;
   align-items: center;
@@ -175,194 +81,131 @@
 }
 
 .section-accent-bar {
-  width: 4px;
   height: 18px;
-  background: #F5C518;
-  border-radius: 4px;
-  flex-shrink: 0;
 }
 
 .section-title-text {
+  color: #111;
   font-size: 18px;
   font-weight: 700;
-  color: #111111;
   line-height: 1.2;
 }
 
-/* Rating / Feedback Checkbox Groups */
-.rating-group {
-  margin-bottom: 14px;
-}
-
-.rating-label {
-  background: var(--yellow);
-  color: var(--gray-800);
-  font-size: 13px;
-  font-weight: 700;
-  padding: 6px 14px;
-  border-radius: var(--radius-sm);
-  margin-bottom: 8px;
-  display: block;
-}
-
-.checkbox-list {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.checkbox-item {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 14px;
-  cursor: pointer;
-  user-select: none;
-}
-
-.checkbox-item input[type="checkbox"],
-.checkbox-item input[type="radio"] {
-  accent-color: var(--red);
-  width: 16px;
-  height: 16px;
-  cursor: pointer;
-}
-
-/* ── Review Input Card (รายละเอียดเพิ่มเติม) ── */
 .review-input-card {
-  background: #FFFFFF;
-  border-radius: 20px;
-  padding: 16px;
-  border: 1px solid #F0F0F0;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
   margin-bottom: 16px;
+  padding: 16px;
+  border: 1px solid #f0f0f0;
+  border-radius: 20px;
+  background: #fff;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, .06);
 }
 
 .review-input-header {
-  background: #FFD54F;
-  color: #1E1E1E;
+  margin-bottom: 14px;
+  padding: 10px 16px;
+  border-radius: 12px;
+  background: linear-gradient(105deg, #ffe58e 0%, #ffd236 100%);
+  color: #1e1e1e;
   font-size: 15px;
   font-weight: 700;
   text-align: center;
-  padding: 10px 16px;
-  border-radius: 12px;
-  margin-bottom: 14px;
   user-select: none;
 }
 
 .review-textarea-wrap {
-  background: #FAFAFA;
-  border: 1.5px solid #E5E7EB;
-  border-radius: 16px;
-  padding: 12px 14px;
   margin-bottom: 12px;
-  transition: border-color 0.2s, background-color 0.2s;
+  padding: 12px 14px;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 16px;
+  background: #fafafa;
+  transition: border-color .2s, background-color .2s;
 }
 
 .review-textarea-wrap:focus-within {
-  border-color: #F5C518;
-  background: #FFFFFF;
+  border-color: #f5c518;
+  background: #fff;
 }
 
 .review-textarea {
+  display: block;
   width: 100%;
   min-height: 85px;
+  border: 0;
+  outline: 0;
   background: transparent;
-  border: none;
-  outline: none;
-  resize: vertical;
+  color: #1e1e1e;
   font-family: var(--font);
   font-size: 13.5px;
   line-height: 1.55;
-  color: #1E1E1E;
-  display: block;
+  resize: vertical;
 }
 
 .review-textarea::placeholder {
-  color: #8E8E93;
+  color: #8e8e93;
   font-size: 13px;
   line-height: 1.5;
 }
 
-/* Politeness notice */
 .review-notice {
   display: flex;
   align-items: center;
   gap: 8px;
-  color: #EF4444;
+  padding: 2px 4px;
+  color: #ef4444;
   font-size: 13px;
   font-weight: 600;
-  padding: 2px 4px;
   user-select: none;
 }
 
-.review-notice svg {
-  width: 18px;
-  height: 18px;
-  stroke: #EF4444;
-  flex-shrink: 0;
-}
-
-/* Action buttons wrap */
-.review-actions-wrap,
-.review-submit-wrap {
+.review-actions-wrap {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-top: 20px;
-  margin-bottom: 24px;
+  margin: 20px 0 24px;
 }
 
-.btn-back-review {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  background: #FFFFFF;
-  color: #1E1E1E;
-  font-family: var(--font);
-  font-size: 14px;
-  font-weight: 600;
-  padding: 9px 30px;
-  border-radius: 999px;
-  border: none;
-  cursor: pointer;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
-  transition: transform 0.15s, box-shadow 0.15s, background-color 0.15s;
-  user-select: none;
-}
-
-.btn-back-review:hover {
-  background: #FAFAFA;
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
-}
-
-.btn-back-review:active {
-  transform: scale(0.97);
-}
-
+.btn-back-review,
 .btn-submit-review {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: #FFD54F;
-  color: #1E1E1E;
+  border: 0;
+  border-radius: 999px;
   font-family: var(--font);
   font-size: 14px;
-  font-weight: 700;
-  padding: 9px 34px;
-  border-radius: 999px;
-  border: none;
   cursor: pointer;
-  box-shadow: 0 4px 14px rgba(254, 208, 83, 0.55);
-  transition: transform 0.15s, box-shadow 0.15s, filter 0.15s;
   user-select: none;
 }
 
-.btn-submit-review:hover {
-  filter: brightness(0.96);
-  box-shadow: 0 4px 16px rgba(254, 208, 83, 0.65);
+.btn-back-review {
+  padding: 9px 30px;
+  background: #fff;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, .08);
+  color: #1e1e1e;
+  font-weight: 600;
+  transition: transform .15s, box-shadow .15s, background-color .15s;
 }
 
+.btn-back-review:hover {
+  background: #fafafa;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, .12);
+}
+
+.btn-submit-review {
+  padding: 9px 34px;
+  background: linear-gradient(105deg, #ffe58e 0%, #ffd236 100%);
+  box-shadow: 0 4px 14px rgba(254, 208, 83, .55);
+  color: #1e1e1e;
+  font-weight: 700;
+  transition: transform .15s, box-shadow .15s, filter .15s;
+}
+
+.btn-submit-review:hover {
+  filter: brightness(.96);
+  box-shadow: 0 4px 16px rgba(254, 208, 83, .65);
+}
+
+.btn-back-review:active,
 .btn-submit-review:active {
-  transform: scale(0.97);
+  transform: scale(.97);
 }

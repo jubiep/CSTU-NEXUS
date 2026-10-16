@@ -2,11 +2,9 @@
    CSTU NEXUS - Courses Page Styles (courses.html)
    ========================================== */
 
-/* Search bar */
-
 /* Profile banner */
 .profile-banner {
-  background: #FFD13F;
+  background: linear-gradient(105deg, #ffe58e 0%, #ffd236 100%);
   border-radius: 16px;
   padding: 16px 20px;
   display: flex;
@@ -123,18 +121,9 @@
   box-sizing: border-box;
 }
 
-/*
-.course-card:hover {
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
-  border-color: var(--red);
-  transform: translateY(-2px);
-}
-  UNUSED
-*/
-
 .course-indicator {
   width: 4px;
-  background: var(--yellow);
+  background: linear-gradient(105deg, #ffe58e 0%, #ffd236 100%);
   border-radius: 4px;
   flex-shrink: 0;
 }
