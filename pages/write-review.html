@@ -12,10 +12,8 @@
 </head>
 <body>
   <div class="app-shell">
-    <div class="topbar">
-      <a id="back-btn" href="#" style="color:var(--white);font-size:22px;text-decoration:none;line-height:1;">‹</a>
-      <span class="topbar-title" id="topbar-code">เขียนรีวิว</span>
-    </div>
+    <!-- Top bar -->
+    <header id="topbar"></header>
 
     <div class="page-content">
       <!-- Course info -->
@@ -64,8 +62,9 @@
         กรุณาเขียนรีวิวก่อนส่ง
       </div>
 
-      <!-- Submit button -->
-      <div class="review-submit-wrap">
+      <!-- Action buttons -->
+      <div class="review-actions-wrap">
+        <button class="btn-back-review" onclick="goBack()" type="button">ย้อนกลับ</button>
         <button class="btn-submit-review" onclick="submitReview()" type="button">ส่ง</button>
       </div>
       <span id="inline-code" style="display:none;"></span>
@@ -86,14 +85,13 @@
   <script src="../app.js"></script>
   <script>
     requireAuth();
-    renderNav("search");
 
     const code = getParam("code") || "CS261";
     const course = getCourse(code);
     const section = getParam("section") || (course && course.sections ? course.sections[0] : "001");
 
-    document.getElementById("back-btn").href = `course-detail.html?code=${code}&section=${section}`;
-    document.getElementById("topbar-code").textContent = code;
+    renderTopbar();
+    renderNav("search");
     document.getElementById("detail-code").textContent = code;
     document.getElementById("inline-code").textContent = code;
     const sectionText = document.getElementById("section-text");

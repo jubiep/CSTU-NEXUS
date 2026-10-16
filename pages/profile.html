@@ -12,13 +12,8 @@
 </head>
 <body>
   <div class="app-shell">
-    <header class="topbar">
-      <a class="topbar-logo" href="dashboard.html" aria-label="ไปหน้าหลัก">CSTU <span>NEXUS</span></a>
-      <button class="btn-logout" type="button" onclick="logout()">
-        <img src="../src/logout-icon.png" alt="" aria-hidden="true"/>
-        <span>Log out</span>
-      </button>
-    </header>
+    <!-- Top bar -->
+    <header id="topbar"></header>
 
     <main class="page-content profile-page">
       <div class="profile-card">
@@ -27,14 +22,12 @@
         <div class="profile-name" id="p-name"></div>
         <div class="student-id" id="p-id"></div>
 
-        <div class="verified-box" aria-label="verified status">
-          <img class="verified-mark" src="../src/verify-icon.png" alt="" aria-hidden="true"/>
-          <div class="verified-copy">
-            <p id="p-faculty"></p>
-            <p id="p-program"></p>
-            <p>ชั้นปีที่ <span id="p-year"></span></p>
-          </div>
-        </div>
+      <hr class="divider"/>
+
+      <!-- My reviews -->
+      <div class="section-header">
+        <span class="section-title">รีวิวของฉัน</span>
+        <span class="text-muted">0 รีวิว</span>
       </div>
 
       <a class="preferences-card" href="preferences.html" aria-label="ไปยัง Preferences">
@@ -52,6 +45,7 @@
   <script src="../app.js"></script>
   <script>
     requireAuth();
+    renderTopbar();
     renderNav("profile");
 
     const nameEl = document.getElementById("p-name");
