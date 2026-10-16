@@ -303,12 +303,41 @@
   flex-shrink: 0;
 }
 
-/* Submit button wrap */
+/* Action buttons wrap */
+.review-actions-wrap,
 .review-submit-wrap {
   display: flex;
-  justify-content: flex-end;
-  margin-top: 14px;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 20px;
   margin-bottom: 24px;
+}
+
+.btn-back-review {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #FFFFFF;
+  color: #1E1E1E;
+  font-family: var(--font);
+  font-size: 14px;
+  font-weight: 600;
+  padding: 9px 30px;
+  border-radius: 999px;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+  transition: transform 0.15s, box-shadow 0.15s, background-color 0.15s;
+  user-select: none;
+}
+
+.btn-back-review:hover {
+  background: #FAFAFA;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+}
+
+.btn-back-review:active {
+  transform: scale(0.97);
 }
 
 .btn-submit-review {

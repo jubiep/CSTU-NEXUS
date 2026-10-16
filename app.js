@@ -70,6 +70,31 @@ function logout() {
   window.location.href = isPages ? "index.html" : "pages/index.html";
 }
 
+// ── Render top bar (Navbar กลาง) ─────────────
+function renderTopbar() {
+  const topbar = document.getElementById("topbar") || document.querySelector(".topbar");
+  if (!topbar) return;
+
+  const isPages = window.location.pathname.includes("/pages/") || !window.location.pathname.endsWith("/NEXUS/");
+  const srcPrefix = isPages ? "../src/" : "src/";
+  const homeUrl = isPages ? "dashboard.html" : "pages/dashboard.html";
+
+  topbar.className = "topbar";
+  topbar.innerHTML = `
+    <div class="topbar-left">
+      <a href="${homeUrl}" class="topbar-logo-link" title="CSTU NEXUS">
+        <img src="${srcPrefix}full-logo.png" alt="CSTU NEXUS" class="topbar-logo-img" />
+      </a>
+    </div>
+    <div class="topbar-right">
+      <button class="btn-logout" onclick="logout()" title="ออกจากระบบ">
+        <img src="${srcPrefix}logout-icon.png" alt="" class="logout-icon-img" />
+        <span>Log out</span>
+      </button>
+    </div>
+  `;
+}
+
 // ── Render bottom nav ────────────────────────
 function renderNav(active) {
   const nav = document.getElementById("bottom-nav");
@@ -86,3 +111,12 @@ function renderNav(active) {
     </a>
   `).join('');
 }
+
+// Auto-render default topbar on DOMContentLoaded if not already rendered
+document.addEventListener("DOMContentLoaded", () => {
+  const topbar = document.getElementById("topbar");
+  if (topbar && !topbar.hasAttribute("data-rendered")) {
+    topbar.setAttribute("data-rendered", "true");
+    renderTopbar();
+  }
+});
