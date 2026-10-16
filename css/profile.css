@@ -3,46 +3,52 @@
    ========================================== */
 
 body {
-  background: #e9e9e9;
+  background: #fff;
 }
 
 .app-shell {
-  max-width: 428px;
+  width: 100%;
+  max-width: 500px;
   min-height: 100vh;
-  background: #f4f1ee;
-  border-left: 2px solid rgba(0,0,0,.08);
-  border-right: 2px solid rgba(0,0,0,.08);
   margin: 0 auto;
+  background: #fff;
+  box-shadow: none;
 }
 
 .topbar {
-  background: linear-gradient(180deg, #ba2f2a 0%, #be2f2a 100%);
-  box-shadow: inset 0 -1px 0 rgba(0,0,0,.08);
-  min-height: 60px;
+  min-height: 56px;
+  padding: 10px 18px;
+  background: #c90035;
+  box-shadow: none;
 }
 
 .topbar-logo {
-  font-size: 17px;
-  letter-spacing: 0.02em;
+  font-size: 19px;
+  letter-spacing: -.3px;
 }
 
 .topbar-logo span {
-  color: #f1d28c;
+  color: #ffd52f;
 }
 
 .btn-logout {
+  gap: 8px;
   font-size: 15px;
   font-weight: 600;
-  letter-spacing: 0.02em;
+}
+
+.btn-logout img {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
 }
 
 .profile-page {
   display: flex;
   flex-direction: column;
   align-items: center;
-  background: #f5f5f4;
-  padding-top: 20px;
-  padding-bottom: 28px;
+  padding: 60px clamp(20px, 9vw, 44px) 32px;
+  background: #fff;
 }
 
 .profile-card {
@@ -50,140 +56,139 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-top: 8px;
+  padding: 34px 14px 16px;
+  border: 1px solid #e5e5e5;
+  border-radius: 21px;
+  background: #fff;
+  box-shadow: 0 5px 14px rgba(0, 0, 0, .24);
 }
 
 .avatar {
   position: relative;
-  width: 170px;
-  height: 170px;
-  border-radius: 50%;
-  background: linear-gradient(180deg, #6ea9e5 0%, #4e9ae0 100%);
+  width: 178px;
+  height: 178px;
+  flex: 0 0 auto;
+  margin-bottom: 20px;
   overflow: hidden;
-  box-shadow: inset 0 0 0 6px rgba(255,255,255,0.08);
-  margin-bottom: 12px;
+  border-radius: 50%;
+  background: linear-gradient(145deg, #3984ff 0%, #438cf8 100%);
 }
 
 .avatar .hair {
   position: absolute;
-  left: 50%;
   top: 18px;
-  width: 92px;
-  height: 52px;
-  background: #1f1d1d;
-  border-radius: 56px 56px 40px 40px;
+  left: 50%;
+  width: 104px;
+  height: 139px;
+  border-radius: 52% 52% 34% 34% / 38% 38% 28% 28%;
+  background: linear-gradient(90deg, #171519 0%, #292329 50%, #131116 100%);
   transform: translateX(-50%);
 }
 
 .avatar .face {
   position: absolute;
+  z-index: 1;
+  top: 29px;
   left: 50%;
-  top: 38px;
-  width: 62px;
-  height: 74px;
-  background: #f2d1b5;
-  border-radius: 46% 46% 44% 44% / 44% 44% 52% 52%;
+  width: 65px;
+  height: 83px;
+  border-radius: 46% 46% 47% 47% / 38% 38% 55% 55%;
+  background: linear-gradient(90deg, #e8b99f, #f5d1ba 48%, #dfae96);
   transform: translateX(-50%);
-  box-shadow: inset 0 -4px 0 rgba(0,0,0,0.03);
-}
-
-.avatar .face::before,
-.avatar .face::after {
-  content: "";
-  position: absolute;
-  top: 30px;
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: #1d1d1d;
+  box-shadow: inset 0 -3px 4px rgba(110, 58, 44, .08);
 }
 
 .avatar .face::before {
-  left: 15px;
+  content: "";
+  position: absolute;
+  top: 38px;
+  left: 12px;
+  width: 41px;
+  height: 3px;
+  border-radius: 50%;
+  background: radial-gradient(ellipse, #322522 0 1px, transparent 2px) left center / 12px 3px no-repeat,
+    radial-gradient(ellipse, #322522 0 1px, transparent 2px) right center / 12px 3px no-repeat;
+  box-shadow: 0 16px 0 -1px rgba(159, 73, 76, .55);
 }
 
 .avatar .face::after {
-  right: 15px;
+  content: "";
+  position: absolute;
+  top: -3px;
+  left: 0;
+  width: 65px;
+  height: 26px;
+  border-radius: 50% 50% 25% 25%;
+  background: #201c20;
 }
 
 .avatar .neck {
   position: absolute;
+  z-index: 1;
+  bottom: 34px;
   left: 50%;
-  bottom: 42px;
-  width: 18px;
-  height: 20px;
-  background: #f2d1b5;
-  border-radius: 0 0 8px 8px;
+  width: 23px;
+  height: 30px;
+  background: #e9bba1;
   transform: translateX(-50%);
 }
 
 .avatar .body {
   position: absolute;
+  bottom: -18px;
   left: 50%;
-  bottom: 0;
-  width: 104px;
-  height: 58px;
-  background: #f5f0ee;
-  border-radius: 52% 52% 14% 14% / 100% 100% 0 0;
+  width: 142px;
+  height: 75px;
+  border-radius: 52% 52% 0 0 / 60% 60% 0 0;
+  background: linear-gradient(110deg, #f2f4fa, #fff 50%, #e5eaf4);
   transform: translateX(-50%);
 }
 
 .profile-name {
-  font-size: 28px;
+  color: #111;
+  font-size: 20px;
   font-weight: 700;
-  color: #1a1a1a;
-  letter-spacing: 0.02em;
+  line-height: 1.4;
   text-align: center;
-  line-height: 1.2;
 }
 
 .profile-name span {
   display: inline-block;
-  margin-left: 0.3em;
+  margin-left: .45em;
 }
 
 .student-id {
-  margin-top: 4px;
-  font-size: 22px;
-  color: #1a1a1a;
-  letter-spacing: 0.04em;
+  margin-top: 2px;
+  color: #111;
+  font-size: 19px;
   font-weight: 500;
+  letter-spacing: .02em;
 }
 
 .verified-box {
-  width: min(92%, 360px);
+  width: 100%;
+  min-height: 100px;
   display: flex;
   align-items: center;
-  gap: 16px;
-  background: rgba(99, 188, 99, 0.9);
-  border-radius: 18px;
-  padding: 14px 18px;
-  margin-top: 20px;
-  box-shadow: inset 0 0 0 1px rgba(0,0,0,0.04);
+  gap: 24px;
+  margin-top: 12px;
+  padding: 12px clamp(14px, 8vw, 38px);
+  border-radius: 20px;
+  background: linear-gradient(105deg, #ffe58e 0%, #ffd236 100%);
 }
 
 .verified-mark {
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  background: rgba(255,255,255,0.2);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #fff;
-  flex-shrink: 0;
-}
-
-.verified-mark svg {
-  width: 22px;
-  height: 22px;
+  width: 52px;
+  height: 64px;
+  flex: 0 0 auto;
+  object-fit: contain;
 }
 
 .verified-copy {
-  color: #0f1c12;
+  color: #111;
   font-size: 16px;
-  font-weight: 600;
-  line-height: 1.4;
+  font-weight: 500;
+  line-height: 1.6;
 }
 
 .verified-copy p {
@@ -191,55 +196,65 @@ body {
 }
 
 .preferences-card {
-  width: min(92%, 360px);
-  background: #f4dc7b;
-  border-radius: 18px;
-  padding: 18px 20px;
-  margin-top: 22px;
+  width: 100%;
+  min-height: 67px;
   display: flex;
   align-items: center;
-  gap: 15px;
-  box-shadow: inset 0 0 0 1px rgba(0,0,0,0.05);
-  color: #1c1c1c;
-  font-size: 22px;
-  font-weight: 600;
+  gap: 14px;
+  margin-top: 38px;
+  padding: 12px 22px;
+  border-radius: 20px;
+  background: linear-gradient(105deg, #ffe58e 0%, #ffd236 100%);
+  box-shadow: 0 7px 20px rgba(255, 204, 47, .38);
+  color: #111;
+  font-size: 19px;
+  font-weight: 500;
+  text-decoration: none;
 }
 
 .preferences-icon {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  border: 3px solid rgba(31, 31, 31, 0.9);
-  font-size: 24px;
-  line-height: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(255,255,255,0.15);
+  width: 40px;
+  height: 40px;
+  flex: 0 0 auto;
+}
+
+.preferences-arrow {
+  width: 24px;
+  height: 24px;
+  margin-left: auto;
 }
 
 .course-reference {
-  margin-top: 34px;
-  font-size: 20px;
-  color: #1b1b1b;
+  margin-top: 26px;
+  color: #222;
+  font-size: 18px;
   text-align: center;
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
 
-@media (max-width: 420px) {
-  .profile-name {
-    font-size: 24px;
+@media (max-width: 380px) {
+  .profile-page {
+    padding-top: 36px;
   }
 
-  .student-id {
-    font-size: 18px;
+  .profile-card {
+    padding: 26px 12px 14px;
+  }
+
+  .avatar {
+    width: 156px;
+    height: 156px;
+    margin-bottom: 16px;
+  }
+
+  .verified-box {
+    gap: 14px;
+    padding-right: 12px;
+    padding-left: 16px;
   }
 
   .verified-copy {
     font-size: 14px;
   }
-
-  .preferences-card {
-    font-size: 18px;
-  }
 }
-

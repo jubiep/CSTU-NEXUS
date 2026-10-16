@@ -109,6 +109,66 @@
     .login-note {
       display: none;
     }
+
+    @media (max-width: 600px) {
+      .login-wrap {
+        padding: 16px;
+      }
+
+      .login-card {
+        width: min(396px, 82vw);
+        height: min(550px, 114vw);
+        padding: min(198px, 41vw) min(40px, 8.3vw) 32px;
+        border-radius: min(40px, 8.2vw);
+        box-shadow: 0 5px 14px rgba(0, 0, 0, .28);
+        transform: translateY(5vh);
+      }
+
+      .login-logo {
+        top: min(61px, 12.5vw);
+        font-size: min(44px, 9vw);
+        letter-spacing: -1.5px;
+        line-height: 1.2;
+      }
+
+      .login-logo svg {
+        top: min(43px, 9vw);
+        width: min(252px, 51.5vw);
+        height: min(36px, 7.4vw);
+      }
+
+      .login-card .form-group {
+        margin-bottom: min(25px, 5.1vw);
+      }
+
+      .login-card .error-msg {
+        margin-bottom: min(16px, 3.3vw);
+      }
+
+      .login-card .form-input {
+        height: min(48px, 9.8vw);
+        padding: 0 min(25px, 5.1vw);
+        border-radius: min(20px, 4.1vw);
+        font-size: max(12px, min(15px, 3.1vw));
+      }
+
+      .forgot-link {
+        font-size: max(14px, min(17px, 3.5vw));
+      }
+
+      .login-card .btn {
+        width: min(111px, 22.7vw);
+        height: min(39px, 8vw);
+        font-size: max(14px, min(18px, 3.7vw));
+        line-height: min(39px, 8vw);
+      }
+    }
+
+    @media (max-width: 600px) and (max-height: 700px) {
+      .login-card {
+        transform: none;
+      }
+    }
   </style>
 </head>
 <body>

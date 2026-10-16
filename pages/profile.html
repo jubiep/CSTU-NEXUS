@@ -15,11 +15,7 @@
     <header class="topbar">
       <a class="topbar-logo" href="dashboard.html" aria-label="ไปหน้าหลัก">CSTU <span>NEXUS</span></a>
       <button class="btn-logout" type="button" onclick="logout()">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
-          <polyline points="16 17 21 12 16 7"/>
-          <line x1="21" y1="12" x2="9" y2="12"/>
-        </svg>
+        <img src="../src/logout-icon.png" alt="" aria-hidden="true"/>
         <span>Log out</span>
       </button>
     </header>
@@ -33,27 +29,31 @@
           <div class="body"></div>
         </div>
 
-        <div class="profile-name" id="p-name">มะละกอ <span>ส้มต้า</span></div>
-        <div class="student-id" id="p-id">68096970670</div>
+        <div class="profile-name" id="p-name"></div>
+        <div class="student-id" id="p-id"></div>
 
         <div class="verified-box" aria-label="verified status">
-          <div class="verified-mark">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <polyline points="20 6 9 17 4 12"></polyline>
-            </svg>
-          </div>
+          <img class="verified-mark" src="../src/verify-icon.png" alt="" aria-hidden="true"/>
           <div class="verified-copy">
-            <p>คณะวิทยาศาสตร์และเทคโนโลยี</p>
-            <p>สาขาวิทยาการคอมพิวเตอร์</p>
-            <p>ชั้นปีที่ <span id="p-year">2</span></p>
+            <p id="p-faculty"></p>
+            <p id="p-program"></p>
+            <p>ชั้นปีที่ <span id="p-year"></span></p>
           </div>
         </div>
       </div>
 
-      <div class="preferences-card" aria-label="Preferences">
-        <div class="preferences-icon">✚</div>
+      <a class="preferences-card" href="preferences.html" aria-label="ไปยัง Preferences">
+        <svg class="preferences-icon" viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M30.8 16.4a13.2 13.2 0 1 1-5.5-8.3"/>
+          <path d="M11.8 18.2h.1m9.2 0h.1"/>
+          <path d="M13.8 25c1.5 2 3.4 3 5.9 3s4.4-1 5.9-3"/>
+          <path d="M31 3v11m-5.5-5.5h11"/>
+        </svg>
         <span>Preferences</span>
-      </div>
+        <svg class="preferences-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="m9 5 7 7-7 7"/>
+        </svg>
+      </a>
 
       <div class="course-reference">หลักสูตรอ้างอิง</div>
     </main>
@@ -66,6 +66,8 @@
 
     const nameEl = document.getElementById("p-name");
     const idEl = document.getElementById("p-id");
+    const facultyEl = document.getElementById("p-faculty");
+    const programEl = document.getElementById("p-program");
     const yearEl = document.getElementById("p-year");
 
     if (currentUser && currentUser.name) {
@@ -73,6 +75,11 @@
     }
     if (currentUser && currentUser.studentId) {
       idEl.textContent = currentUser.studentId;
+    }
+    if (currentUser && currentUser.faculty) {
+      const [faculty, ...program] = currentUser.faculty.split(" สาขา");
+      facultyEl.textContent = faculty;
+      programEl.textContent = program.length ? `สาขา${program.join(" สาขา")}` : "";
     }
     if (currentUser && currentUser.year) {
       yearEl.textContent = currentUser.year;
