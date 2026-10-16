@@ -3,6 +3,69 @@
    ========================================== */
 
 /* Search bar */
+
+/* Profile banner */
+.profile-banner {
+  background: #FFD13F;
+  border-radius: 16px;
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 16px;
+  text-decoration: none;
+  color: inherit;
+  box-shadow: 0 6px 10px rgb(255, 222, 131); 
+}
+
+.avatar-wrapper {
+  position: relative;
+  width: 72px;
+  height: 72px;
+  flex-shrink: 0;
+}
+
+.avatar-img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  display: block;
+}
+
+.verified-badge {
+  position: absolute;
+  top: -6px;
+  left: -6px;
+  width: 28px;
+  height: 28px;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.15));
+}
+
+.verified-badge svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.profile-info .name {
+  font-size: 20px;
+  font-weight: 700;
+  color: #000000;
+  line-height: 1.2;
+}
+
+.profile-info .student-id {
+  font-size: 14px;
+  font-weight: 500;
+  color: #000000;
+  margin-top: 6px;
+}
+
 .search-wrap {
   position: relative;
   margin-bottom: 16px;
@@ -22,7 +85,7 @@
   width: 100%;
   padding: 10px 14px 10px 38px;
   border: 1.5px solid var(--gray-200);
-  border-radius: var(--radius-lg);
+  border-radius: 10px;
   font-family: var(--font);
   font-size: 14px;
   background: var(--gray-50);
@@ -39,37 +102,60 @@
 .course-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 10px;
+  gap: 14px 10px;
+  padding: 4px;
 }
 
 .course-card {
   background: var(--white);
   border: 1px solid var(--gray-200);
   border-radius: var(--radius-md);
-  padding: 12px;
+  padding: 16px 14px;
   cursor: pointer;
-  transition: box-shadow .15s, border-color .15s;
+  box-shadow: 0 6px 10px rgba(0, 0, 0, 0.2); 
+  transition: box-shadow .15s, border-color .15s, transform .15s;
   text-decoration: none;
   color: inherit;
-  display: block;
+  display: flex;
+  align-items: stretch;
+  gap: 12px;
+  min-height: 105px;
+  box-sizing: border-box;
 }
 
+/*
 .course-card:hover {
-  box-shadow: var(--shadow-md);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
   border-color: var(--red);
+  transform: translateY(-2px);
+}
+  UNUSED
+*/
+
+.course-indicator {
+  width: 4px;
+  background: var(--yellow);
+  border-radius: 4px;
+  flex-shrink: 0;
 }
 
 .course-code {
-  font-size: 13px;
+  font-size: 16px;
   font-weight: 700;
-  color: var(--red);
 }
 
 .course-name {
-  font-size: 12px;
+  font-size: 14px;
+  font-weight: 300;
   color: var(--gray-600);
-  margin-top: 3px;
+  margin-top: 4px;
   line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* Empty message */
