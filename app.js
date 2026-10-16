@@ -77,7 +77,7 @@ function renderTopbar() {
 
   const isPages = window.location.pathname.includes("/pages/") || !window.location.pathname.endsWith("/NEXUS/");
   const srcPrefix = isPages ? "../src/" : "src/";
-  const homeUrl = isPages ? "dashboard.html" : "pages/dashboard.html";
+  const homeUrl = isPages ? "courses.html" : "pages/courses.html";
 
   topbar.className = "topbar";
   topbar.innerHTML = `

@@ -8,11 +8,11 @@ body {
 
 .app-shell {
   width: 100%;
-  max-width: 500px;
+  max-width: 420px;
   min-height: 100vh;
   margin: 0 auto;
   background: #fff;
-  box-shadow: none;
+  box-shadow: 0 0 40px rgba(0, 0, 0, .08);
 }
 
 .topbar {
@@ -164,7 +164,7 @@ body {
   text-underline-offset: 3px;
 }
 
-@media (max-width: 380px) {
+@media (max-width: 480px) {
   .profile-page {
     padding-top: 36px;
   }
@@ -179,18 +179,6 @@ body {
     margin-bottom: 16px;
   }
 
-  .verified-box {
-    gap: 14px;
-    padding-right: 12px;
-    padding-left: 16px;
-  }
-
-  .verified-copy {
-    font-size: 14px;
-  }
-}
-
-@media (max-width: 480px) {
   .verified-box {
     gap: 12px;
     padding: 10px 12px;
