@@ -328,15 +328,26 @@ git status
 
 ## 5. รัน Backend และ Database ผ่าน Docker
 
-ต้องติดตั้งและเปิด Docker Desktop ก่อน จากนั้นเปิด PowerShell ที่ root ของ repository และตั้ง TU API key ใน terminal เดียวกันกับที่จะรัน Compose:
+ก่อนเริ่มต้นให้เตรียมไฟล์ `.env` ที่ root ของ repository:
+
+```bash
+# คัดลอกไฟล์ตัวอย่างไปเป็น .env
+cp .env.example .env
+```
+
+จากนั้นเปิดไฟล์ `.env` และใส่ Application Key ที่ได้รับมา:
+
+```env
+TU_API_APPLICATION_KEY=your_actual_key_here
+```
+
+จากนั้นสามารถสั่งรัน Docker Compose ได้ทันที:
 
 ```powershell
-$secureKey = Read-Host "TU API Application Key" -AsSecureString
-$env:TU_API_APPLICATION_KEY = [System.Net.NetworkCredential]::new("", $secureKey).Password
 docker compose -f backend/database/compose.yaml up -d --build
 ```
 
-Compose จะ build Spring Boot backend, เริ่ม PostgreSQL และเริ่ม backend หลังจาก database พร้อมใช้งาน โดย backend เปิดที่ `http://localhost:8080` และข้อมูล PostgreSQL เก็บใน named volume เดิม
+Compose จะดึงค่า `TU_API_APPLICATION_KEY` และ `APP_CORS_ALLOWED_ORIGINS` จากไฟล์ `.env` โดยอัตโนมัติ พร้อม build Spring Boot backend, เริ่ม PostgreSQL และเริ่ม backend โดย backend เปิดที่ `http://localhost:8080`
 
 ตรวจสถานะและ log:
 
@@ -359,16 +370,17 @@ docker compose -f backend/database/compose.yaml down
 
 Backend เชื่อมต่อ `https://restapi.tu.ac.th/api/v1/auth/Ad/verify` จากฝั่ง server เท่านั้น โดยส่งชื่อผู้ใช้/รหัสผ่านไปตรวจสอบ และเก็บผลยืนยันใน HttpOnly session cookie ของแอป ไม่ส่ง TU Application Key ให้ browser
 
-ขอ Application Key จากผู้ดูแล TU API แล้วตั้งค่าใน PowerShell **ก่อนเริ่ม Compose** (ใช้ค่าจริงเฉพาะในเครื่อง/secret manager ห้าม commit ลง Git):
+### วิธีตั้งค่าผ่านไฟล์ `.env` (แนะนำ)
 
-```powershell
-$secureKey = Read-Host "TU API Application Key" -AsSecureString
-$env:TU_API_APPLICATION_KEY = [System.Net.NetworkCredential]::new("", $secureKey).Password
-$env:APP_CORS_ALLOWED_ORIGINS = "http://localhost:5500"
-docker compose -f backend/database/compose.yaml up -d --build
+สร้างไฟล์ `.env` ที่ root ของโปรเจกต์ (หรือคัดลอกมาจาก `.env.example`) โดยไฟล์นี้จะถูกละเว้นจาก Git อัตโนมัติ:
+
+```env
+TU_API_APPLICATION_KEY=your_actual_key_here
+APP_CORS_ALLOWED_ORIGINS=http://localhost:5500,http://127.0.0.1:5500,http://localhost:5501,http://127.0.0.1:5501
 ```
 
-ถ้าใช้ Live Server ที่พอร์ตอื่น ให้แก้ `APP_CORS_ALLOWED_ORIGINS` ให้ตรง origin ที่แสดงใน address bar เช่น `http://127.0.0.1:5500` ไม่ใช่ URL ของ backend
+- **หากรันผ่าน Docker Compose:** Docker จะส่งตัวแปรจาก `.env` ไปยัง container โดยตรง
+- **หากรันผ่าน Maven Wrapper (`.\mvnw.cmd spring-boot:run`):** Backend จะตรวจหาและโหลดค่าจาก `.env` ให้อัตโนมัติ
 
 เรียกใช้ได้ที่:
 

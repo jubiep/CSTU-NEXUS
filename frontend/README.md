@@ -78,5 +78,4 @@ python -m http.server 5500
 ```html
 <script>window.CSTU_API_BASE_URL = "http://localhost:8080/api";</script>
 ```
-
-ตั้ง `TU_API_APPLICATION_KEY` ใน environment ของ **backend เท่านั้น** ก่อนรัน Spring Boot ดูขั้นตอนใน [คู่มือ Backend](../backend/README.md) ห้ามนำ Application Key ไปใส่ใน `app.js`, HTML หรือ commit ลง Git
+ตั้ง `TU_API_APPLICATION_KEY` ในไฟล์ `.env` หรือ environment ของ **backend เท่านั้น** ก่อนรัน Spring Boot ดูขั้นตอนใน [คู่มือ Backend](../backend/README.md) ห้ามนำ Application Key ไปใส่ใน `app.js`, HTML หรือ commit ลง Git
