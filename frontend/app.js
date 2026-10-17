@@ -72,8 +72,8 @@ async function apiRequest(path, options = {}) {
   }
 
   if (!response.ok) {
-    const message = payload && typeof payload === "object" && (payload.message || payload.detail)
-      ? payload.message || payload.detail
+    const message = payload && typeof payload === "object" && (payload.message || payload.detail || payload.error)
+      ? payload.message || payload.detail || payload.error
       : `Backend ตอบกลับด้วยสถานะ ${response.status}`;
     const error = new Error(message);
     error.status = response.status;

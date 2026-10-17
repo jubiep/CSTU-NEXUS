@@ -10,6 +10,7 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
 
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.web.client.RestClient;
@@ -76,5 +77,19 @@ class TuAuthServiceTests {
 
         assertEquals(403, exception.getStatusCode().value());
         server.verify();
+    }
+
+    @Test
+    void rejectsBlankOrCrlfKeyWith503() {
+        RestClient.Builder builder = RestClient.builder();
+        TuAuthService serviceWithCr = new TuAuthService(builder, VERIFY_URL, "\r\n");
+        ResponseStatusException ex1 = assertThrows(ResponseStatusException.class,
+                () -> serviceWithCr.verify("6800000000", "pass"));
+        assertEquals(HttpStatus.SERVICE_UNAVAILABLE, ex1.getStatusCode());
+
+        TuAuthService serviceWithQuotes = new TuAuthService(builder, VERIFY_URL, "\"\"");
+        ResponseStatusException ex2 = assertThrows(ResponseStatusException.class,
+                () -> serviceWithQuotes.verify("6800000000", "pass"));
+        assertEquals(HttpStatus.SERVICE_UNAVAILABLE, ex2.getStatusCode());
     }
 }

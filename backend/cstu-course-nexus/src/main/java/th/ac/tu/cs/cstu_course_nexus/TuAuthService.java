@@ -28,15 +28,29 @@ public class TuAuthService {
             @Value("${tu.auth.application-key:}") String applicationKey
     ) {
         this.restClient = restClientBuilder.build();
-        this.verifyUrl = verifyUrl;
-        this.applicationKey = applicationKey;
+        this.verifyUrl = verifyUrl != null ? verifyUrl.trim() : "";
+        this.applicationKey = sanitizeKey(applicationKey);
+    }
+
+    private static String sanitizeKey(String key) {
+        if (key == null) {
+            return "";
+        }
+        String cleaned = key.replaceAll("[\\r\\n]", "").trim();
+        if ((cleaned.startsWith("\"") && cleaned.endsWith("\"")) ||
+            (cleaned.startsWith("'") && cleaned.endsWith("'"))) {
+            if (cleaned.length() >= 2) {
+                cleaned = cleaned.substring(1, cleaned.length() - 1).trim();
+            }
+        }
+        return cleaned;
     }
 
     public AuthUser verify(String username, String password) {
         if (applicationKey.isBlank()) {
             throw new ResponseStatusException(
                     HttpStatus.SERVICE_UNAVAILABLE,
-                    "ยังไม่ได้ตั้งค่า TU API Application Key บน backend"
+                    "ยังไม่ได้ตั้งค่า TU API Application Key บน backend กรุณาตั้งค่า TU_API_APPLICATION_KEY ก่อนเริ่มระบบ"
             );
         }
 
@@ -53,14 +67,25 @@ public class TuAuthService {
             if (exception.getStatusCode().value() == HttpStatus.UNAUTHORIZED.value()) {
                 throw invalidCredentials();
             }
+            if (exception.getStatusCode().value() == HttpStatus.FORBIDDEN.value()) {
+                throw new ResponseStatusException(
+                        HttpStatus.BAD_GATEWAY,
+                        "TU API ปฏิเสธการเข้าถึง (403 Forbidden) กรุณาตรวจสอบ Application Key ว่าถูกต้องและได้รับอนุญาต"
+                );
+            }
             throw new ResponseStatusException(
                     HttpStatus.BAD_GATEWAY,
-                    "TU Authentication ตอบกลับด้วยข้อผิดพลาด กรุณาลองใหม่ภายหลัง"
+                    "TU Authentication ตอบกลับด้วยข้อผิดพลาด (" + exception.getStatusCode().value() + ") กรุณาลองใหม่ภายหลัง"
             );
         } catch (ResourceAccessException exception) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_GATEWAY,
-                    "ไม่สามารถเชื่อมต่อ TU Authentication ได้ กรุณาลองใหม่ภายหลัง"
+                    "ไม่สามารถเชื่อมต่อ TU Authentication ได้ (หมดเวลาการเชื่อมต่อหรือต่อเซิร์ฟเวอร์ไม่ได้) กรุณาลองใหม่ภายหลัง"
+            );
+        } catch (Exception exception) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_GATEWAY,
+                    "เกิดข้อผิดพลาดในการเรียก TU Authentication: " + exception.getMessage()
             );
         }
 
