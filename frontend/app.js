@@ -2,11 +2,10 @@
    CSTU NEXUS - Shared JS + API integration
    ========================================== */
 
-const isLocalLiveServer = ["localhost", "127.0.0.1"].includes(window.location.hostname)
-  && window.location.port === "5500";
+const isLocalFrontend = ["localhost", "127.0.0.1"].includes(window.location.hostname);
 const API_BASE_URL = (
   window.CSTU_API_BASE_URL
-  || (isLocalLiveServer ? "http://localhost:8080/api" : `${window.location.origin}/api`)
+  || (isLocalFrontend ? `http://${window.location.hostname}:8080/api` : `${window.location.origin}/api`)
 ).replace(/\/+$/, "");
 const AUTH_STATE_KEY = "cstu_authenticated";
 

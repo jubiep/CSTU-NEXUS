@@ -64,7 +64,7 @@ python -m http.server 5500
 
 หน้า Login และ Profile เรียก backend จริงผ่าน session cookie แบบ HttpOnly ไม่มี mock login หรือ token ที่เปิดอ่านได้จาก JavaScript
 
-- ค่า API เริ่มต้นคือ `http://localhost:8080/api` และตั้งค่าใหม่ได้โดยกำหนด `window.CSTU_API_BASE_URL` **ก่อน** โหลด `app.js`
+- เมื่อเปิด Frontend บน `localhost` หรือ `127.0.0.1` ค่า API เริ่มต้นจะใช้ hostname เดียวกันที่พอร์ต `8080` (เช่น `http://127.0.0.1:8080/api`) ไม่ขึ้นกับพอร์ตของ Frontend เพื่อให้ session cookie ใช้ได้ และตั้งค่าใหม่ได้โดยกำหนด `window.CSTU_API_BASE_URL` **ก่อน** โหลด `app.js`
 - `POST /auth/login` รับ `{ "username": "6800000000", "password": "..." }` โดย `username` คือเลขนักศึกษา 10 หลักจากฟอร์ม login แล้ว backend ส่งเลขนั้นเป็น `UserName` ไป TU AD Verify พร้อม `Application-Key`; สำเร็จแล้ว backend สร้าง session และตอบ `{ "user": { ... } }`
 - `GET /auth/me` ใช้ session cookie และตอบ `{ "displayName": "...", "studentId": "...", "year": 2, "faculty": "...", "department": "...", "email": "..." }`
 - หน้า Courses เรียก `/auth/me` เช่นกัน เพื่อแสดงชื่อและรหัสนักศึกษาจากบัญชีที่ยืนยันแล้ว; ถ้าโหลดไม่สำเร็จจะแสดงข้อผิดพลาดและปุ่มลองใหม่แทนข้อมูล mock
