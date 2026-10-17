@@ -15,52 +15,83 @@
       <img src="../src/login-logo.png" alt="CSTU NEXUS logo" width="250"/>
       </div>
 
-      <div class="error-msg" id="error-msg">ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง</div>
+      <div class="error-msg" id="error-msg" role="alert" aria-live="polite"></div>
 
-      <div class="form-group">
-        <input class="form-input" type="email" id="username" placeholder="email@dome.tu.ac.th" autocomplete="username" aria-label="อีเมล"/>
-      </div>
+      <form id="login-form">
+        <div class="form-group">
+          <input class="form-input" type="text" id="student-id" name="studentId" placeholder="เลขนักศึกษา 10 หลัก" autocomplete="username" aria-label="เลขนักศึกษา" inputmode="numeric" pattern="[0-9]{10}" maxlength="10" title="กรุณากรอกเลขนักศึกษา 10 หลัก" required/>
+        </div>
 
-      <div class="form-group">
-        <input class="form-input" type="password" id="password" placeholder="Password" autocomplete="current-password" aria-label="รหัสผ่าน"/>
-      </div>
+        <div class="form-group">
+          <input class="form-input" type="password" id="password" name="password" placeholder="Password" autocomplete="current-password" aria-label="รหัสผ่าน" required/>
+        </div>
 
-      <button class="btn btn-primary" onclick="doLogin()">Log in</button>
+        <button class="btn btn-primary" id="login-button" type="submit">Log in</button>
+      </form>
 
       <p class="login-note">
-        ระบบใช้การยืนยันตัวตนผ่าน TU Authentication<br/>
-        เฉพาะนักศึกษา CSTU มธ. เท่านั้น
+        ยืนยันตัวตนผ่าน TU Authentication<br/>
+        ใช้บัญชีนักศึกษา TU ที่เปิดใช้งาน
       </p>
     </div>
   </div>
 
   <script src="../app.js"></script>
   <script>
-    // ถ้า login แล้ว redirect ไป courses.html
-    if (sessionStorage.getItem("cstu_logged_in")) {
+    if (sessionStorage.getItem(AUTH_STATE_KEY)) {
       window.location.href = "courses.html";
     }
 
-    function doLogin() {
-      const u = document.getElementById("username").value.trim();
-      const p = document.getElementById("password").value;
-      const err = document.getElementById("error-msg");
+    const loginForm = document.getElementById("login-form");
+    const loginButton = document.getElementById("login-button");
+    const studentIdInput = document.getElementById("student-id");
+    const passwordInput = document.getElementById("password");
+    const err = document.getElementById("error-msg");
 
-      if (!u || !p) {
-        err.textContent = "กรุณากรอกชื่อผู้ใช้และรหัสผ่าน";
-        err.classList.add("show");
-        return;
+    const reason = getParam("reason");
+    if (reason === "session-expired") {
+      showLoginError("เซสชันหมดอายุ กรุณาเข้าสู่ระบบอีกครั้ง");
+    } else if (reason === "logout-failed") {
+      showLoginError("ออกจากระบบบนอุปกรณ์นี้แล้ว แต่ backend ติดต่อไม่ได้ เซสชันฝั่ง server อาจยังไม่ถูกยกเลิก");
+    }
+
+    function showLoginError(message) {
+      err.textContent = message;
+      err.classList.add("show");
+    }
+
+    loginForm.addEventListener("submit", async event => {
+      event.preventDefault();
+      err.textContent = "";
+      err.classList.remove("show");
+      loginButton.disabled = true;
+      loginButton.textContent = "กำลังเข้าสู่ระบบ...";
+
+      try {
+        const result = await apiRequest("/auth/login", {
+          method: "POST",
+          body: JSON.stringify({
+            username: studentIdInput.value.trim(),
+            password: passwordInput.value,
+          }),
+        });
+
+        if (!result || !result.user || typeof result.user !== "object" || Array.isArray(result.user)) {
+          throw new Error("ข้อมูลตอบกลับจาก backend ไม่ถูกต้อง");
+        }
+
+        sessionStorage.setItem(AUTH_STATE_KEY, "1");
+        window.location.replace("courses.html");
+      } catch (error) {
+        if (error instanceof TypeError) {
+          showLoginError("เชื่อมต่อ backend ไม่ได้ กรุณาตรวจสอบว่า backend ทำงานอยู่และลองอีกครั้ง");
+        } else {
+          showLoginError(error.message || "เข้าสู่ระบบไม่สำเร็จ กรุณาลองใหม่");
+        }
+      } finally {
+        loginButton.disabled = false;
+        loginButton.textContent = "Log in";
       }
-
-      // TODO: เชื่อม TU Auth API
-      // Mock: รับทุก credential
-      sessionStorage.setItem("cstu_logged_in", "1");
-      window.location.href = "courses.html";
-    }
-
-    // Enter key
-    document.addEventListener("keydown", e => {
-      if (e.key === "Enter") doLogin();
     });
   </script>
 </body>

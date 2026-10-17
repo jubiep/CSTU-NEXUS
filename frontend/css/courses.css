@@ -64,6 +64,24 @@
   margin-top: 6px;
 }
 
+.profile-load-error {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: -6px 0 16px;
+  color: var(--red);
+  font-size: 13px;
+}
+
+.profile-load-error[hidden] {
+  display: none;
+}
+
+.profile-load-error .btn {
+  flex: 0 0 auto;
+}
+
 .search-wrap {
   position: relative;
   margin-bottom: 16px;

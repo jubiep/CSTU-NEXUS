@@ -24,10 +24,14 @@
           </div>
         </div>
         <div class="profile-info">
-          <div class="name" id="user-name">มะละกอ ส้มตำ</div>
-          <div class="student-id" id="user-id">6809670670</div>
+          <div class="name" id="user-name">กำลังโหลดข้อมูลโปรไฟล์...</div>
+          <div class="student-id" id="user-id"></div>
         </div>
       </a>
+      <div class="profile-load-error" id="profile-load-error" role="alert" aria-live="polite" hidden>
+        <span id="profile-load-error-message"></span>
+        <button class="btn btn-outline btn-sm" id="profile-retry" type="button">ลองอีกครั้ง</button>
+      </div>
 
       <!-- Search -->
       <div class="search-wrap">
@@ -47,8 +51,45 @@
 
   <script src="../app.js"></script>
   <script>
-    requireAuth();
-    renderTopbar();
+    const userNameEl = document.getElementById("user-name");
+    const userIdEl = document.getElementById("user-id");
+    const profileLoadError = document.getElementById("profile-load-error");
+    const profileLoadErrorMessage = document.getElementById("profile-load-error-message");
+    const profileRetryButton = document.getElementById("profile-retry");
+
+    async function loadCurrentUser() {
+      profileLoadError.hidden = true;
+      profileRetryButton.disabled = true;
+      userNameEl.textContent = "กำลังโหลดข้อมูลโปรไฟล์...";
+      userIdEl.textContent = "";
+
+      try {
+        const user = await apiRequest("/auth/me");
+        if (!user || typeof user.displayName !== "string" || !user.displayName.trim() ||
+            typeof user.studentId !== "string" || !user.studentId.trim()) {
+          throw new Error("ข้อมูลโปรไฟล์จาก backend ไม่ครบ");
+        }
+
+        userNameEl.textContent = user.displayName;
+        userIdEl.textContent = user.studentId;
+      } catch (error) {
+        if (error.status === 401) {
+          sessionStorage.removeItem(AUTH_STATE_KEY);
+          window.location.replace("index.html?reason=session-expired");
+          return;
+        }
+
+        userNameEl.textContent = "โหลดข้อมูลโปรไฟล์ไม่สำเร็จ";
+        profileLoadErrorMessage.textContent = error instanceof TypeError
+          ? "เชื่อมต่อ backend ไม่ได้"
+          : error.message || "โหลดข้อมูลโปรไฟล์ไม่สำเร็จ";
+        profileLoadError.hidden = false;
+      } finally {
+        profileRetryButton.disabled = false;
+      }
+    }
+
+    profileRetryButton.addEventListener("click", loadCurrentUser);
 
     function renderCourses(list) {
       const grid = document.getElementById("course-grid");
@@ -82,7 +123,11 @@
       renderCourses(filtered);
     }
 
-    renderCourses(mockCourses);
+    if (requireAuth()) {
+      renderTopbar();
+      loadCurrentUser();
+      renderCourses(mockCourses);
+    }
   </script>
 </body>
 </html>

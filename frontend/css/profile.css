@@ -37,6 +37,29 @@ body {
   box-shadow: 0 5px 14px rgba(0, 0, 0, .24);
 }
 
+.profile-card[hidden] {
+  display: none;
+}
+
+.profile-message {
+  margin: 28px 0;
+  color: #616161;
+  text-align: center;
+}
+
+.profile-error {
+  width: 100%;
+  overflow-wrap: anywhere;
+}
+
+.profile-retry {
+  margin-top: 12px;
+}
+
+.profile-retry[hidden] {
+  display: none;
+}
+
 .avatar {
   width: 156px;
   height: 156px;
