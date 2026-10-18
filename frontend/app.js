@@ -9,17 +9,18 @@ const API_BASE_URL = (
 ).replace(/\/+$/, "");
 const AUTH_STATE_KEY = "cstu_authenticated";
 
-// ── Mock courses ────────────────────────────
-const mockCourses = [
-  { code: "CS261", name: "Introduction to Software Engineering", teacher: "ดร.กรงศักดิ์ รองวิชาหมัน", sections: ["001","002","003"] },
-  { code: "CS262", name: "Data Structures", teacher: "ผศ.ดร.อลิษา วงศ์ทอง", sections: ["001","002"] },
-  { code: "CS270", name: "Database Systems", teacher: "ดร.ชัยวัฒน์ พรมพิทักษ์", sections: ["001"] },
-  { code: "CS301", name: "Algorithm Design", teacher: "ศ.ดร.วิไลวรรณ สุขใจ", sections: ["001","002","003"] },
-  { code: "CS310", name: "Computer Networks", teacher: "ดร.ประสิทธิ์ มีชัย", sections: ["001","002"] },
-  { code: "CS320", name: "Operating Systems", teacher: "ผศ.ณัฐพล เจริญสุข", sections: ["001"] },
-  { code: "CS340", name: "Web Development", teacher: "ดร.พิมพ์ใจ ศรีนวล", sections: ["001","002"] },
-  { code: "MA201", name: "Calculus II", teacher: "ผศ.ดร.สุชาดา วัฒนาสุข", sections: ["001","002","003","004"] },
-];
+/* ค้นหารายวิชาจาก Backend (GET /api/courses?keyword=...)*/
+async function apiFetchCourses(keyword = "") {
+  const trimmed = keyword.trim();
+  const url = trimmed 
+    ? `${API_BASE_URL}/courses?keyword=${encodeURIComponent(trimmed)}`
+    : `${API_BASE_URL}/courses`;
+  const response = await fetch(url);
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`);
+  }
+  return await response.json();
+}
 
 // ── Mock reviews ────────────────────────────
 const mockReviews = {
@@ -34,9 +35,6 @@ const mockReviews = {
 };
 
 // ── Helpers ─────────────────────────────────
-function getCourse(code) {
-  return mockCourses.find(c => c.code === code) || null;
-}
 
 function getReviews(code) {
   return mockReviews[code] || [];
