@@ -1,0 +1,18 @@
+package th.ac.tu.cs.cstu_course_nexus;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+@Repository
+public interface ReviewRepository extends JpaRepository<Review, Long> {
+    
+    Page<Review> findByCourseIdAndSectionIdOrderByCreatedAtDesc(
+            String courseId, 
+            String sectionId, 
+            Pageable pageable
+    );
+
+    boolean existsByCourseIdAndUserId(String courseId, Integer userId);
+}
