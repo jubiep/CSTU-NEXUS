@@ -344,7 +344,7 @@ TU_API_APPLICATION_KEY=your_actual_key_here
 จากนั้นสามารถสั่งรัน Docker Compose ได้ทันที:
 
 ```powershell
-docker compose --project-directory . -f backend/database/compose.yaml up -d --build
+docker compose --env-file .env -f backend/database/compose.yaml up -d --build
 ```
 
 เช็คว่า key ถูกส่งเข้า container หรือไม่ โดยไม่แสดงค่าลับ:
