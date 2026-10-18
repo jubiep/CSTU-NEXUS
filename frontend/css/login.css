@@ -55,6 +55,7 @@ body {
 
 .login-card .error-msg {
   margin: 0 0 12px;
+  overflow-wrap: anywhere;
 }
 
 .login-card .form-group {
@@ -86,6 +87,17 @@ body {
   color: #111;
   font-size: 14px;
   line-height: 30px;
+}
+
+.login-card .btn:disabled {
+  cursor: wait;
+  opacity: .7;
+}
+
+@media (max-width: 600px) {
+  .login-card .error-msg {
+    font-size: max(11px, min(13px, 2.7vw));
+  }
 }
 
 .forgot-link {

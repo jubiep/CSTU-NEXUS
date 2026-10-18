@@ -1,0 +1,21 @@
+# Environment files
+.env
+.env.local
+.env.*
+!.env.example
+
+# Operating System files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE and Editor configurations
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Build and Dependency artifacts
+**/target/
+**/.mvn/wrapper/maven-wrapper.jar
+node_modules/

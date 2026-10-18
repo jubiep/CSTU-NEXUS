@@ -1,17 +1,13 @@
 /* ==========================================
-   CSTU NEXUS - Shared JS + Mock Data
-   (ยังไม่มี backend — ใช้ mockData แทน)
+   CSTU NEXUS - Shared JS + API integration
    ========================================== */
 
-// ── Mock current user ──────────────────────
-const currentUser = {
-  name: "มะละกอ ส้มตำ",
-  studentId: "6809670670",
-  year: 2,
-  faculty: "คณะวิทยาศาสตร์และเทคโนโลยี สาขาวิทยาการคอมพิวเตอร์",
-  verified: true,
-  avatar: null,   // null = ใช้ emoji fallback
-};
+const isLocalFrontend = ["localhost", "127.0.0.1"].includes(window.location.hostname);
+const API_BASE_URL = (
+  window.CSTU_API_BASE_URL
+  || (isLocalFrontend ? `http://${window.location.hostname}:8080/api` : `${window.location.origin}/api`)
+).replace(/\/+$/, "");
+const AUTH_STATE_KEY = "cstu_authenticated";
 
 // ── Mock courses ────────────────────────────
 const mockCourses = [
@@ -55,19 +51,63 @@ function getParam(key) {
   return new URLSearchParams(window.location.search).get(key);
 }
 
-// ── Auth guard (mock) ────────────────────────
-function requireAuth() {
-  const loggedIn = sessionStorage.getItem("cstu_logged_in");
-  if (!loggedIn) {
-    const isPages = window.location.pathname.includes("/pages/");
-    window.location.href = isPages ? "index.html" : "pages/index.html";
+async function apiRequest(path, options = {}) {
+  const headers = new Headers(options.headers || {});
+  if (options.body !== undefined) {
+    headers.set("Content-Type", "application/json");
   }
+
+  const response = await fetch(`${API_BASE_URL}${path}`, {
+    ...options,
+    headers,
+    credentials: "include",
+  });
+
+  const contentType = response.headers.get("content-type") || "";
+  let payload = null;
+  if (response.status !== 204) {
+    payload = contentType.includes("application/json") || contentType.includes("+json")
+      ? await response.json()
+      : await response.text();
+  }
+
+  if (!response.ok) {
+    const message = payload && typeof payload === "object" && (payload.message || payload.detail || payload.error)
+      ? payload.message || payload.detail || payload.error
+      : `Backend ตอบกลับด้วยสถานะ ${response.status}`;
+    const error = new Error(message);
+    error.status = response.status;
+    throw error;
+  }
+
+  return payload;
 }
 
-function logout() {
-  sessionStorage.removeItem("cstu_logged_in");
+// ── Auth ────────────────────────────────────
+function requireAuth() {
+  if (!sessionStorage.getItem(AUTH_STATE_KEY)) {
+    const isPages = window.location.pathname.includes("/pages/");
+    window.location.replace(isPages ? "index.html" : "pages/index.html");
+    return false;
+  }
+  return true;
+}
+
+async function logout() {
+  let logoutError = false;
+  if (sessionStorage.getItem(AUTH_STATE_KEY)) {
+    try {
+      await apiRequest("/auth/logout", { method: "POST" });
+    } catch (error) {
+      console.error("Backend logout failed:", error);
+      logoutError = true;
+    }
+  }
+
+  sessionStorage.removeItem(AUTH_STATE_KEY);
   const isPages = window.location.pathname.includes("/pages/");
-  window.location.href = isPages ? "index.html" : "pages/index.html";
+  const loginUrl = isPages ? "index.html" : "pages/index.html";
+  window.location.replace(logoutError ? `${loginUrl}?reason=logout-failed` : loginUrl);
 }
 
 // ── Render top bar (Navbar กลาง) ─────────────

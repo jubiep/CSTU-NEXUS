@@ -53,27 +53,36 @@ CSTU-NEXUS/
 │   │   ├── write-review.css      # สไตล์หน้าฟอร์มเขียนรีวิว
 │   │   └── profile.css           # สไตล์หน้าโปรไฟล์ผู้ใช้งาน
 │   ├── src/                      # รูปภาพ โลโก้ และ Asset มีเดีย
-│   └── app.js                    # ฟังก์ชันหลักฝั่ง Client (Mock Auth, Navigation, Topbar)
+│   ├── app.js                    # ฟังก์ชันหลักฝั่ง Client (API integration, Auth state, Topbar)
+│   └── README.md                 # คู่มือการใช้งาน Frontend
 │
 ├── backend/                      # ฝั่งเซิร์ฟเวอร์และฐานข้อมูล
 │   ├── cstu-course-nexus/        # Spring Boot Application
 │   │   ├── src/main/java/        # Java Source Code
 │   │   │   └── th/ac/tu/cs/cstu_course_nexus/
-│   │   │       ├── CstuCourseNexusApplication.java
-│   │   │       └── HealthController.java
+│   │   │       ├── CstuCourseNexusApplication.java  # Main Application + .env Auto-loader
+│   │   │       ├── HealthController.java            # ตรวจสอบสถานะและเชื่อมต่อ DB
+│   │   │       ├── AuthController.java              # Login, Profile, Logout session
+│   │   │       ├── AuthUser.java                    # Model ข้อมูลผู้ใช้ใน session
+│   │   │       ├── StudyYearCalculator.java         # คำนวณชั้นปีจากรหัสนักศึกษา
+│   │   │       ├── TuAuthService.java               # ยืนยันตัวตนกับ TU AD Verify API
+│   │   │       └── WebConfig.java                   # CORS และ Timeout ของ RestClient
 │   │   ├── src/main/resources/
-│   │   │   └── application.properties # การตั้งค่าเชื่อมต่อ Database
+│   │   │   └── application.properties # การตั้งค่าเชื่อมต่อ Database และ Spring Boot
 │   │   ├── pom.xml               # รายการ Dependencies และการตั้งค่า Maven
 │   │   └── mvnw / mvnw.cmd       # Maven Wrapper
-│   └── database/                 # การตั้งค่าฐานข้อมูล PostgreSQL และ Seed Data
-│       ├── compose.yaml          # Docker Compose สำหรับรัน PostgreSQL 17
-│       ├── init.sql              # Schema โครงสร้างตาราง (mock_user, courses, sections, review)
-│       ├── seed.sql              # ชุดข้อมูลตั้งต้น (38 รายวิชา, 63 เซกชัน)
-│       ├── courses.csv           # ไฟล์ข้อมูลวิชาตั้งต้น
-│       ├── sections.csv          # ไฟล์ข้อมูลเซกชันตั้งต้น
-│       ├── generate-seed.ps1     # สคริปต์แปลง CSV สู่ seed.sql
-│       └── migrations/           # ประวัติการปรับปรุง Database Schema
+│   ├── database/                 # การตั้งค่าฐานข้อมูล PostgreSQL และ Seed Data
+│   │   ├── compose.yaml          # Docker Compose สำหรับรัน PostgreSQL 17 และ Backend
+│   │   ├── init.sql              # Schema โครงสร้างตาราง (mock_user, courses, sections, review)
+│   │   ├── seed.sql              # ชุดข้อมูลตั้งต้น (38 รายวิชา, 63 เซกชัน)
+│   │   ├── courses.csv           # ไฟล์ข้อมูลวิชาตั้งต้น
+│   │   ├── sections.csv          # ไฟล์ข้อมูลเซกชันตั้งต้น
+│   │   ├── generate-seed.ps1     # สคริปต์แปลง CSV สู่ seed.sql
+│   │   └── migrations/           # ประวัติการปรับปรุง Database Schema
+│   └── README.md                 # คู่มือการตั้งค่า Backend & Database ฉบับสมบูรณ์
 │
+├── .env.example                  # แม่แบบการตั้งค่า Environment Variables
+├── .gitignore                    # ละเว้นไฟล์ที่ไม่ควรขึ้น Git (.env, target/, build artifacts)
 └── README.md                     # เอกสารแนะนำและคู่มือโปรเจกต์ฉบับหลัก
 ```
 
@@ -82,7 +91,7 @@ CSTU-NEXUS/
 ## Features หลัก
 
 1. **Structured Course Review** — รีวิววิชาตามหัวข้อเกณฑ์มาตรฐาน (แนวการสอน, สัดส่วนคะแนน, ปริมาณงาน, สื่อการเรียน) และเลือกเปิดเผยหรือปิดบังตัวตนได้
-2. **TU Auth & Year Verification** — ยืนยันสิทธิ์นักศึกษาผ่าน TU Authentication และตรวจสอบชั้นปีเพื่อควบคุมสิทธิ์ในการรีวิวรายวิชา
+2. **TU Auth & Year Verification** — ยืนยันสิทธิ์นักศึกษาผ่าน TU Authentication API และคำนวณชั้นปีอัตโนมัติจากรหัสนักศึกษา พร้อมเก็บ Session Cookie แบบ HttpOnly ปลอดภัย
 3. **Section Matching Algorithm** — คำนวณความเข้ากันได้ระหว่างความชอบของนักศึกษา (User Preferences) กับคะแนนรีวิวของแต่ละเซกชัน แสดงเป็น Match Percentage (%)
 4. **Interactive Course Exploration** — ค้นหา คัดกรองตามชั้นปีที่แนะนำ และดูสถิติรีวิวของรายวิชาต่าง ๆ ในหลักสูตร CSTU
 
@@ -97,13 +106,36 @@ CSTU-NEXUS/
 
 ---
 
-### 2. รัน Database (PostgreSQL 17 บน Docker)
+### 2. ตั้งค่าไฟล์สภาพแวดล้อม (`.env`)
 
-1. เปิด **Docker Desktop**
-2. เปิด Terminal ที่โฟลเดอร์หลักของโปรเจกต์ แล้วรันคำสั่ง:
+คัดลอกไฟล์แม่แบบ `.env.example` เป็น `.env` ที่ root ของโปรเจกต์:
 
 ```bash
-docker compose -f backend/database/compose.yaml up -d
+# บน Windows PowerShell
+copy .env.example .env
+
+# บน Linux / macOS / Git Bash
+cp .env.example .env
+```
+
+เปิดไฟล์ `.env` แล้วใส่ `TU_API_APPLICATION_KEY` ที่ได้รับจากผู้ดูแลระบบ TU API:
+
+```env
+TU_API_APPLICATION_KEY=your_actual_key_here
+APP_CORS_ALLOWED_ORIGINS=http://localhost:5500,http://127.0.0.1:5500,http://localhost:5501,http://127.0.0.1:5501
+```
+
+*(ไฟล์ `.env` นี้จะไม่ถูกนำขึ้น Git เนื่องจากมี `.gitignore` ดักไว้แล้ว)*
+
+---
+
+### 3. เริ่มต้น Database (PostgreSQL 17 บน Docker)
+
+1. เปิด **Docker Desktop**
+2. เปิด Terminal ที่โฟลเดอร์หลักของโปรเจกต์ แล้วสั่งเริ่ม PostgreSQL Container:
+
+```bash
+docker compose -f backend/database/compose.yaml up -d db
 ```
 
 3. ตรวจสอบสถานะ Container:
@@ -119,14 +151,15 @@ docker exec -i cstu-nexus-postgres psql -U cstu_nexus_user -d cstu_nexus_db -v O
 
 ---
 
-### 3. รัน Spring Boot Backend
+### 4. รัน Spring Boot Backend
 
+#### ทางเลือกที่ A: รันผ่าน Maven Wrapper โดยตรง (แนะนำสำหรับ Local Dev)
 1. ไปที่โฟลเดอร์ Backend:
 ```bash
 cd backend/cstu-course-nexus
 ```
 
-2. รันแอปพลิเคชันผ่าน Maven Wrapper:
+2. รันแอปพลิเคชัน (แอปจะโหลดค่า Key จากไฟล์ `.env` ที่ root อัตโนมัติ):
 ```bash
 # บน Windows (PowerShell / Command Prompt)
 .\mvnw.cmd spring-boot:run
@@ -136,15 +169,16 @@ cd backend/cstu-course-nexus
 ```
 Backend จะพร้อมทำงานที่ `http://localhost:8080`
 
-3. ทดสอบการเชื่อมต่อ API / Database:
-- ตรวจสอบสถานะเซิร์ฟเวอร์: `http://localhost:8080/health`
-- ตรวจสอบการเชื่อมต่อ PostgreSQL: `http://localhost:8080/db-test`
+#### ทางเลือกที่ B: รันทั้ง Backend และ Database ผ่าน Docker Compose
+```bash
+docker compose -f backend/database/compose.yaml up -d --build
+```
 
 ---
 
-### 4. รัน Frontend
+### 5. รัน Frontend
 
-Frontend ถูกพัฒนาด้วย Vanilla HTML/CSS/JS สามารถเปิดได้สะดวกโดยไม่ต้องติดตั้ง dependencies เพิ่มเติม:
+Frontend ถูกพัฒนาด้วย Vanilla HTML/CSS/JS บริสุทธิ์ สามารถเปิดได้ทันที:
 
 #### วิธีที่ 1: ใช้ Live Server (VS Code Extension)
 - คลิกขวาที่ไฟล์ `frontend/pages/index.html` → เลือก **Open with Live Server**
@@ -154,9 +188,7 @@ Frontend ถูกพัฒนาด้วย Vanilla HTML/CSS/JS สามา�
 cd frontend/
 python -m http.server 5500
 ```
-เปิดบราวเซอร์ไปที่: `http://localhost:5500/pages/index.html`
-
-> **หมายเหตุช่วงทดสอบ (Mock Login):** ในระหว่างที่ยังไม่ได้เชื่อมต่อ TU Auth API สามารถกรอก username และ password ใดก็ได้เพื่อทดลองเข้าสู่ระบบ
+เปิดเบราว์เซอร์ไปที่: `http://localhost:5500/pages/index.html` (หรือ `http://127.0.0.1:5500/pages/index.html`)
 
 ---
 
@@ -167,7 +199,9 @@ python -m http.server 5500
 | `GET` | `/health` | ตรวจสอบสถานะการทำงานของ Backend | พร้อมใช้งาน |
 | `GET` | `/db-test` | ทดสอบ Query ตาราง courses จาก PostgreSQL | พร้อมใช้งาน |
 | `POST` | `/echo` | ทดสอบรับ-ส่ง String Request Body | พร้อมใช้งาน |
-| `POST` | `/api/auth/login` | ตรวจสอบการล็อกอินผ่าน TU Authentication API | อยู่ระหว่างพัฒนา |
+| `POST` | `/api/auth/login` | ยืนยันบัญชีนักศึกษา TU และสร้าง HttpOnly Session | พร้อมใช้งาน |
+| `GET` | `/api/auth/me` | ดึงข้อมูลโปรไฟล์ผู้ใช้ปัจจุบันจาก Session | พร้อมใช้งาน |
+| `POST` | `/api/auth/logout` | ยกเลิก Session ผู้ใช้ | พร้อมใช้งาน |
 | `GET` | `/api/courses` | ดึงรายชื่อและข้อมูลวิชาทั้งหมด | อยู่ระหว่างพัฒนา |
 | `GET` | `/api/courses/{code}/reviews` | ดึงประวัติรีวิวของรายวิชานั้น ๆ | อยู่ระหว่างพัฒนา |
 | `POST` | `/api/reviews` | บันทึกรีวิวรายวิชาใหม่ลงฐานข้อมูล | อยู่ระหว่างพัฒนา |

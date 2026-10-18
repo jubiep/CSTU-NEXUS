@@ -25,7 +25,12 @@ backend/
 │   ├── src/main/java/             # Source Code หลักภาษา Java
 │   │   └── th/ac/tu/cs/cstu_course_nexus/
 │   │       ├── CstuCourseNexusApplication.java  # Main Application Entry Point
-│   │       └── HealthController.java            # Controller ตรวจสอบสถานะและทดสอบ DB
+│   │       ├── HealthController.java            # Controller ตรวจสอบสถานะและทดสอบ DB
+│   │       ├── AuthController.java              # Login, profile และ logout session
+│   │       ├── AuthUser.java                    # ข้อมูลผู้ใช้ที่ยืนยันแล้วใน session
+│   │       ├── StudyYearCalculator.java         # คำนวณชั้นปีจากรหัสนักศึกษา
+│   │       ├── TuAuthService.java               # ยืนยันบัญชีกับ TU AD Verify API
+│   │       └── WebConfig.java                   # CORS สำหรับ frontend
 │   ├── src/main/resources/
 │   │   └── application.properties # การตั้งค่า Spring Boot และการเชื่อมต่อ PostgreSQL
 │   ├── src/test/                  # Unit / Integration Tests
@@ -53,10 +58,11 @@ backend/
 3. [ตั้งค่าและเริ่มต้น Database](#3-ตั้งค่าและเริ่มต้น-database)
 4. [ทำความเข้าใจ Schema และ Seed Data](#4-ทำความเข้าใจ-schema-และ-seed-data)
 5. [รัน Spring Boot Backend](#5-รัน-spring-boot-backend)
-6. [ทดสอบ Backend และ Database](#6-ทดสอบ-backend-และ-database)
-7. [คำสั่งที่ใช้บ่อย](#7-คำสั่งที่ใช้บ่อย)
-8. [การแก้ไขปัญหาเบื้องต้น](#8-การแก้ไขปัญหาเบื้องต้น)
-9. [ข้อควรระวังเกี่ยวกับ Database](#9-ข้อควรระวังเกี่ยวกับ-database)
+6. [ตั้งค่า TU Authentication](#6-ตั้งค่า-tu-authentication)
+7. [ทดสอบ Backend และ Database](#7-ทดสอบ-backend-และ-database)
+8. [คำสั่งที่ใช้บ่อย](#8-คำสั่งที่ใช้บ่อย)
+9. [การแก้ไขปัญหาเบื้องต้น](#9-การแก้ไขปัญหาเบื้องต้น)
+10. [ข้อควรระวังเกี่ยวกับ Database](#10-ข้อควรระวังเกี่ยวกับ-database)
 
 ---
 
@@ -320,62 +326,79 @@ git status
 
 ---
 
-## 5. รัน Spring Boot Backend
+## 5. รัน Backend และ Database ผ่าน Docker
 
-เมื่อ PostgreSQL ทำงานแล้ว สามารถเริ่ม Spring Boot Backend ได้
-
-### ขั้นตอนที่ 1: ตรวจสอบ Java
-
-จากโฟลเดอร์หลักของ Repository:
+ก่อนเริ่มต้นให้เตรียมไฟล์ `.env` ที่ root ของ repository:
 
 ```bash
-java -version
+# คัดลอกไฟล์ตัวอย่างไปเป็น .env
+cp .env.example .env
 ```
 
-ตรวจสอบว่าใช้ Java 17
+จากนั้นเปิดไฟล์ `.env` และใส่ Application Key ที่ได้รับมา:
 
-### ขั้นตอนที่ 2: เข้าโฟลเดอร์ Application
-
-จากโฟลเดอร์ `backend/` ให้เข้าไปที่:
-
-```bash
-cd cstu-course-nexus
+```env
+TU_API_APPLICATION_KEY=your_actual_key_here
 ```
 
-ตรวจสอบว่ามีไฟล์ `pom.xml` และ `mvnw` อยู่ในโฟลเดอร์นี้
+จากนั้นสามารถสั่งรัน Docker Compose ได้ทันที:
 
-### ขั้นตอนที่ 3: รัน Spring Boot
-
-```bash
-./mvnw spring-boot:run
+```powershell
+docker compose -f backend/database/compose.yaml up -d --build
 ```
 
-รอจนแอปเริ่มทำงานสำเร็จ โดยปกติ Spring Boot จะเปิดให้บริการที่ Port `8080`
+Compose จะดึงค่า `TU_API_APPLICATION_KEY` และ `APP_CORS_ALLOWED_ORIGINS` จากไฟล์ `.env` โดยอัตโนมัติ พร้อม build Spring Boot backend, เริ่ม PostgreSQL และเริ่ม backend โดย backend เปิดที่ `http://localhost:8080`
 
-**อย่าปิด Terminal นี้** ขณะที่ต้องการให้ Backend ทำงานอยู่
+ตรวจสถานะและ log:
 
-หากต้องการรันคำสั่งอื่น ให้เปิด Terminal อีกหน้าต่างหนึ่ง
-
-### ขั้นตอนที่ 4: ทดสอบการ Build และ Test
-
-เปิด Terminal ใหม่ แล้วเข้าโฟลเดอร์ Backend:
-
-```bash
-cd cstu-course-nexus
-./mvnw test
+```powershell
+docker compose -f backend/database/compose.yaml ps
+docker compose -f backend/database/compose.yaml logs -f backend
 ```
 
-หากคำสั่งสำเร็จ Maven จะแสดง `BUILD SUCCESS`
+หยุด app/database โดยเก็บข้อมูลฐานข้อมูลไว้:
 
-หาก Test ไม่ผ่าน ให้ตรวจสอบข้อความ Error ก่อนแก้ไข Source Code
+```powershell
+docker compose -f backend/database/compose.yaml down
+```
+
+ห้ามใช้ `down -v` หากยังต้องการเก็บข้อมูลใน database volume
 
 ---
 
-## 6. ทดสอบ Backend และ Database
+## 6. ตั้งค่า TU Authentication
+
+Backend เชื่อมต่อ `https://restapi.tu.ac.th/api/v1/auth/Ad/verify` จากฝั่ง server เท่านั้น โดยส่งชื่อผู้ใช้/รหัสผ่านไปตรวจสอบ และเก็บผลยืนยันใน HttpOnly session cookie ของแอป ไม่ส่ง TU Application Key ให้ browser
+
+### วิธีตั้งค่าผ่านไฟล์ `.env` (แนะนำ)
+
+สร้างไฟล์ `.env` ที่ root ของโปรเจกต์ (หรือคัดลอกมาจาก `.env.example`) โดยไฟล์นี้จะถูกละเว้นจาก Git อัตโนมัติ:
+
+```env
+TU_API_APPLICATION_KEY=your_actual_key_here
+APP_CORS_ALLOWED_ORIGINS=http://localhost:5500,http://127.0.0.1:5500,http://localhost:5501,http://127.0.0.1:5501
+```
+
+- **หากรันผ่าน Docker Compose:** Docker จะส่งตัวแปรจาก `.env` ไปยัง container โดยตรง
+- **หากรันผ่าน Maven Wrapper (`.\mvnw.cmd spring-boot:run`):** Backend จะตรวจหาและโหลดค่าจาก `.env` ให้อัตโนมัติ
+
+เรียกใช้ได้ที่:
+
+- `POST http://localhost:8080/api/auth/login` รับ JSON `{ "username": "6800000000", "password": "..." }`; ในฟอร์มให้กรอกเลขนักศึกษา 10 หลัก ระบบส่งเลขนั้นไป TU Authentication
+- `GET http://localhost:8080/api/auth/me` คืนข้อมูลบัญชีเมื่อส่ง session cookie ที่ได้จาก login
+- `POST http://localhost:8080/api/auth/logout` ยกเลิก session
+
+Backend อนุญาตเฉพาะ account type `student` ที่มีอีเมล `@dome.tu.ac.th` ตามข้อมูลจาก TU Verify; ขณะนี้ยังไม่ได้จำกัดสาขา CSTU เนื่องจากต้องใช้ค่าคณะ/สาขาจริงจาก TU API ชั้นปีคำนวณจากเลขสองหลักแรกของรหัสนักศึกษาเทียบกับปี พ.ศ. ปัจจุบัน เช่น `68` ในปี พ.ศ. 2569 ได้ชั้นปี 2; หากรหัสอ่านไม่ได้หรือเป็นปีในอนาคตจะส่ง `null`
+
+ค่า session หมดอายุใน 30 นาที Cookie ตั้ง `HttpOnly` และ `SameSite=Lax`; เมื่อนำ frontend/backend ไปอยู่คนละ site ใน production ต้องใช้ HTTPS และตั้ง `SESSION_COOKIE_SECURE=true`, `SESSION_COOKIE_SAME_SITE=none` พร้อมระบุ origin จริงใน `APP_CORS_ALLOWED_ORIGINS` การเก็บ session เริ่มต้นอยู่ในหน่วยความจำของ Spring Boot เหมาะกับการพัฒนา/instance เดียว; ระบบหลาย instance ควรย้าย session store ไป Redis หรือระบบ shared session
+
+---
+
+## 7. ทดสอบ Backend และ Database
 
 หลังจาก Spring Boot เริ่มทำงาน ให้เปิด Terminal อีกหน้าต่างหนึ่ง
 
-### 6.1 ตรวจสอบว่า Backend ทำงานหรือไม่
+### 7.1 ตรวจสอบว่า Backend ทำงานหรือไม่
 
 ```bash
 curl -i http://localhost:8080/health
@@ -389,7 +412,7 @@ Endpoint นี้ใช้ตรวจสอบว่าแอปตอบส�
 CSTU Course Nexus is running!
 ```
 
-### 6.2 ตรวจสอบการเชื่อมต่อ Database
+### 7.2 ตรวจสอบการเชื่อมต่อ Database
 
 ```bash
 curl -i http://localhost:8080/db-test
@@ -405,17 +428,20 @@ PostgreSQL connection successful! Courses: 38
 
 หากได้ผลลัพธ์ดังกล่าว แสดงว่า Spring Boot สามารถเชื่อมต่อ PostgreSQL และอ่านข้อมูลจากตาราง `courses` ได้
 
-### 6.3 Endpoint ที่มีในปัจจุบัน
+### 7.3 Endpoint ที่มีในปัจจุบัน
 
 | Method | Endpoint | หน้าที่ |
 |---|---|---|
 | `GET` | `/health` | ตรวจสอบว่า Backend ทำงานอยู่ |
 | `POST` | `/echo` | รับข้อความแล้วส่งข้อความตอบกลับ |
 | `GET` | `/db-test` | ตรวจสอบการเชื่อมต่อ PostgreSQL และนับ Courses |
+| `POST` | `/api/auth/login` | ยืนยันบัญชีกับ TU AD และสร้าง session |
+| `GET` | `/api/auth/me` | อ่านโปรไฟล์จาก session |
+| `POST` | `/api/auth/logout` | ยกเลิก session |
 
-Endpoint เหล่านี้เป็นจุดเริ่มต้นสำหรับตรวจสอบระบบ ไม่ได้หมายความว่า Features ทั้งหมดของโปรเจกต์เสร็จสมบูรณ์แล้ว
+Endpoints สำหรับ Authentication ต้องตั้ง `TU_API_APPLICATION_KEY` ก่อนใช้งาน
 
-### 6.4 หยุด Spring Boot
+### 7.4 หยุด Spring Boot
 
 กลับไปที่ Terminal ที่กำลังรัน Spring Boot แล้วกด:
 
@@ -427,7 +453,7 @@ Ctrl + C
 
 ---
 
-## 7. คำสั่งที่ใช้บ่อย
+## 8. คำสั่งที่ใช้บ่อย
 
 ### Docker และ PostgreSQL
 
@@ -443,17 +469,20 @@ Ctrl + C
 
 ### Spring Boot และ Maven
 
-รันคำสั่งเหล่านี้จากโฟลเดอร์ `cstu-course-nexus`
+รันคำสั่งเหล่านี้จาก root ของ repository:
 
 | สิ่งที่ต้องการทำ | คำสั่ง |
 |---|---|
-| เริ่ม Backend | `./mvnw spring-boot:run` |
-| รัน Test | `./mvnw test` |
-| ตรวจสอบ Maven และ Java | `./mvnw -version` |
+| เริ่ม Database และ Backend | `docker compose -f backend/database/compose.yaml up -d --build` |
+| ดูสถานะบริการ | `docker compose -f backend/database/compose.yaml ps` |
+| ดู log ของ Backend | `docker compose -f backend/database/compose.yaml logs -f backend` |
+| หยุดบริการโดยเก็บข้อมูล | `docker compose -f backend/database/compose.yaml down` |
+
+รัน Test โดยไม่ผ่าน Docker จาก `backend/cstu-course-nexus` ด้วย `.\mvnw.cmd test`
 
 ---
 
-## 8. การแก้ไขปัญหาเบื้องต้น
+## 9. การแก้ไขปัญหาเบื้องต้น
 
 ### ปัญหา: Docker ไม่ทำงาน
 
@@ -498,9 +527,9 @@ PostgreSQL จะรัน Initialization Script เมื่อ Data Directory 
 
 ---
 
-## 9. ข้อควรระวังเกี่ยวกับ Database
+## 10. ข้อควรระวังเกี่ยวกับ Database
 
-### 9.1 Persistent Volume
+### 10.1 Persistent Volume
 
 Docker Compose ใช้ Persistent Volume เพื่อเก็บข้อมูล Database ให้คงอยู่แม้หยุดหรือสร้าง Container ใหม่
 
@@ -514,23 +543,23 @@ docker compose -f database/compose.yaml down -v
 
 คำสั่งนี้สามารถลบ Volume ที่ Compose จัดการอยู่ได้ และทำให้ข้อมูล Database ที่เก็บใน Volume สูญหาย
 
-### 9.2 การเปลี่ยนแปลง Schema
+### 10.2 การเปลี่ยนแปลง Schema
 
 ก่อนแก้ไข Schema ให้ตรวจสอบผลกระทบกับข้อมูลเดิมและสมาชิกคนอื่นในทีมก่อน
 
 ไฟล์ใน `database/migrations/` เป็นสคริปต์สำหรับการเปลี่ยนแปลง Schema ในแต่ละช่วงของการพัฒนา ไม่ควรรัน Migration เดิมซ้ำโดยไม่ตรวจสอบว่าเคยนำไปใช้กับ Database แล้วหรือไม่
 
-### 9.3 Password และ Environment Variables
+### 10.3 Password และ Environment Variables
 
 Spring Boot อ่านการตั้งค่าการเชื่อมต่อ Database จาก `cstu-course-nexus/src/main/resources/application.properties`
 
 ค่าที่ใช้ในเครื่องสำหรับการพัฒนา ได้แก่:
 
-- Database URL: `jdbc:postgresql://localhost:5432/cstu_nexus_db`
+- Database URL ใน Docker Compose: `jdbc:postgresql://db:5432/cstu_nexus_db`
 - Username: `cstu_nexus_user`
-- Password: อ่านจาก Environment Variable `DB_PASSWORD` หากกำหนดไว้ มิฉะนั้นใช้ค่าเริ่มต้นสำหรับการพัฒนาในเครื่อง
+- Password: กำหนดผ่าน `SPRING_DATASOURCE_PASSWORD` ให้ตรงกับ PostgreSQL Container
 
-หากกำหนด `DB_PASSWORD` ต้องใช้รหัสผ่านให้ตรงกับ PostgreSQL Container
+หากรัน Spring Boot จากเครื่องโดยตรง ให้ใช้ Database URL ที่มี host เป็น `localhost`; ใน Docker Compose backend ใช้ service host `db`
 
 รหัสผ่านเริ่มต้นมีไว้สำหรับ Local Development เท่านั้น ไม่ควรนำไปใช้ในระบบ Production และไม่ควร Commit รหัสผ่านจริงของระบบเข้าสู่ Repository
 

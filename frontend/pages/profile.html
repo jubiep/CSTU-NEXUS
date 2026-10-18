@@ -13,7 +13,11 @@
     <header id="topbar"></header>
 
     <main class="page-content profile-page">
-      <div class="profile-card">
+      <p id="profile-loading" class="profile-message" role="status">กำลังโหลดข้อมูลโปรไฟล์...</p>
+      <div id="profile-error" class="error-msg profile-error" role="alert" aria-live="polite"></div>
+      <button id="profile-retry" class="btn btn-primary profile-retry" type="button" hidden>ลองโหลดอีกครั้ง</button>
+
+      <div class="profile-card" id="profile-card" hidden>
         <img class="avatar" src="../src/profile-pic.jpg" alt="Profile photo"/>
 
         <div class="profile-name" id="p-name"></div>
@@ -45,33 +49,70 @@
 
   <script src="../app.js"></script>
   <script>
-    requireAuth();
-    renderTopbar();
-
     const nameEl = document.getElementById("p-name");
     const idEl = document.getElementById("p-id");
     const facultyEl = document.getElementById("p-faculty");
     const programEl = document.getElementById("p-program");
     const yearEl = document.getElementById("p-year");
+    const profileCard = document.getElementById("profile-card");
+    const profileLoading = document.getElementById("profile-loading");
+    const profileError = document.getElementById("profile-error");
+    const profileRetry = document.getElementById("profile-retry");
 
-    if (currentUser && currentUser.name) {
-      const parts = currentUser.name.split(" ");
-      if (parts.length > 1) {
-        nameEl.innerHTML = `${parts[0]} <span>${parts.slice(1).join(" ")}</span>`;
-      } else {
-        nameEl.textContent = currentUser.name;
+    function showProfileError(message) {
+      profileLoading.hidden = true;
+      profileCard.hidden = true;
+      profileError.textContent = message;
+      profileError.classList.add("show");
+      profileRetry.hidden = false;
+    }
+
+    async function loadProfile() {
+      profileLoading.hidden = false;
+      profileError.classList.remove("show");
+      profileRetry.hidden = true;
+      profileCard.hidden = true;
+      profileRetry.disabled = true;
+
+      try {
+        const user = await apiRequest("/auth/me");
+        if (!user || typeof user.displayName !== "string" ||
+            typeof user.studentId !== "string" ||
+            (user.year !== null && (!Number.isInteger(user.year) || user.year < 1)) ||
+            typeof user.faculty !== "string" ||
+            typeof user.department !== "string") {
+          throw new Error("ข้อมูลโปรไฟล์จาก backend ไม่ครบตาม API contract");
+        }
+
+        nameEl.textContent = user.displayName;
+        idEl.textContent = user.studentId;
+        facultyEl.textContent = user.faculty;
+        programEl.textContent = user.department ? `สาขา${user.department}` : "";
+        yearEl.textContent = user.year === null ? "ไม่ระบุ" : String(user.year);
+
+        profileLoading.hidden = true;
+        profileCard.hidden = false;
+      } catch (error) {
+        if (error.status === 401) {
+          sessionStorage.removeItem(AUTH_STATE_KEY);
+          window.location.replace("index.html?reason=session-expired");
+          return;
+        }
+
+        const message = error instanceof TypeError
+          ? "เชื่อมต่อ backend ไม่ได้ กรุณาตรวจสอบว่า backend ทำงานอยู่และลองอีกครั้ง"
+          : error.message || "โหลดข้อมูลโปรไฟล์ไม่สำเร็จ";
+        showProfileError(message);
+      } finally {
+        profileRetry.disabled = false;
       }
     }
-    if (currentUser && currentUser.studentId) {
-      idEl.textContent = currentUser.studentId;
-    }
-    if (currentUser && currentUser.faculty) {
-      const [faculty, ...program] = currentUser.faculty.split(" สาขา");
-      facultyEl.textContent = faculty;
-      programEl.textContent = program.length ? `สาขา${program.join(" สาขา")}` : "";
-    }
-    if (currentUser && currentUser.year) {
-      yearEl.textContent = currentUser.year;
+
+    profileRetry.addEventListener("click", loadProfile);
+
+    if (requireAuth()) {
+      renderTopbar();
+      loadProfile();
     }
   </script>
 </body>

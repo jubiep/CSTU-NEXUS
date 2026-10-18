@@ -10,7 +10,7 @@
 
 - **HTML5:** Semantic Elements รองรับโครงสร้างหน้าเว็บที่เข้าถึงง่าย
 - **CSS3:** Flexbox, CSS Grid, CSS Variables (`--tu-primary: #C3002F`, `--bg-color: #F8F9FA` ฯลฯ) และ Mobile-first Media Queries
-- **JavaScript (Vanilla ES6+):** ควบคุม Dynamic DOM, Mock Authentication, Modal Dialogs และ Navigation State
+- **JavaScript (Vanilla ES6+):** ควบคุม Dynamic DOM, การเรียก REST API, Modal Dialogs และ Navigation State
 - **Icons & Assets:** Vector SVGs และ Image Assets จากดีไซน์ Figma
 
 ---
@@ -35,7 +35,7 @@ frontend/
 │   └── profile.css           # สไตล์หน้าโปรไฟล์ผู้ใช้
 │
 ├── src/                      # รูปภาพ โลโก้ และไอคอนต่างๆ
-├── app.js                    # ฟังก์ชัน Client-side รวม (renderTopbar, doLogin, doLogout ฯลฯ)
+├── app.js                    # API client และฟังก์ชันส่วนกลาง (apiRequest, requireAuth, logout ฯลฯ)
 └── README.md                 # เอกสารแนะนำ Frontend เบื้องต้น
 ```
 
@@ -60,8 +60,22 @@ python -m http.server 5500
 
 ---
 
-## ข้อมูลจำลองสำหรับการทดสอบ (Mock Data & Login)
+## Login, Profile และ Courses API contract
 
-- **Login Bypass:** ในช่วงการพัฒนายังไม่ได้ต่อ TU Authentication API จริง สามารถกรอกอีเมลและรหัสผ่านใดๆ แล้วกด **Log in** เพื่อเข้าใช้งานระบบได้ทันที
-- **Session State:** จัดเก็บสถานะการล็อกอินผ่าน `sessionStorage` (`cstu_logged_in`)
-- **API Integration Point:** มีการใส่คอมเมนต์ `// TODO:` กำกับไว้ใน `app.js` และหน้าต่างๆ สำหรับจุดที่รอเชื่อมต่อ REST API กับ Spring Boot Backend
+หน้า Login และ Profile เรียก backend จริงผ่าน session cookie แบบ HttpOnly ไม่มี mock login หรือ token ที่เปิดอ่านได้จาก JavaScript
+
+- เมื่อเปิด Frontend บน `localhost` หรือ `127.0.0.1` ค่า API เริ่มต้นจะใช้ hostname เดียวกันที่พอร์ต `8080` (เช่น `http://127.0.0.1:8080/api`) ไม่ขึ้นกับพอร์ตของ Frontend เพื่อให้ session cookie ใช้ได้ และตั้งค่าใหม่ได้โดยกำหนด `window.CSTU_API_BASE_URL` **ก่อน** โหลด `app.js`
+- `POST /auth/login` รับ `{ "username": "6800000000", "password": "..." }` โดย `username` คือเลขนักศึกษา 10 หลักจากฟอร์ม login แล้ว backend ส่งเลขนั้นเป็น `UserName` ไป TU AD Verify พร้อม `Application-Key`; สำเร็จแล้ว backend สร้าง session และตอบ `{ "user": { ... } }`
+- `GET /auth/me` ใช้ session cookie และตอบ `{ "displayName": "...", "studentId": "...", "year": 2, "faculty": "...", "department": "...", "email": "..." }`
+- หน้า Courses เรียก `/auth/me` เช่นกัน เพื่อแสดงชื่อและรหัสนักศึกษาจากบัญชีที่ยืนยันแล้ว; ถ้าโหลดไม่สำเร็จจะแสดงข้อผิดพลาดและปุ่มลองใหม่แทนข้อมูล mock
+- `POST /auth/logout` ยกเลิก session ฝั่ง backend
+- Frontend ใช้ `sessionStorage` เก็บเพียงสถานะนำทาง ไม่เก็บรหัสผ่าน, Application Key หรือ bearer token; โปรไฟล์จริงอ่านจาก `/auth/me`
+- Backend จำกัด CORS ด้วย `APP_CORS_ALLOWED_ORIGINS` และเปิด credentials สำหรับ session cookie
+- ค่า `year` คำนวณจากเลขสองหลักแรกของรหัสนักศึกษาเทียบกับปี พ.ศ. ปัจจุบัน (เช่น รหัสขึ้นต้น `68` ในปี พ.ศ. 2569 คือชั้นปี 2); หากอ่านรหัสไม่ได้หรือเป็นปีในอนาคต จะส่ง `null`
+
+ตัวอย่างตั้ง API URL สำหรับ local development (วางก่อน `<script src="../app.js"></script>` ในหน้า):
+
+```html
+<script>window.CSTU_API_BASE_URL = "http://localhost:8080/api";</script>
+```
+ตั้ง `TU_API_APPLICATION_KEY` ในไฟล์ `.env` หรือ environment ของ **backend เท่านั้น** ก่อนรัน Spring Boot ดูขั้นตอนใน [คู่มือ Backend](../backend/README.md) ห้ามนำ Application Key ไปใส่ใน `app.js`, HTML หรือ commit ลง Git
