@@ -8,18 +8,190 @@ const API_BASE_URL = (
   || (isLocalFrontend ? `http://${window.location.hostname}:8080/api` : `${window.location.origin}/api`)
 ).replace(/\/+$/, "");
 const AUTH_STATE_KEY = "cstu_authenticated";
+const mockCurrentUser = {
+  name: "มะละกอ ส้มตำ",
+  studentId: "6809670670",
+  year: 2,
+  faculty: "คณะวิทยาศาสตร์และเทคโนโลยี สาขาวิทยาการคอมพิวเตอร์"
+};
 
-/* ค้นหารายวิชาจาก Backend (GET /api/courses?keyword=...)*/
+/* ค้นหารายวิชาจาก Backend (หากยังเชื่อมไม่ได้ ให้ใช้ mockCourses แทนอัตโนมัติ) */
 async function apiFetchCourses(keyword = "") {
   const trimmed = keyword.trim();
   const url = trimmed 
     ? `${API_BASE_URL}/courses?keyword=${encodeURIComponent(trimmed)}`
     : `${API_BASE_URL}/courses`;
-  const response = await fetch(url);
-  if (!response.ok) {
-    throw new Error(`HTTP error! status: ${response.status}`);
+
+  try {
+    const response = await fetch(url);
+    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+    return await response.json();
+  } catch (error) {
+    if (!trimmed) return mockCourses;
+    const q = trimmed.toLowerCase();
+    return mockCourses.filter(c =>
+      c.courseId.toLowerCase().includes(q) ||
+      c.courseName.toLowerCase().includes(q)
+    );
   }
-  return await response.json();
+}
+
+/**
+ * ดึงข้อมูลวิชาและเซกชันจาก Backend (GET /api/courses/{id})
+ * หากยังเชื่อมไม่ได้ ให้ใช้ mockCourses แทนอัตโนมัติ
+ */
+async function apiFetchCourseDetail(courseId) {
+  if (!courseId) return null;
+  const url = `${API_BASE_URL}/courses/${encodeURIComponent(courseId)}`;
+
+  try {
+    const response = await fetch(url);
+    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+    return await response.json();
+  } catch (error) {
+    console.warn(`Backend API unavailable for ${courseId}, using mock:`, error.message);
+    const c = getCourse(courseId);
+    if (!c) return null;
+    return {
+      courseId: c.courseId,
+      courseName: c.courseName,
+      recommendedYear: c.recommendedYear,
+      teacher: c.teacher,
+      credits: c.credits,
+      description: c.description,
+      sections: c.sections || []
+    };
+  }
+}
+
+// ── Mock courses & sections (อิงจาก Database จริง: courses.csv และ sections.csv) ──
+const mockCourses = [
+  { 
+    courseId: "CS102", 
+    code: "CS102", 
+    courseName: "Data Structures", 
+    name: "Data Structures", 
+    recommendedYear: 1, 
+    credits: "3 (2-2-5)",
+    teacher: "ผศ.ดร.เสาวลักษณ์ วรรธนาภา",
+    description: "โครงสร้างข้อมูลเบื้องต้น ลิงก์ลิสต์ สแต็ก คิว ทรี กราฟ และการวิเคราะห์ขั้นตอนวิธี",
+    sectionCount: 2,
+    sections: [
+      { sectionId: "cs102_030001", sectionNumber: "030001", instructorName: "ผศ.ดร.เสาวลักษณ์ วรรธนาภา" },
+      { sectionId: "cs102_030002", sectionNumber: "030002", instructorName: "ผศ.ดร.ฐาปนา บุญชู" }
+    ]
+  },
+  { 
+    courseId: "CS261", 
+    code: "CS261", 
+    courseName: "Introduction to Software Engineering", 
+    name: "Introduction to Software Engineering", 
+    recommendedYear: 2, 
+    credits: "3 (3-0-6)",
+    teacher: "ผศ.ดร.ทรงศักดิ์ รองวิริยะพานิช",
+    description: "ระเบียบวิธีทางวิศวกรรมซอฟต์แวร์ การจัดการโครงการ และการประกันคุณภาพซอฟต์แวร์",
+    sectionCount: 1,
+    sections: [
+      { sectionId: "cs261_100001", sectionNumber: "100001", instructorName: "ผศ.ดร.ทรงศักดิ์ รองวิริยะพานิช" }
+    ]
+  },
+  { 
+    courseId: "CS213", 
+    code: "CS213", 
+    courseName: "Data Structures", 
+    name: "Data Structures", 
+    recommendedYear: 2, 
+    credits: "3 (2-2-5)",
+    teacher: "ผศ.ดร.วนิดา พฤทธิวิทยา",
+    description: "โครงสร้างข้อมูลขั้นสูงและการออกแบบโครงสร้างข้อมูลที่มีประสิทธิภาพ",
+    sectionCount: 2,
+    sections: [
+      { sectionId: "cs213_050001", sectionNumber: "050001", instructorName: "ผศ.ดร.วนิดา พฤทธิวิทยา" },
+      { sectionId: "cs213_050002", sectionNumber: "050002", instructorName: "ผศ.ดร.ฐาปนา บุญชู" }
+    ]
+  },
+  { 
+    courseId: "CS251", 
+    code: "CS251", 
+    courseName: "Database Systems 1", 
+    name: "Database Systems 1", 
+    recommendedYear: 2, 
+    credits: "3 (3-0-6)",
+    teacher: "ผศ.ดร.วิลาวรรณ รักผกาวงศ์",
+    description: "ระบบจัดการฐานข้อมูล สถาปัตยกรรม แบบจำลองข้อมูลเชิงสัมพันธ์ และภาษา SQL",
+    sectionCount: 2,
+    sections: [
+      { sectionId: "cs251_090001", sectionNumber: "090001", instructorName: "ผศ.ดร.วิลาวรรณ รักผกาวงศ์" },
+      { sectionId: "cs251_090002", sectionNumber: "090002", instructorName: "ผศ.ดร.เสาวลักษณ์ วรรธนาภา" }
+    ]
+  },
+  { 
+    courseId: "TU100", 
+    code: "TU100", 
+    courseName: "Civic Engagement", 
+    name: "Civic Engagement", 
+    recommendedYear: 1, 
+    credits: "3 (3-0-6)",
+    teacher: "รศ.ดร.ปริญญา เทวานฤมิตรกุล",
+    description: "พลเมืองกับความรับผิดชอบต่อสังคม การมีส่วนร่วมเพื่อการพัฒนาชุมชนอย่างยั่งยืน",
+    sectionCount: 2,
+    sections: [
+      { sectionId: "tu100_820001", sectionNumber: "820001", instructorName: "รศ.ดร.ปริญญา เทวานฤมิตรกุล" },
+      { sectionId: "tu100_830001", sectionNumber: "830001", instructorName: "ผศ.ดร.ปาริยา ณ นคร" }
+    ]
+  },
+  { 
+    courseId: "TU103", 
+    code: "TU103", 
+    courseName: "Life and Sustainability", 
+    name: "Life and Sustainability", 
+    recommendedYear: 1, 
+    credits: "3 (3-0-6)",
+    teacher: "รศ.โรจน์ คุณเอนก",
+    description: "ชีวิตและความยั่งยืน สิ่งแวดล้อม และการดำรงชีวิตในยุคการเปลี่ยนแปลงสภาพภูมิอากาศ",
+    sectionCount: 3,
+    sections: [
+      { sectionId: "tu103_230001", sectionNumber: "230001", instructorName: "รศ.โรจน์ คุณเอนก, ผศ.ชล บุนนาค" },
+      { sectionId: "tu103_320001", sectionNumber: "320001", instructorName: "รศ.โรจน์ คุณเอนก, ผศ.ชล บุนนาค" },
+      { sectionId: "tu103_000002", sectionNumber: "000002", instructorName: "รศ.โรจน์ คุณเอนก" }
+    ]
+  },
+  { 
+    courseId: "CS372", 
+    code: "CS372", 
+    courseName: "Machine Learning", 
+    name: "Machine Learning", 
+    recommendedYear: 3, 
+    credits: "3 (3-0-6)",
+    teacher: "รศ.ดร.ธนาธร ทะนานทอง",
+    description: "การเรียนรู้ของเครื่อง การเรียนรู้แบบมีผู้สอน ไม่มีผู้สอน และโครงข่ายประสาทเทียม",
+    sectionCount: 1,
+    sections: [
+      { sectionId: "cs372_110001", sectionNumber: "110001", instructorName: "รศ.ดร.ธนาธร ทะนานทอง" }
+    ]
+  },
+  { 
+    courseId: "EL105", 
+    code: "EL105", 
+    courseName: "English Communication Skills", 
+    name: "English Communication Skills", 
+    recommendedYear: 1, 
+    credits: "3 (3-0-6)",
+    teacher: "ไม่ระบุผู้สอน",
+    description: "ทักษะการสื่อสารภาษาอังกฤษเพื่อการทำงานและการนำเสนอทางวิชาการ",
+    sectionCount: 1,
+    sections: [
+      { sectionId: "el105_000000", sectionNumber: "000000", instructorName: "ไม่ระบุผู้สอน" }
+    ]
+  }
+];
+
+function getCourse(code) {
+  if (!code) return null;
+  return mockCourses.find(c => 
+    c.courseId.toLowerCase() === code.toLowerCase() || 
+    (c.code && c.code.toLowerCase() === code.toLowerCase())
+  ) || null;
 }
 
 // ── Mock reviews ────────────────────────────
