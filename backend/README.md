@@ -344,7 +344,7 @@ TU_API_APPLICATION_KEY=your_actual_key_here
 จากนั้นสามารถสั่งรัน Docker Compose ได้ทันที:
 
 ```powershell
-docker compose -f backend/database/compose.yaml up -d --build
+docker compose --project-directory . -f backend/database/compose.yaml up -d --build
 ```
 
 Compose จะดึงค่า `TU_API_APPLICATION_KEY` และ `APP_CORS_ALLOWED_ORIGINS` จากไฟล์ `.env` โดยอัตโนมัติ พร้อม build Spring Boot backend, เริ่ม PostgreSQL และเริ่ม backend โดย backend เปิดที่ `http://localhost:8080`
