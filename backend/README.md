@@ -347,6 +347,12 @@ TU_API_APPLICATION_KEY=your_actual_key_here
 docker compose --project-directory . -f backend/database/compose.yaml up -d --build
 ```
 
+เช็คว่า key ถูกส่งเข้า container หรือไม่ โดยไม่แสดงค่าลับ:
+
+```powershell
+docker compose --env-file .env -f backend/database/compose.yaml exec backend sh -lc 'test -n "$TU_API_APPLICATION_KEY" && echo KEY_PRESENT || echo KEY_EMPTY'
+```
+
 Compose จะดึงค่า `TU_API_APPLICATION_KEY` และ `APP_CORS_ALLOWED_ORIGINS` จากไฟล์ `.env` โดยอัตโนมัติ พร้อม build Spring Boot backend, เริ่ม PostgreSQL และเริ่ม backend โดย backend เปิดที่ `http://localhost:8080`
 
 ตรวจสถานะและ log:
