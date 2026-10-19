@@ -93,20 +93,42 @@
       document.getElementById("detail-teacher").textContent = course.teacher;
     }
 
-    function submitReview() {
-      const text = document.getElementById("review-text").value.trim();
+    async function submitReview() {
+      const textarea = document.getElementById("review-text");
+      const text = textarea.value.trim();
       const errEl = document.getElementById("form-error");
+      const submitBtn = document.querySelector(".btn-submit-review");
 
       if (!text) {
+        errEl.textContent = "กรุณากรอกข้อความรีวิวก่อนส่ง";
         errEl.style.display = "block";
-        document.getElementById("review-text").focus();
+        textarea.focus();
         return;
       }
       errEl.style.display = "none";
 
-      // TODO: POST /api/reviews
-      // Mock: แสดง success modal
-      document.getElementById("success-modal").classList.add("show");
+      submitBtn.disabled = true;
+      submitBtn.textContent = "กำลังส่ง...";
+
+      try {
+        await apiRequest(`/courses/${code}/reviews`, {
+          method: "POST",
+          body: JSON.stringify({
+            section: section,
+            comment: text,
+            text: text
+          }),
+        });
+
+        document.getElementById("success-modal").classList.add("show");
+      } catch (error) {
+        console.error("Failed to submit review:", error);
+        errEl.textContent = error.message || "เกิดข้อผิดพลาดในการส่งรีวิว กรุณาลองใหม่อีกครั้ง";
+        errEl.style.display = "block";
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = "ส่ง";
+      }
     }
 
     function goBack() {

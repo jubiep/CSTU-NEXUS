@@ -81,7 +81,6 @@
       throw new Error("Course not found");
     }
 
-    // Fill header
     const topbarCode = document.getElementById("topbar-code");
     if (topbarCode) topbarCode.textContent = code;
     document.getElementById("detail-code").textContent = code;
@@ -98,9 +97,9 @@
     }
     updateWriteBtn();
 
-    // Section list
     const sectionList = document.getElementById("section-list");
     if (sectionList && course.sections) {
+      sectionList.innerHTML = "";
       course.sections.forEach(s => {
         const btn = document.createElement("button");
         btn.type = "button";
@@ -111,6 +110,8 @@
           if (badgeText) badgeText.textContent = "Section " + s;
           updateWriteBtn();
           toggleSection();
+          loadReviews();
+          checkReviewPermission();
         };
         sectionList.appendChild(btn);
       });
@@ -127,7 +128,6 @@
         const arrow = btn.querySelector("img");
         if (arrow) {
           arrow.src = isHidden ? "../src/chevron-up-icon.png" : "../src/chevron-down-icon.png";
-          arrow.alt = isHidden ? "chevron up icon" : "chevron down icon";
         }
       }
     }
@@ -135,45 +135,63 @@
     const writeCourseCode = document.getElementById("write-course-code");
     if (writeCourseCode) writeCourseCode.textContent = code;
 
-    // Render reviews
-    const reviews = getReviews(code);
-    const reviewList = document.getElementById("review-list");
-    if (!reviews || reviews.length === 0) {
-      reviewList.innerHTML = `<p style="text-align:center;color:var(--gray-400);padding:32px 0;font-size:14px;">ยังไม่มีรีวิว — เป็นคนแรกที่รีวิวรายวิชานี้!</p>`;
-    } else {
-      reviews.forEach(r => {
-        const yearText = r.year ? `ชั้นปีที่ ${r.year}` : '';
-        const dateText = r.date || '10/10/2569';
-        reviewList.innerHTML += `
-          <div class="review-card">
-            <div class="review-card-top">
-              <div class="review-user-info">
-                <div class="review-verified-shield">
-                  <img src="../src/verify-icon.png" alt="verified icon" height="30" width="30"/>
-                </div>
-                <span class="review-student-id">${r.studentId || '6600000000'}</span>
-                <span class="review-student-year">${yearText}</span>
-              </div>
-              <span class="review-date">${dateText}</span>
-            </div>
-            <div class="review-comment-box">
-              <p class="review-comment-text">${r.text}</p>
-            </div>
-          </div>`;
-      });
+    async function checkReviewPermission() {
+      const writeBtn = document.getElementById("write-btn");
+      try {
+        const res = await apiRequest(`/courses/${code}/eligibility?section=${selectedSection}`);
+        if (res && res.canReview) {
+          writeBtn.style.display = "flex";
+        } else {
+          writeBtn.style.display = "none";
+        }
+      } catch (err) {
+        console.error("Check permission error:", err);
+        writeBtn.style.display = "none";
+      }
     }
 
-    // Pagination (static mock)
-    if (reviews.length > 0) {
-      document.getElementById("pagination").innerHTML = `
-        <button class="page-btn arrow">‹</button>
-        <button class="page-btn active">1</button>
-        <button class="page-btn">2</button>
-        <button class="page-btn">3</button>
-        <span style="color:var(--gray-400);font-size:13px;">…</span>
-        <button class="page-btn">6</button>
-        <button class="page-btn arrow">›</button>`;
+    async function loadReviews() {
+      const reviewList = document.getElementById("review-list");
+      reviewList.innerHTML = `<p style="text-align:center;color:var(--gray-400);padding:32px 0;font-size:14px;">กำลังโหลดรีวิว...</p>`;
+
+      try {
+        const reviews = await apiRequest(`/courses/${code}/reviews?section=${selectedSection}`);
+        
+        if (!reviews || reviews.length === 0) {
+          reviewList.innerHTML = `<p style="text-align:center;color:var(--gray-400);padding:32px 0;font-size:14px;">ยังไม่มีรีวิว — เป็นคนแรกที่รีวิวรายวิชานี้!</p>`;
+          document.getElementById("pagination").innerHTML = "";
+          return;
+        }
+
+        reviewList.innerHTML = reviews.map(r => {
+          const yearText = r.year ? `ชั้นปีที่ ${r.year}` : '';
+          const dateText = r.date || '10/10/2569';
+          return `
+            <div class="review-card">
+              <div class="review-card-top">
+                <div class="review-user-info">
+                  <div class="review-verified-shield">
+                    <img src="../src/verify-icon.png" alt="verified icon" height="30" width="30"/>
+                  </div>
+                  <span class="review-student-id">${r.studentId || '6600000000'}</span>
+                  <span class="review-student-year">${yearText}</span>
+                </div>
+                <span class="review-date">${dateText}</span>
+              </div>
+              <div class="review-comment-box">
+                <p class="review-comment-text">${r.text || r.comment}</p>
+              </div>
+            </div>`;
+        }).join('');
+
+      } catch (err) {
+        console.error("Load reviews error:", err);
+        reviewList.innerHTML = `<p style="text-align:center;color:var(--red);padding:32px 0;font-size:14px;">ไม่สามารถโหลดรีวิวได้</p>`;
+      }
     }
+
+    checkReviewPermission();
+    loadReviews();
   </script>
 </body>
 </html>
