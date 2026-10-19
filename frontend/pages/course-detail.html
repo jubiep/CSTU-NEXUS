@@ -24,7 +24,7 @@
           </div>
         </div>
         <button class="section-pill-btn" id="section-badge" onclick="toggleSection()" type="button">
-          <span>Section</span>
+          <span>กรุณาเลือก Section</span>
           <img src="../src/chevron-down-icon.png" alt="chevron down icon" height="14" width="14"/>
         </button>
       </div>
@@ -32,7 +32,11 @@
       <!-- Section selector (hidden by default) -->
       <div id="section-panel" class="section-panel" style="display:none;">
         <div class="section-panel-card">
-          <div class="section-panel-title">เลือก Section</div>
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+            <div class="section-panel-title" style="margin-bottom:0;">เลือก Section</div>
+            <span id="section-count-badge" style="font-size:12px; color:var(--gray-500); font-weight:500;"></span>
+          </div>
+
           <div id="section-list" class="section-list-wrap"></div>
         </div>
       </div>
@@ -74,49 +78,72 @@
     renderTopbar();
 
     const code = getParam("code") || "CS261";
-    const course = getCourse(code);
+    let courseData = null;
+    let allSections = [];
+    let selectedSection = getParam("section") || "";
+    let selectedSectionId = "";
 
-    if (!course) {
-      document.body.innerHTML = "<p style='padding:40px;text-align:center;'>ไม่พบรายวิชา</p>";
-      throw new Error("Course not found");
-    }
-
-    // Fill header
-    const topbarCode = document.getElementById("topbar-code");
-    if (topbarCode) topbarCode.textContent = code;
-    document.getElementById("detail-code").textContent = code;
-    document.getElementById("detail-name").textContent = course.name;
-    document.getElementById("detail-teacher").textContent = course.teacher;
-
-    let selectedSection = getParam("section") || (course.sections && course.sections.length > 0 ? course.sections[0] : "001");
     const badgeText = document.querySelector("#section-badge span");
-    if (badgeText) badgeText.textContent = "Section " + selectedSection;
+    const sectionList = document.getElementById("section-list");
+    const sectionCountBadge = document.getElementById("section-count-badge");
+    const teacherEl = document.getElementById("detail-teacher");
 
     function updateWriteBtn() {
       const writeBtn = document.getElementById("write-btn");
-      if (writeBtn) writeBtn.href = `write-review.html?code=${code}&section=${selectedSection}`;
-    }
-    updateWriteBtn();
+      const writeText = document.querySelector(".write-review-card-text");
+      if (!writeBtn) return;
 
-    // Section list
-    const sectionList = document.getElementById("section-list");
-    if (sectionList && course.sections) {
-      course.sections.forEach(s => {
-        const btn = document.createElement("button");
-        btn.type = "button";
-        btn.className = "section-btn-item";
-        btn.textContent = "Section " + s;
-        btn.onclick = () => {
-          selectedSection = s;
-          if (badgeText) badgeText.textContent = "Section " + s;
-          updateWriteBtn();
-          toggleSection();
+      const hasSections = Array.isArray(allSections) && allSections.length > 0;
+
+      if (!hasSections) {
+        // กรณีวิชาไม่มี Section: เป็นการรีวิวรวมรายวิชา -> เข้าถึงข้อมูลและกดรีวิวได้ทันทีโดยไม่ต้องเลือก section
+        writeBtn.classList.remove("disabled");
+        writeBtn.href = `write-review.html?code=${encodeURIComponent(code)}`;
+        writeBtn.onclick = null;
+        if (writeText) {
+          writeText.innerHTML = `
+            <div>คุณได้รับสิทธิ์แบ่งปันประสบการณ์</div>
+            <div>รายวิชา <span id="write-course-code">${code}</span> (รีวิวรวมรายวิชา)</div>
+          `;
+        }
+      } else if (selectedSection) {
+        // เมื่อเลือก Section แล้ว: อนุญาตให้เขียนรีวิวได้
+        writeBtn.classList.remove("disabled");
+        writeBtn.href = `write-review.html?code=${encodeURIComponent(code)}&section=${encodeURIComponent(selectedSection)}&sectionId=${encodeURIComponent(selectedSectionId)}`;
+        writeBtn.onclick = null;
+        if (writeText) {
+          writeText.innerHTML = `
+            <div>คุณได้รับสิทธิ์แบ่งปันประสบการณ์</div>
+            <div>รายวิชา <span id="write-course-code">${code}</span> (Section ${selectedSection})</div>
+          `;
+        }
+      } else {
+        // เมื่อมี Section แต่ยังไม่ได้เลือก Section: ยังเขียนรีวิวไม่ได้ (แจ้งเตือนให้เลือก Section)
+        writeBtn.classList.add("disabled");
+        writeBtn.removeAttribute("href");
+        writeBtn.onclick = (e) => {
+          e.preventDefault();
+          // เปิดแผงเลือก section อัตโนมัติและเลื่อนจอไปให้ผู้ใช้เลือก
+          const panel = document.getElementById("section-panel");
+          if (panel && (panel.style.display === "none" || !panel.style.display)) {
+            toggleSection();
+          }
+          if (panel) {
+            panel.scrollIntoView({ behavior: "smooth", block: "center" });
+          }
         };
-        sectionList.appendChild(btn);
-      });
+        if (writeText) {
+          writeText.innerHTML = `
+            <div>คุณได้รับสิทธิ์แบ่งปันประสบการณ์</div>
+            <div>รายวิชา <span id="write-course-code">${code}</span> <span style="color:#DC2626; font-size:12px; font-weight:600;">(กรุณาเลือก Section ก่อนเริ่มเขียนรีวิว)</span></div>
+          `;
+        }
+      }
     }
 
     function toggleSection() {
+      // หากไม่มี Section ไม่ต้องเปิดแผงเลือก
+      if (!allSections || allSections.length === 0) return;
       const panel = document.getElementById("section-panel");
       const btn = document.getElementById("section-badge");
       if (!panel) return;
@@ -132,8 +159,116 @@
       }
     }
 
-    const writeCourseCode = document.getElementById("write-course-code");
-    if (writeCourseCode) writeCourseCode.textContent = code;
+    // Render รายการปุ่ม Section
+    function renderSectionButtons(list) {
+      if (!sectionList) return;
+      sectionList.innerHTML = "";
+
+      if (!list || list.length === 0) {
+        sectionList.innerHTML = `<span style="font-size:13px; color:var(--gray-400);">วิชานี้ไม่มี Section (รีวิวรวมรายวิชา)</span>`;
+        return;
+      }
+
+      list.forEach(s => {
+        const secNum = typeof s === "object" ? s.sectionNumber : s;
+        const secId = typeof s === "object" ? s.sectionId : `sec_${s}`;
+        const instructor = typeof s === "object" && s.instructorName ? s.instructorName : "";
+        const isSelected = Boolean(selectedSection) && (String(secNum).trim() === String(selectedSection).trim());
+
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = `section-btn-item ${isSelected ? 'active' : ''}`;
+        btn.textContent = `Section ${secNum}`;
+
+        btn.onclick = () => {
+          selectedSection = secNum;
+          selectedSectionId = secId;
+          if (badgeText) badgeText.textContent = "Section " + secNum;
+          if (instructor && teacherEl) {
+            teacherEl.textContent = instructor;
+          } else if (teacherEl) {
+            teacherEl.textContent = courseData.teacher || "ไม่ระบุผู้สอน";
+          }
+          updateWriteBtn();
+          renderSectionButtons(allSections); // อัปเดตสถานะ active
+          toggleSection(); // ปิดแผงเมื่อเลือกแล้ว
+        };
+
+        sectionList.appendChild(btn);
+      });
+    }
+
+    // เริ่มต้นโหลดข้อมูลวิชาและเซกชันจาก API (GET /api/courses/{id})
+    async function initCourseDetail() {
+      try {
+        // ยิง API (มี fallback ไปยัง mock ใน app.js)
+        courseData = await apiFetchCourseDetail(code);
+      } catch (err) {
+        console.error("Load course detail error:", err);
+      }
+
+      if (!courseData) {
+        document.body.innerHTML = "<p style='padding:40px;text-align:center;'>ไม่พบรายวิชา</p>";
+        return;
+      }
+
+      // แสดงข้อมูลส่วน Header
+      document.getElementById("detail-code").textContent = courseData.courseId || code;
+      document.getElementById("detail-name").textContent = courseData.courseName || courseData.name || "";
+      
+      const writeCourseCode = document.getElementById("write-course-code");
+      if (writeCourseCode) writeCourseCode.textContent = courseData.courseId || code;
+
+      // จัดการเซกชัน
+      allSections = courseData.sections || [];
+      const hasSections = Array.isArray(allSections) && allSections.length > 0;
+      if (sectionCountBadge) {
+        sectionCountBadge.textContent = `${allSections.length} section`;
+      }
+
+      if (!hasSections) {
+        // กรณีวิชาไม่มี Section: เป็นการรีวิวรวมรายวิชา (ไม่ต้องกรอก section ก็เข้าถึงข้อมูลหรือกดรีวิวได้)
+        selectedSection = "";
+        selectedSectionId = "";
+        if (badgeText) badgeText.textContent = "รีวิวรวมรายวิชา";
+        if (teacherEl) teacherEl.textContent = courseData.teacher || "ไม่ระบุผู้สอน";
+        const badgeBtn = document.getElementById("section-badge");
+        if (badgeBtn) {
+          badgeBtn.style.cursor = "default";
+          const arrow = badgeBtn.querySelector("img");
+          if (arrow) arrow.style.display = "none";
+        }
+      } else if (selectedSection) {
+        // ตรวจสอบว่ามี section ที่ส่งมาจาก URL หรือไม่ (Test case 6)
+        const found = allSections.find(s => 
+          String(typeof s === "object" ? s.sectionNumber : s).trim() === String(selectedSection).trim()
+        );
+        if (found) {
+          selectedSection = String(typeof found === "object" ? found.sectionNumber : found).trim();
+          selectedSectionId = typeof found === "object" ? found.sectionId : `sec_${found}`;
+          const instructor = typeof found === "object" && found.instructorName ? found.instructorName : (courseData.teacher || "");
+          if (teacherEl) teacherEl.textContent = instructor;
+          if (badgeText) badgeText.textContent = "Section " + selectedSection;
+        } else {
+          // หากเลข section ใน URL ไม่ตรงกับที่มี ให้กลับสู่ค่าเริ่มต้น (Test case 1)
+          selectedSection = "";
+          selectedSectionId = "";
+          if (badgeText) badgeText.textContent = "กรุณาเลือก Section";
+          if (teacherEl) teacherEl.textContent = "กรุณาเลือก Section";
+        }
+      } else {
+        // ค่าเริ่มต้น: มี Section แต่ยังไม่ได้เลือก Section ใดๆ (Test case 1)
+        selectedSection = "";
+        selectedSectionId = "";
+        if (badgeText) badgeText.textContent = "กรุณาเลือก Section";
+        if (teacherEl) teacherEl.textContent = "กรุณาเลือก Section";
+      }
+
+      updateWriteBtn();
+      renderSectionButtons(allSections);
+    }
+
+    initCourseDetail();
 
     // Render reviews
     const reviews = getReviews(code);
