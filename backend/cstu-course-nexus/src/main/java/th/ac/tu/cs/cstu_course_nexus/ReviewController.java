@@ -19,13 +19,28 @@ public class ReviewController {
     private ReviewService reviewService;
 
     @GetMapping("/{id}/reviews")
-    public ResponseEntity<List<Review>> getReviews(
+    public ResponseEntity<List<Map<String, Object>>> getReviews(
             @PathVariable("id") String courseId,
-            @RequestParam(value = "sectionId", required = false) String sectionId) {
+            @RequestParam(value = "sectionId", required = false) String sectionId,
+            HttpSession session) {
         
         List<Review> reviewList = reviewService.getReviews(courseId, sectionId);
-        
-        return ResponseEntity.ok(reviewList);
+        List<Map<String, Object>> response = reviewList.stream().map(review -> {
+            Map<String, Object> item = new java.util.LinkedHashMap<>();
+            item.put("id", review.getId());
+            item.put("courseId", review.getCourseId());
+            item.put("sectionId", review.getSectionId());
+            item.put("userId", review.getUserId());
+            item.put("year", review.getReviewerYear());
+            item.put("reviewerYear", review.getReviewerYear());
+            item.put("text", review.getReviewText());
+            item.put("comment", review.getReviewText());
+            item.put("date", review.getDate());
+            item.put("studentId", reviewService.getStudentId(review.getUserId()));
+            return item;
+        }).toList();
+
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/{id}/reviews/eligibility")
@@ -44,6 +59,7 @@ public class ReviewController {
 
         return ResponseEntity.ok(Map.of(
             "eligible", status.isEligible(),
+            "alreadyReviewed", reviewService.hasReviewed(studentId, courseId),
             "studentYear", status.studentYear() != null ? status.studentYear() : 1,
             "recommendedYear", status.recommendedYear() != null ? status.recommendedYear() : 0,
             "message", status.message()

@@ -24,6 +24,18 @@ public class ReviewService {
         return reviewRepository.findByCourseIdAndSectionIdOrderByCreatedAtDesc(courseId, sectionId.trim());
     }
 
+    public String getStudentId(Integer userId) {
+        if (userId == null) return null;
+        // Existing reviews store deriveUserId(studentId), a Java String.hashCode based value.
+        List<String> candidates = jdbcTemplate.query(
+                "SELECT student_id FROM mock_user",
+                (rs, rowNum) -> rs.getString("student_id"));
+        return candidates.stream()
+                .filter(studentId -> deriveUserId(studentId).equals(userId))
+                .findFirst()
+                .orElse(null);
+    }
+
     // ตรงตาม U3: checkReviewEligibility(courseId)
     // เงื่อนไข: ชั้นปีที่เรียนอยู่ (studentYear) ต้อง > recommended_year ในตาราง courses และยังไม่เคยรีวิว
     public boolean checkReviewEligibility(String studentId, String courseId) {
@@ -103,6 +115,13 @@ public class ReviewService {
     }
 
     public record EligibilityStatus(boolean isEligible, Integer studentYear, Integer recommendedYear, String message) {}
+
+    public boolean hasReviewed(String studentId, String courseId) {
+        if (studentId == null || studentId.isBlank() || courseId == null || courseId.isBlank()) {
+            return false;
+        }
+        return reviewRepository.existsByCourseIdAndUserId(courseId, deriveUserId(studentId));
+    }
 
     /**
      * Map a student ID safely to a positive 32-bit integer for user_id storage
