@@ -117,9 +117,9 @@
       }
 
       try {
-        const eligibility = await apiRequest(`/courses/${code}/eligibility?section=${encodeURIComponent(selectedSection)}`);
+        const eligibility = await apiRequest(`/courses/${encodeURIComponent(code)}/reviews/eligibility`);
         
-        if (eligibility && eligibility.hasReviewed) {
+        if (eligibility && eligibility.alreadyReviewed) {
           writeBtn.className = "reviewed-card";
           writeBtn.removeAttribute("href");
           writeBtn.onclick = null;
@@ -131,7 +131,7 @@
                   <polyline points="8 12 11 15 16 9" />
                 </svg>
               </div>
-              <span class="reviewed-text">คุณได้แบ่งปันประสบการณ์แล้ว</span>
+              <span class="reviewed-text">คุณเคยแบ่งปันประสบการณ์แล้ว</span>
             </div>
           `;
           return;
@@ -200,6 +200,7 @@
             teacherEl.textContent = courseData.teacher || "ไม่ระบุผู้สอน";
           }
           updateWriteBtn();
+          checkReviewPermission();
           renderSectionButtons(allSections); // อัปเดตสถานะ active
           toggleSection(); // ปิดแผงเมื่อเลือกแล้ว
           loadReviews(); // โหลดรีวิวของ Section ที่เลือก
@@ -277,6 +278,8 @@
 
       updateWriteBtn();
       renderSectionButtons(allSections);
+      loadReviews();
+      checkReviewPermission();
     }
 
     initCourseDetail();
@@ -286,10 +289,24 @@
       if (!writeBtn) return;
       try {
         const res = await apiRequest(`/courses/${encodeURIComponent(code)}/reviews/eligibility`);
-        if (res && res.eligible) {
-          writeBtn.style.display = "flex";
-        } else {
-          writeBtn.style.display = "none";
+        writeBtn.style.display = "flex";
+        if (res && res.alreadyReviewed) {
+          writeBtn.className = "reviewed-card";
+          writeBtn.removeAttribute("href");
+          writeBtn.onclick = null;
+          writeBtn.innerHTML = `
+            <div class="reviewed-card-content">
+              <div class="reviewed-icon-wrap" aria-hidden="true">
+                <img src="../src/success-icon.png" alt="verified icon" height="28" width="28"/>
+              </div>
+              <span class="reviewed-text">คุณเคยแบ่งปันประสบการณ์แล้ว</span>
+            </div>`;
+        } else if (res && !res.eligible) {
+          writeBtn.className = "write-review-card disabled";
+          writeBtn.removeAttribute("href");
+          writeBtn.onclick = event => event.preventDefault();
+          const writeText = writeBtn.querySelector(".write-review-card-text");
+          if (writeText) writeText.innerHTML = `<div>${res.message || "ยังไม่มีสิทธิ์เขียนรีวิว"}</div>`;
         }
       } catch (err) {
         console.error("Check permission error:", err);
@@ -302,7 +319,7 @@
       const paginationEl = document.getElementById("pagination");
 
       if (!selectedSection) {
-        reviewList.innerHTML = `<p style="text-align:center;color:var(--gray-400);padding:32px 0;font-size:14px;">กรุณาเลือก section</p>`;
+        reviewList.innerHTML = `<p style="text-align:center;color:var(--gray-400);padding:32px 0;font-size:14px;">กรุณาเลือก Section</p>`;
         if (paginationEl) paginationEl.innerHTML = "";
         return;
       }
@@ -310,7 +327,7 @@
       reviewList.innerHTML = `<p style="text-align:center;color:var(--gray-400);padding:32px 0;font-size:14px;">กำลังโหลดรีวิว...</p>`;
 
       try {
-        const res = await apiRequest(`/courses/${code}/reviews?section=${encodeURIComponent(selectedSection)}`);
+        const res = await apiRequest(`/courses/${encodeURIComponent(code)}/reviews?sectionId=${encodeURIComponent(selectedSectionId)}`);
         const reviews = Array.isArray(res) ? res : (res.reviews || []);
 
         if (reviews.length === 0) {
@@ -322,14 +339,14 @@
         reviewList.innerHTML = reviews.map(r => {
           const yearText = r.year ? `ชั้นปีที่ ${r.year}` : '';
           const dateText = r.date || '10/10/2569';
-          const studentId = r.studentId || r.authorStudentId || '6800000000';
+          const studentId = r.studentId || r.authorStudentId || "ไม่พบรหัสนักศึกษา";
 
           return `
             <div class="review-card">
               <div class="review-card-top">
                 <div class="review-user-info">
                   <div class="review-verified-shield">
-                    <img src="../src/verify-icon.png" alt="verified icon" height="30" width="30"/>
+                    <img src="../src/verify-icon.png" alt="verified icon" height="50" width="50"/>
                   </div>
                   <span class="review-student-id">${studentId}</span>
                   <span class="review-student-year">${yearText}</span>
