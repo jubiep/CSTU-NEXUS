@@ -42,6 +42,7 @@ CREATE TABLE review (
         REFERENCES mock_user(user_id),
     reviewer_year INTEGER NOT NULL
         CHECK (reviewer_year BETWEEN 1 AND 4),
+    review_text TEXT NOT NULL,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
 
     CONSTRAINT review_section_course_match
