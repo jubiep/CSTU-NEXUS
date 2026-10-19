@@ -60,9 +60,6 @@
     const profileRetryButton = document.getElementById("profile-retry");
 
     async function loadCurrentUser(verifiedUser) {
-      profileLoadError.hidden = true;
-      profileRetryButton.disabled = true;
-    async function loadCurrentUser() {
       if (!userNameEl) return;
       if (profileLoadError) profileLoadError.hidden = true;
       if (profileRetryButton) profileRetryButton.disabled = true;
@@ -162,8 +159,6 @@
 
       renderTopbar();
       loadCurrentUser(verifiedUser);
-      renderCourses(mockCourses);
-      loadCurrentUser();
       loadCourses("");
     }
 
