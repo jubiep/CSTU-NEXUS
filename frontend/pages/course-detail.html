@@ -91,47 +91,19 @@
     const sectionCountBadge = document.getElementById("section-count-badge");
     const teacherEl = document.getElementById("detail-teacher");
 
-    function updateWriteBtn() {
+    async function updateWriteBtn() {
       const writeBtn = document.getElementById("write-btn");
       const writeText = document.querySelector(".write-review-card-text");
       if (!writeBtn) return;
 
-      const hasSections = Array.isArray(allSections) && allSections.length > 0;
-
-      if (!hasSections) {
-        // กรณีวิชาไม่มี Section: เป็นการรีวิวรวมรายวิชา -> เข้าถึงข้อมูลและกดรีวิวได้ทันทีโดยไม่ต้องเลือก section
-        writeBtn.classList.remove("disabled");
-        writeBtn.href = `write-review.html?code=${encodeURIComponent(code)}`;
-        writeBtn.onclick = null;
-        if (writeText) {
-          writeText.innerHTML = `
-            <div>คุณได้รับสิทธิ์แบ่งปันประสบการณ์</div>
-            <div>รายวิชา <span id="write-course-code">${code}</span> (รีวิวรวมรายวิชา)</div>
-          `;
-        }
-      } else if (selectedSection) {
-        // เมื่อเลือก Section แล้ว: อนุญาตให้เขียนรีวิวได้
-        writeBtn.classList.remove("disabled");
-        writeBtn.href = `write-review.html?code=${encodeURIComponent(code)}&section=${encodeURIComponent(selectedSection)}&sectionId=${encodeURIComponent(selectedSectionId)}`;
-        writeBtn.onclick = null;
-        if (writeText) {
-          writeText.innerHTML = `
-            <div>คุณได้รับสิทธิ์แบ่งปันประสบการณ์</div>
-            <div>รายวิชา <span id="write-course-code">${code}</span> (Section ${selectedSection})</div>
-          `;
-        }
-      } else {
-        // เมื่อมี Section แต่ยังไม่ได้เลือก Section: ยังเขียนรีวิวไม่ได้ (แจ้งเตือนให้เลือก Section)
-        writeBtn.classList.add("disabled");
+      if (!selectedSection) {
+        writeBtn.className = "write-review-card disabled";
         writeBtn.removeAttribute("href");
         writeBtn.onclick = (e) => {
           e.preventDefault();
-          // เปิดแผงเลือก section อัตโนมัติและเลื่อนจอไปให้ผู้ใช้เลือก
           const panel = document.getElementById("section-panel");
-          if (panel && (panel.style.display === "none" || !panel.style.display)) {
-            toggleSection();
-          }
           if (panel) {
+            panel.style.display = "block";
             panel.scrollIntoView({ behavior: "smooth", block: "center" });
           }
         };
@@ -141,6 +113,41 @@
             <div>รายวิชา <span id="write-course-code">${code}</span> <span style="color:#DC2626; font-size:12px; font-weight:600;">(กรุณาเลือก Section ก่อนเริ่มเขียนรีวิว)</span></div>
           `;
         }
+        return;
+      }
+
+      try {
+        const eligibility = await apiRequest(`/courses/${code}/eligibility?section=${encodeURIComponent(selectedSection)}`);
+        
+        if (eligibility && eligibility.hasReviewed) {
+          writeBtn.className = "reviewed-card";
+          writeBtn.removeAttribute("href");
+          writeBtn.onclick = null;
+          writeBtn.innerHTML = `
+            <div class="reviewed-card-content">
+              <div class="reviewed-icon-wrap">
+                <svg viewBox="0 0 24 24" fill="none" stroke="#22C55E" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" width="28" height="28">
+                  <circle cx="12" cy="12" r="10" stroke="#22C55E" stroke-width="2" fill="none"/>
+                  <polyline points="8 12 11 15 16 9" />
+                </svg>
+              </div>
+              <span class="reviewed-text">คุณได้แบ่งปันประสบการณ์แล้ว</span>
+            </div>
+          `;
+          return;
+        }
+      } catch (e) {
+        console.error("Check eligibility error:", e);
+      }
+
+      writeBtn.className = "write-review-card";
+      writeBtn.href = `write-review.html?code=${encodeURIComponent(code)}&section=${encodeURIComponent(selectedSection)}`;
+      writeBtn.onclick = null;
+      if (writeText) {
+        writeText.innerHTML = `
+          <div>คุณได้รับสิทธิ์แบ่งปันประสบการณ์</div>
+          <div>รายวิชา <span id="write-course-code">${code}</span> (Section ${selectedSection})</div>
+        `;
       }
     }
 
@@ -292,26 +299,31 @@
 
     async function loadReviews() {
       const reviewList = document.getElementById("review-list");
-      if (!reviewList) return;
+      const paginationEl = document.getElementById("pagination");
+
+      if (!selectedSection) {
+        reviewList.innerHTML = `<p style="text-align:center;color:var(--gray-400);padding:32px 0;font-size:14px;">กรุณาเลือก section</p>`;
+        if (paginationEl) paginationEl.innerHTML = "";
+        return;
+      }
+
       reviewList.innerHTML = `<p style="text-align:center;color:var(--gray-400);padding:32px 0;font-size:14px;">กำลังโหลดรีวิว...</p>`;
 
       try {
-        const query = selectedSectionId ? `?sectionId=${encodeURIComponent(selectedSectionId)}` : "";
-        const reviews = await apiRequest(`/courses/${encodeURIComponent(code)}/reviews${query}`);
-        
-        if (!reviews || reviews.length === 0) {
+        const res = await apiRequest(`/courses/${code}/reviews?section=${encodeURIComponent(selectedSection)}`);
+        const reviews = Array.isArray(res) ? res : (res.reviews || []);
+
+        if (reviews.length === 0) {
           reviewList.innerHTML = `<p style="text-align:center;color:var(--gray-400);padding:32px 0;font-size:14px;">ยังไม่มีรีวิว — เป็นคนแรกที่รีวิวรายวิชานี้!</p>`;
-          const pagEl = document.getElementById("pagination");
-          if (pagEl) pagEl.innerHTML = "";
+          if (paginationEl) paginationEl.innerHTML = "";
           return;
         }
 
         reviewList.innerHTML = reviews.map(r => {
-          const yearVal = r.reviewerYear || r.year;
-          const yearText = yearVal ? `ชั้นปีที่ ${yearVal}` : '';
-          const dateText = r.date || (r.createdAt ? new Date(r.createdAt).toLocaleDateString('th-TH') : '10/10/2569');
-          const commentText = r.reviewText || r.text || r.comment || '';
-          const displayStudent = r.studentId || 'นักศึกษา CSTU';
+          const yearText = r.year ? `ชั้นปีที่ ${r.year}` : '';
+          const dateText = r.date || '10/10/2569';
+          const studentId = r.studentId || r.authorStudentId || '6800000000';
+
           return `
             <div class="review-card">
               <div class="review-card-top">
@@ -319,19 +331,26 @@
                   <div class="review-verified-shield">
                     <img src="../src/verify-icon.png" alt="verified icon" height="30" width="30"/>
                   </div>
-                  <span class="review-student-id">${displayStudent}</span>
+                  <span class="review-student-id">${studentId}</span>
                   <span class="review-student-year">${yearText}</span>
                 </div>
                 <span class="review-date">${dateText}</span>
               </div>
               <div class="review-comment-box">
-                <p class="review-comment-text">${commentText}</p>
+                <p class="review-comment-text">${r.text || r.comment}</p>
               </div>
             </div>`;
         }).join('');
 
+        if (paginationEl) {
+          paginationEl.innerHTML = `
+            <button class="page-btn arrow">‹</button>
+            <button class="page-btn active">1</button>
+            <button class="page-btn">2</button>
+            <button class="page-btn arrow">›</button>`;
+        }
       } catch (err) {
-        console.error("Load reviews error:", err);
+        console.error("Failed to load reviews:", err);
         reviewList.innerHTML = `<p style="text-align:center;color:var(--red);padding:32px 0;font-size:14px;">ไม่สามารถโหลดรีวิวได้</p>`;
       }
     }
