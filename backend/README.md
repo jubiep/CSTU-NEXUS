@@ -344,10 +344,16 @@ TU_API_APPLICATION_KEY=your_actual_key_here
 จากนั้นสามารถสั่งรัน Docker Compose ได้ทันที:
 
 ```powershell
-docker compose -f backend/database/compose.yaml up -d --build
+docker compose --env-file .env -f backend/database/compose.yaml up -d --build
 ```
 
-Compose จะดึงค่า `TU_API_APPLICATION_KEY` และ `APP_CORS_ALLOWED_ORIGINS` จากไฟล์ `.env` โดยอัตโนมัติ พร้อม build Spring Boot backend, เริ่ม PostgreSQL และเริ่ม backend โดย backend เปิดที่ `http://localhost:8080`
+เช็คว่า key ถูกส่งเข้า container หรือไม่ โดยไม่แสดงค่าลับ:
+
+```powershell
+docker compose --env-file .env -f backend/database/compose.yaml exec backend sh -lc 'test -n "$TU_API_APPLICATION_KEY" && echo KEY_PRESENT || echo KEY_EMPTY'
+```
+
+ต้องระบุ `--env-file .env` เพราะไฟล์ Compose อยู่ใน `backend/database/` แต่ไฟล์ `.env` อยู่ที่ root ของ repository มิฉะนั้น Compose อาจไม่ส่ง `TU_API_APPLICATION_KEY` เข้า Backend container พร้อม build Spring Boot backend, เริ่ม PostgreSQL และเริ่ม backend โดย backend เปิดที่ `http://localhost:8080`
 
 ตรวจสถานะและ log:
 
@@ -438,6 +444,8 @@ PostgreSQL connection successful! Courses: 38
 | `POST` | `/api/auth/login` | ยืนยันบัญชีกับ TU AD และสร้าง session |
 | `GET` | `/api/auth/me` | อ่านโปรไฟล์จาก session |
 | `POST` | `/api/auth/logout` | ยกเลิก session |
+| `GET` | `/api/courses?keyword={คำค้นหา}&year={1-4}` | ค้นหารหัสหรือชื่อรายวิชาแบบพิมพ์บางส่วนได้; ไม่ส่ง `keyword` จะคืนรายการทั้งหมด |
+| `GET` | `/api/courses/{courseId}` | อ่านข้อมูลรายวิชาและรายการ section |
 
 Endpoints สำหรับ Authentication ต้องตั้ง `TU_API_APPLICATION_KEY` ก่อนใช้งาน
 
@@ -473,7 +481,7 @@ Ctrl + C
 
 | สิ่งที่ต้องการทำ | คำสั่ง |
 |---|---|
-| เริ่ม Database และ Backend | `docker compose -f backend/database/compose.yaml up -d --build` |
+| เริ่ม Database และ Backend | `docker compose --env-file .env -f backend/database/compose.yaml up -d --build` |
 | ดูสถานะบริการ | `docker compose -f backend/database/compose.yaml ps` |
 | ดู log ของ Backend | `docker compose -f backend/database/compose.yaml logs -f backend` |
 | หยุดบริการโดยเก็บข้อมูล | `docker compose -f backend/database/compose.yaml down` |

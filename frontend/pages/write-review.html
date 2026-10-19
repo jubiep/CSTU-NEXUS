@@ -76,21 +76,58 @@
 
   <script src="../app.js"></script>
   <script>
-    requireAuth();
+    requireAuth().then(user => {
+    if (!user) return;
 
     const code = getParam("code") || "CS261";
-    const course = getCourse(code);
-    const section = getParam("section") || (course && course.sections ? course.sections[0] : "001");
+    let section = getParam("section") || "";
+    let sectionId = getParam("sectionId") || "";
+    let course = null;
 
     renderTopbar();
     document.getElementById("detail-code").textContent = code;
     document.getElementById("inline-code").textContent = code;
-    const sectionText = document.getElementById("section-text");
-    if (sectionText) sectionText.textContent = "Section " + section;
 
-    if (course) {
-      document.getElementById("detail-name").textContent = course.name;
-      document.getElementById("detail-teacher").textContent = course.teacher;
+    async function initWriteReview() {
+      try {
+        course = await apiFetchCourseDetail(code);
+      } catch (err) {
+        course = getCourse(code);
+      }
+      if (!course) {
+        course = getCourse(code);
+      }
+
+      const sectionText = document.getElementById("section-text");
+      const nameEl = document.getElementById("detail-name");
+      const teacherEl = document.getElementById("detail-teacher");
+
+      if (course) {
+        if (nameEl) nameEl.textContent = course.courseName || course.name || "";
+        const sections = course.sections || [];
+        const hasSections = Array.isArray(sections) && sections.length > 0;
+
+        if (!hasSections || !section) {
+          // กรณีวิชาไม่มี Section หรือเข้ามาแบบรีวิวรวมรายวิชา
+          section = "";
+          sectionId = "";
+          if (sectionText) sectionText.textContent = "รีวิวรวมรายวิชา";
+          if (teacherEl) teacherEl.textContent = course.teacher || "ไม่ระบุผู้สอน";
+        } else {
+          // กรณีมี Section และระบุ Section
+          if (sectionText) sectionText.textContent = "Section " + section;
+          const found = sections.find(s => String(typeof s === "object" ? s.sectionNumber : s).trim() === String(section).trim());
+          if (found && typeof found === "object" && found.instructorName) {
+            if (teacherEl) teacherEl.textContent = found.instructorName;
+          } else if (teacherEl) {
+            teacherEl.textContent = course.teacher || "ไม่ระบุผู้สอน";
+          }
+        }
+      } else {
+        if (sectionText) {
+          sectionText.textContent = section ? "Section " + section : "รีวิวรวมรายวิชา";
+        }
+      }
     }
 
     async function submitReview() {
@@ -131,8 +168,16 @@
       }
     }
 
-    function goBack() {
+    window.goBack = function goBack() {
       window.location.href = `course-detail.html?code=${code}&section=${section}`;
+    };
+    });
+    function goBack() {
+      if (section) {
+        window.location.href = `course-detail.html?code=${encodeURIComponent(code)}&section=${encodeURIComponent(section)}`;
+      } else {
+        window.location.href = `course-detail.html?code=${encodeURIComponent(code)}`;
+      }
     }
   </script>
 </body>

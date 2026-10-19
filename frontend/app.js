@@ -8,18 +8,203 @@ const API_BASE_URL = (
   || (isLocalFrontend ? `http://${window.location.hostname}:8080/api` : `${window.location.origin}/api`)
 ).replace(/\/+$/, "");
 const AUTH_STATE_KEY = "cstu_authenticated";
+const mockCurrentUser = {
+  name: "มะละกอ ส้มตำ",
+  studentId: "6809670670",
+  year: 2,
+  faculty: "คณะวิทยาศาสตร์และเทคโนโลยี สาขาวิทยาการคอมพิวเตอร์"
+};
 
-// ── Mock courses ────────────────────────────
+/* ค้นหารายวิชาจาก Backend (หากยังเชื่อมไม่ได้ ให้ใช้ mockCourses แทนอัตโนมัติ) */
+async function apiFetchCourses(keyword = "") {
+  const trimmed = keyword.trim();
+  const url = trimmed 
+    ? `${API_BASE_URL}/courses?keyword=${encodeURIComponent(trimmed)}`
+    : `${API_BASE_URL}/courses`;
+
+  try {
+    const response = await fetch(url);
+    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+    return await response.json();
+  } catch (error) {
+    if (!trimmed) return mockCourses;
+    const q = trimmed.toLowerCase();
+    return mockCourses.filter(c =>
+      c.courseId.toLowerCase().includes(q) ||
+      c.courseName.toLowerCase().includes(q)
+    );
+  }
+}
+
+/**
+ * ดึงข้อมูลวิชาและเซกชันจาก Backend (GET /api/courses/{id})
+ * หากยังเชื่อมไม่ได้ ให้ใช้ mockCourses แทนอัตโนมัติ
+ */
+async function apiFetchCourseDetail(courseId) {
+  if (!courseId) return null;
+  const url = `${API_BASE_URL}/courses/${encodeURIComponent(courseId)}`;
+
+  try {
+    const response = await fetch(url);
+    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+    return await response.json();
+  } catch (error) {
+    console.warn(`Backend API unavailable for ${courseId}, using mock:`, error.message);
+    const c = getCourse(courseId);
+    if (!c) return null;
+    return {
+      courseId: c.courseId,
+      courseName: c.courseName,
+      recommendedYear: c.recommendedYear,
+      teacher: c.teacher,
+      credits: c.credits,
+      description: c.description,
+      sections: c.sections || []
+    };
+  }
+}
+
+// ── Mock courses & sections (อิงจาก Database จริง: courses.csv และ sections.csv) ──
 const mockCourses = [
-  { code: "CS261", name: "Introduction to Software Engineering", teacher: "ดร.กรงศักดิ์ รองวิชาหมัน", sections: ["001","002","003"] },
-  { code: "CS262", name: "Data Structures", teacher: "ผศ.ดร.อลิษา วงศ์ทอง", sections: ["001","002"] },
-  { code: "CS270", name: "Database Systems", teacher: "ดร.ชัยวัฒน์ พรมพิทักษ์", sections: ["001"] },
-  { code: "CS301", name: "Algorithm Design", teacher: "ศ.ดร.วิไลวรรณ สุขใจ", sections: ["001","002","003"] },
-  { code: "CS310", name: "Computer Networks", teacher: "ดร.ประสิทธิ์ มีชัย", sections: ["001","002"] },
-  { code: "CS320", name: "Operating Systems", teacher: "ผศ.ณัฐพล เจริญสุข", sections: ["001"] },
-  { code: "CS340", name: "Web Development", teacher: "ดร.พิมพ์ใจ ศรีนวล", sections: ["001","002"] },
-  { code: "MA201", name: "Calculus II", teacher: "ผศ.ดร.สุชาดา วัฒนาสุข", sections: ["001","002","003","004"] },
+  { 
+    courseId: "CS102", 
+    code: "CS102", 
+    courseName: "Problem solving Basics and Computer Programming", 
+    name: "Problem solving Basics and Computer Programming", 
+    recommendedYear: 1, 
+    credits: "3 (2-2-5)",
+    teacher: "ผศ.ดร.เสาวลักษณ์ วรรธนาภา",
+    description: "",
+    sectionCount: 2,
+    sections: [
+      { sectionId: "cs102_030001", sectionNumber: "030001", instructorName: "ผศ.ดร.เสาวลักษณ์ วรรธนาภา" },
+      { sectionId: "cs102_030002", sectionNumber: "030002", instructorName: "ผศ.ดร.ฐาปนา บุญชู" }
+    ]
+  },
+  { 
+    courseId: "CS261", 
+    code: "CS261", 
+    courseName: "Introduction to Software Engineering", 
+    name: "Introduction to Software Engineering", 
+    recommendedYear: 2, 
+    credits: "3 (3-0-6)",
+    teacher: "ผศ.ดร.ทรงศักดิ์ รองวิริยะพานิช",
+    description: "ระเบียบวิธีทางวิศวกรรมซอฟต์แวร์ การจัดการโครงการ และการประกันคุณภาพซอฟต์แวร์",
+    sectionCount: 1,
+    sections: [
+      { sectionId: "cs261_100001", sectionNumber: "100001", instructorName: "ผศ.ดร.ทรงศักดิ์ รองวิริยะพานิช" }
+    ]
+  },
+  { 
+    courseId: "CS213", 
+    code: "CS213", 
+    courseName: "Data Structures", 
+    name: "Data Structures", 
+    recommendedYear: 2, 
+    credits: "3 (2-2-5)",
+    teacher: "ผศ.ดร.วนิดา พฤทธิวิทยา",
+    description: "โครงสร้างข้อมูลขั้นสูงและการออกแบบโครงสร้างข้อมูลที่มีประสิทธิภาพ",
+    sectionCount: 2,
+    sections: [
+      { sectionId: "cs213_050001", sectionNumber: "050001", instructorName: "ผศ.ดร.วนิดา พฤทธิวิทยา" },
+      { sectionId: "cs213_050002", sectionNumber: "050002", instructorName: "ผศ.ดร.ฐาปนา บุญชู" }
+    ]
+  },
+  { 
+    courseId: "CS251", 
+    code: "CS251", 
+    courseName: "Database Systems 1", 
+    name: "Database Systems 1", 
+    recommendedYear: 2, 
+    credits: "3 (3-0-6)",
+    teacher: "ผศ.ดร.วิลาวรรณ รักผกาวงศ์",
+    description: "ระบบจัดการฐานข้อมูล สถาปัตยกรรม แบบจำลองข้อมูลเชิงสัมพันธ์ และภาษา SQL",
+    sectionCount: 2,
+    sections: [
+      { sectionId: "cs251_090001", sectionNumber: "090001", instructorName: "ผศ.ดร.วิลาวรรณ รักผกาวงศ์" },
+      { sectionId: "cs251_090002", sectionNumber: "090002", instructorName: "ผศ.ดร.เสาวลักษณ์ วรรธนาภา" }
+    ]
+  },
+  { 
+    courseId: "TU100", 
+    code: "TU100", 
+    courseName: "Civic Engagement", 
+    name: "Civic Engagement", 
+    recommendedYear: 1, 
+    credits: "3 (3-0-6)",
+    teacher: "รศ.ดร.ปริญญา เทวานฤมิตรกุล",
+    description: "พลเมืองกับความรับผิดชอบต่อสังคม การมีส่วนร่วมเพื่อการพัฒนาชุมชนอย่างยั่งยืน",
+    sectionCount: 2,
+    sections: [
+      { sectionId: "tu100_820001", sectionNumber: "820001", instructorName: "รศ.ดร.ปริญญา เทวานฤมิตรกุล" },
+      { sectionId: "tu100_830001", sectionNumber: "830001", instructorName: "ผศ.ดร.ปาริยา ณ นคร" }
+    ]
+  },
+  { 
+    courseId: "TU103", 
+    code: "TU103", 
+    courseName: "Life and Sustainability", 
+    name: "Life and Sustainability", 
+    recommendedYear: 1, 
+    credits: "3 (3-0-6)",
+    teacher: "รศ.โรจน์ คุณเอนก",
+    description: "ชีวิตและความยั่งยืน สิ่งแวดล้อม และการดำรงชีวิตในยุคการเปลี่ยนแปลงสภาพภูมิอากาศ",
+    sectionCount: 3,
+    sections: [
+      { sectionId: "tu103_230001", sectionNumber: "230001", instructorName: "รศ.โรจน์ คุณเอนก, ผศ.ชล บุนนาค" },
+      { sectionId: "tu103_320001", sectionNumber: "320001", instructorName: "รศ.โรจน์ คุณเอนก, ผศ.ชล บุนนาค" },
+      { sectionId: "tu103_000002", sectionNumber: "000002", instructorName: "รศ.โรจน์ คุณเอนก" }
+    ]
+  },
+  { 
+    courseId: "CS372", 
+    code: "CS372", 
+    courseName: "Machine Learning", 
+    name: "Machine Learning", 
+    recommendedYear: 3, 
+    credits: "3 (3-0-6)",
+    teacher: "รศ.ดร.ธนาธร ทะนานทอง",
+    description: "การเรียนรู้ของเครื่อง การเรียนรู้แบบมีผู้สอน ไม่มีผู้สอน และโครงข่ายประสาทเทียม",
+    sectionCount: 1,
+    sections: [
+      { sectionId: "cs372_110001", sectionNumber: "110001", instructorName: "รศ.ดร.ธนาธร ทะนานทอง" }
+    ]
+  },
+  { 
+    courseId: "EL105", 
+    code: "EL105", 
+    courseName: "English Communication Skills", 
+    name: "English Communication Skills", 
+    recommendedYear: 1, 
+    credits: "3 (3-0-6)",
+    teacher: "ไม่ระบุผู้สอน",
+    description: "ทักษะการสื่อสารภาษาอังกฤษเพื่อการทำงานและการนำเสนอทางวิชาการ",
+    sectionCount: 1,
+    sections: [
+      { sectionId: "el105_000000", sectionNumber: "000000", instructorName: "ไม่ระบุผู้สอน" }
+    ]
+  },
+  { 
+    courseId: "CS299", 
+    code: "CS299", 
+    courseName: "Special Topics in Computer Science", 
+    name: "Special Topics in Computer Science", 
+    recommendedYear: 3, 
+    credits: "3 (3-0-6)",
+    teacher: "คณาจารย์สาขาวิทยาการคอมพิวเตอร์",
+    description: "หัวข้อคัดสรรทางวิทยาการคอมพิวเตอร์ (ไม่มี Section - รีวิวรวมรายวิชา)",
+    sectionCount: 0,
+    sections: []
+  }
 ];
+
+function getCourse(code) {
+  if (!code) return null;
+  return mockCourses.find(c => 
+    c.courseId.toLowerCase() === code.toLowerCase() || 
+    (c.code && c.code.toLowerCase() === code.toLowerCase())
+  ) || null;
+}
 
 // ── Mock reviews ────────────────────────────
 const mockReviews = {
@@ -34,9 +219,6 @@ const mockReviews = {
 };
 
 // ── Helpers ─────────────────────────────────
-function getCourse(code) {
-  return mockCourses.find(c => c.code === code) || null;
-}
 
 function getReviews(code) {
   return mockReviews[code] || [];
@@ -57,11 +239,29 @@ async function apiRequest(path, options = {}) {
     headers.set("Content-Type", "application/json");
   }
 
-  const response = await fetch(`${API_BASE_URL}${path}`, {
-    ...options,
-    headers,
-    credentials: "include",
-  });
+  let response;
+  try {
+    response = await fetch(`${API_BASE_URL}${path}`, {
+      ...options,
+      headers,
+      credentials: "include",
+    });
+  } catch (error) {
+    if (error instanceof TypeError && path !== "/auth/login" && path !== "/auth/logout") {
+      sessionStorage.removeItem(AUTH_STATE_KEY);
+      const isPages = window.location.pathname.includes("/pages/");
+      const loginUrl = isPages ? "index.html" : "pages/index.html";
+      window.location.replace(`${loginUrl}?reason=backend-disconnected`);
+    }
+    throw error;
+  }
+
+  if (response.status === 401 && path !== "/auth/login" && path !== "/auth/logout") {
+    sessionStorage.removeItem(AUTH_STATE_KEY);
+    const isPages = window.location.pathname.includes("/pages/");
+    const loginUrl = isPages ? "index.html" : "pages/index.html";
+    window.location.replace(`${loginUrl}?reason=session-expired`);
+  }
 
   const contentType = response.headers.get("content-type") || "";
   let payload = null;
@@ -84,14 +284,32 @@ async function apiRequest(path, options = {}) {
 }
 
 // ── Auth ────────────────────────────────────
-function requireAuth() {
-  if (!sessionStorage.getItem(AUTH_STATE_KEY)) {
-    const isPages = window.location.pathname.includes("/pages/");
-    window.location.replace(isPages ? "index.html" : "pages/index.html");
-    return false;
+async function requireAuth() {
+  const protectedContent = document.querySelector(".app-shell");
+  if (protectedContent) protectedContent.hidden = true;
+
+  try {
+    const user = await apiRequest("/auth/me");
+    sessionStorage.setItem(AUTH_STATE_KEY, "1");
+    if (protectedContent) protectedContent.hidden = false;
+    return user;
+  } catch (error) {
+    if (error.status !== 401) {
+      console.error("Session verification failed:", error);
+      if (!(error instanceof TypeError)) {
+        window.alert(error.message || "ตรวจสอบสถานะการเข้าสู่ระบบไม่สำเร็จ");
+      }
+    }
+    return null;
   }
-  return true;
 }
+
+window.addEventListener("pageshow", event => {
+  const isLoginPage = window.location.pathname.endsWith("/pages/index.html");
+  if (event.persisted && !isLoginPage && !sessionStorage.getItem(AUTH_STATE_KEY)) {
+    window.location.replace("index.html");
+  }
+});
 
 async function logout() {
   let logoutError = false;

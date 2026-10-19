@@ -104,6 +104,8 @@ CSTU-NEXUS/
 - [Docker Desktop](https://www.docker.com/products/docker-desktop/) (สำหรับรัน PostgreSQL)
 - [Java JDK 17](https://adoptium.net/temurin/releases/?version=17) ขึ้นไป
 
+> 💡 **สำหรับสมาชิกในทีม:** ดูคู่มือดาวน์โหลด ติดตั้ง และตรวจสอบ Stack แบบละเอียดได้ที่ [REQUIREMENTS.md](REQUIREMENTS.md) (หรือรันสคริปต์ตรวจเช็ค `check-requirements.ps1` / `check-requirements.sh`)
+
 ---
 
 ### 2. ตั้งค่าไฟล์สภาพแวดล้อม (`.env`)
@@ -171,7 +173,7 @@ Backend จะพร้อมทำงานที่ `http://localhost:8080`
 
 #### ทางเลือกที่ B: รันทั้ง Backend และ Database ผ่าน Docker Compose
 ```bash
-docker compose -f backend/database/compose.yaml up -d --build
+docker compose --env-file .env -f backend/database/compose.yaml up -d --build
 ```
 
 ---

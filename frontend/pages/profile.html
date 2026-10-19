@@ -67,7 +67,7 @@
       profileRetry.hidden = false;
     }
 
-    async function loadProfile() {
+    async function loadProfile(verifiedUser) {
       profileLoading.hidden = false;
       profileError.classList.remove("show");
       profileRetry.hidden = true;
@@ -75,7 +75,7 @@
       profileRetry.disabled = true;
 
       try {
-        const user = await apiRequest("/auth/me");
+        const user = verifiedUser || await apiRequest("/auth/me");
         if (!user || typeof user.displayName !== "string" ||
             typeof user.studentId !== "string" ||
             (user.year !== null && (!Number.isInteger(user.year) || user.year < 1)) ||
@@ -93,12 +93,6 @@
         profileLoading.hidden = true;
         profileCard.hidden = false;
       } catch (error) {
-        if (error.status === 401) {
-          sessionStorage.removeItem(AUTH_STATE_KEY);
-          window.location.replace("index.html?reason=session-expired");
-          return;
-        }
-
         const message = error instanceof TypeError
           ? "เชื่อมต่อ backend ไม่ได้ กรุณาตรวจสอบว่า backend ทำงานอยู่และลองอีกครั้ง"
           : error.message || "โหลดข้อมูลโปรไฟล์ไม่สำเร็จ";
@@ -110,10 +104,15 @@
 
     profileRetry.addEventListener("click", loadProfile);
 
-    if (requireAuth()) {
+    async function initializeProfilePage() {
+      const verifiedUser = await requireAuth();
+      if (!verifiedUser) return;
+
       renderTopbar();
-      loadProfile();
+      loadProfile(verifiedUser);
     }
+
+    initializeProfilePage();
   </script>
 </body>
 </html>
