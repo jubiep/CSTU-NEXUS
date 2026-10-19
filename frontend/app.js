@@ -69,12 +69,12 @@ const mockCourses = [
   { 
     courseId: "CS102", 
     code: "CS102", 
-    courseName: "Data Structures", 
-    name: "Data Structures", 
+    courseName: "Problem solving Basics and Computer Programming", 
+    name: "Problem solving Basics and Computer Programming", 
     recommendedYear: 1, 
     credits: "3 (2-2-5)",
     teacher: "ผศ.ดร.เสาวลักษณ์ วรรธนาภา",
-    description: "โครงสร้างข้อมูลเบื้องต้น ลิงก์ลิสต์ สแต็ก คิว ทรี กราฟ และการวิเคราะห์ขั้นตอนวิธี",
+    description: "",
     sectionCount: 2,
     sections: [
       { sectionId: "cs102_030001", sectionNumber: "030001", instructorName: "ผศ.ดร.เสาวลักษณ์ วรรธนาภา" },
