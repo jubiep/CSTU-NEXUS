@@ -93,7 +93,20 @@
       const writeText = document.querySelector(".write-review-card-text");
       if (!writeBtn) return;
 
-      if (selectedSection) {
+      const hasSections = Array.isArray(allSections) && allSections.length > 0;
+
+      if (!hasSections) {
+        // กรณีวิชาไม่มี Section: เป็นการรีวิวรวมรายวิชา -> เข้าถึงข้อมูลและกดรีวิวได้ทันทีโดยไม่ต้องเลือก section
+        writeBtn.classList.remove("disabled");
+        writeBtn.href = `write-review.html?code=${encodeURIComponent(code)}`;
+        writeBtn.onclick = null;
+        if (writeText) {
+          writeText.innerHTML = `
+            <div>คุณได้รับสิทธิ์แบ่งปันประสบการณ์</div>
+            <div>รายวิชา <span id="write-course-code">${code}</span> (รีวิวรวมรายวิชา)</div>
+          `;
+        }
+      } else if (selectedSection) {
         // เมื่อเลือก Section แล้ว: อนุญาตให้เขียนรีวิวได้
         writeBtn.classList.remove("disabled");
         writeBtn.href = `write-review.html?code=${encodeURIComponent(code)}&section=${encodeURIComponent(selectedSection)}&sectionId=${encodeURIComponent(selectedSectionId)}`;
@@ -105,7 +118,7 @@
           `;
         }
       } else {
-        // เมื่อยังไม่ได้เลือก Section: ยังเขียนรีวิวไม่ได้
+        // เมื่อมี Section แต่ยังไม่ได้เลือก Section: ยังเขียนรีวิวไม่ได้ (แจ้งเตือนให้เลือก Section)
         writeBtn.classList.add("disabled");
         writeBtn.removeAttribute("href");
         writeBtn.onclick = (e) => {
@@ -129,6 +142,8 @@
     }
 
     function toggleSection() {
+      // หากไม่มี Section ไม่ต้องเปิดแผงเลือก
+      if (!allSections || allSections.length === 0) return;
       const panel = document.getElementById("section-panel");
       const btn = document.getElementById("section-badge");
       if (!panel) return;
@@ -150,7 +165,7 @@
       sectionList.innerHTML = "";
 
       if (!list || list.length === 0) {
-        sectionList.innerHTML = `<span style="font-size:13px; color:var(--gray-400);">ไม่มีเซกชัน</span>`;
+        sectionList.innerHTML = `<span style="font-size:13px; color:var(--gray-400);">วิชานี้ไม่มี Section (รีวิวรวมรายวิชา)</span>`;
         return;
       }
 
@@ -206,12 +221,25 @@
 
       // จัดการเซกชัน
       allSections = courseData.sections || [];
+      const hasSections = Array.isArray(allSections) && allSections.length > 0;
       if (sectionCountBadge) {
-        sectionCountBadge.textContent = `${allSections.length} เซกชัน`;
+        sectionCountBadge.textContent = `${allSections.length} section`;
       }
 
-      // ตรวจสอบว่ามี section ที่ส่งมาจาก URL หรือไม่ (Test case 6)
-      if (selectedSection && allSections.length > 0) {
+      if (!hasSections) {
+        // กรณีวิชาไม่มี Section: เป็นการรีวิวรวมรายวิชา (ไม่ต้องกรอก section ก็เข้าถึงข้อมูลหรือกดรีวิวได้)
+        selectedSection = "";
+        selectedSectionId = "";
+        if (badgeText) badgeText.textContent = "รีวิวรวมรายวิชา";
+        if (teacherEl) teacherEl.textContent = courseData.teacher || "ไม่ระบุผู้สอน";
+        const badgeBtn = document.getElementById("section-badge");
+        if (badgeBtn) {
+          badgeBtn.style.cursor = "default";
+          const arrow = badgeBtn.querySelector("img");
+          if (arrow) arrow.style.display = "none";
+        }
+      } else if (selectedSection) {
+        // ตรวจสอบว่ามี section ที่ส่งมาจาก URL หรือไม่ (Test case 6)
         const found = allSections.find(s => 
           String(typeof s === "object" ? s.sectionNumber : s).trim() === String(selectedSection).trim()
         );
@@ -229,7 +257,7 @@
           if (teacherEl) teacherEl.textContent = "กรุณาเลือก Section";
         }
       } else {
-        // ค่าเริ่มต้น: ไม่เลือก Section ใดๆ (Test case 1)
+        // ค่าเริ่มต้น: มี Section แต่ยังไม่ได้เลือก Section ใดๆ (Test case 1)
         selectedSection = "";
         selectedSectionId = "";
         if (badgeText) badgeText.textContent = "กรุณาเลือก Section";

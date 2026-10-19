@@ -183,6 +183,18 @@ const mockCourses = [
     sections: [
       { sectionId: "el105_000000", sectionNumber: "000000", instructorName: "ไม่ระบุผู้สอน" }
     ]
+  },
+  { 
+    courseId: "CS299", 
+    code: "CS299", 
+    courseName: "Special Topics in Computer Science", 
+    name: "Special Topics in Computer Science", 
+    recommendedYear: 3, 
+    credits: "3 (3-0-6)",
+    teacher: "คณาจารย์สาขาวิทยาการคอมพิวเตอร์",
+    description: "หัวข้อคัดสรรทางวิทยาการคอมพิวเตอร์ (ไม่มี Section - รีวิวรวมรายวิชา)",
+    sectionCount: 0,
+    sections: []
   }
 ];
 
