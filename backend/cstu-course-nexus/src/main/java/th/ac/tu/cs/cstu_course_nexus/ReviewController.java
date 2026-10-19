@@ -2,11 +2,11 @@ package th.ac.tu.cs.cstu_course_nexus;
 
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -18,67 +18,67 @@ public class ReviewController {
     @Autowired
     private ReviewService reviewService;
 
-    // GET /api/courses/{courseId}/reviews
-    @GetMapping("/{courseId}/reviews")
-    public ResponseEntity<Page<Review>> getReviews(
-            @PathVariable String courseId,
-            @RequestParam String section,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "5") int size) {
+    @GetMapping("/{id}/reviews")
+    public ResponseEntity<List<Review>> getReviews(
+            @PathVariable("id") String courseId,
+            @RequestParam("sectionId") String sectionId) {
         
-        Page<Review> reviews = reviewService.getReviewsByCourseAndSection(courseId, section, page, size);
-        return ResponseEntity.ok(reviews);
+        List<Review> reviewList = reviewService.getReviews(courseId, sectionId);
+        
+        return ResponseEntity.ok(reviewList);
     }
 
-    // GET /api/courses/{courseId}/reviews/eligibility
-    @GetMapping("/{courseId}/reviews/eligibility")
-    public ResponseEntity<?> checkEligibility(
-            @PathVariable String courseId,
+    @GetMapping("/{id}/reviews/eligibility")
+    public ResponseEntity<?> checkReviewEligibility(
+            @PathVariable("id") String courseId,
             HttpSession session) {
         
         Object sessionUser = session.getAttribute(AUTH_USER_SESSION_KEY);
         if (!(sessionUser instanceof AuthUser authUser)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                                 .body(Map.of("canReview", false, "message", "กรุณาเข้าสู่ระบบก่อนเช็กสิทธิ์"));
+                                 .body(Map.of("eligible", false, "message", "กรุณาเข้าสู่ระบบก่อนเช็กสิทธิ์"));
         }
 
         String studentId = authUser.studentId(); 
-        boolean isEligible = reviewService.checkEligibility(studentId, courseId);
-        return ResponseEntity.ok(Map.of("canReview", isEligible));
+        boolean isEligible = reviewService.checkReviewEligibility(studentId, courseId);
+        
+        if (!isEligible) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                                 .body(Map.of("eligible", false, "message", "ยังไม่มีสิทธิ์รีวิววิชานี้"));
+        }
+
+        return ResponseEntity.ok(Map.of(
+            "eligible", true,
+            "currentYear", authUser.year() != null ? authUser.year() : 1
+        ));
     }
 
-    // POST /api/courses/{courseId}/reviews
-    @PostMapping("/{courseId}/reviews")
-    public ResponseEntity<?> createReview(
-            @PathVariable String courseId,
+    @PostMapping("/{id}/reviews")
+    public ResponseEntity<?> submitReview(
+            @PathVariable("id") String courseId,
             @RequestBody Review review,
             HttpSession session) {
 
-        // 1. ตรวจสอบ Authentication จาก Session
         Object sessionUser = session.getAttribute(AUTH_USER_SESSION_KEY);
         if (!(sessionUser instanceof AuthUser authUser)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                                 .body(Map.of("message", "กรุณาเข้าสู่ระบบก่อนเขียนรีวิว"));
+                                 .body(Map.of("error", "กรุณาเข้าสู่ระบบก่อนเขียนรีวิว"));
         }
 
-        // 2. ดึง/แปลง userId จาก AuthUser
+        if (review.getReviewText() == null || review.getReviewText().trim().isEmpty() ||
+            review.getSectionId() == null || review.getSectionId().trim().isEmpty()) {
+            
+            return ResponseEntity.badRequest()
+                                 .body(Map.of("error", "กรุณากรอกข้อมูลให้ครบถ้วน"));
+        }
+
         Integer userId;
         try {
             userId = Integer.parseInt(authUser.studentId());
         } catch (NumberFormatException e) {
-            userId = 1; // Fallback กรณีรหัสนักศึกษาแปลงเป็น Integer โดยตรงไม่ได้
+            userId = 1;
         }
 
-        // 3. Validate ข้อความรีวิว
-        if (review.getReviewText() == null || review.getReviewText().trim().isEmpty()) {
-            return ResponseEntity.badRequest().body(Map.of("message", "กรุณากรอกข้อความรีวิวก่อนทำการส่ง"));
-        }
-
-        if (review.getSectionId() == null || review.getSectionId().trim().isEmpty()) {
-            return ResponseEntity.badRequest().body(Map.of("message", "กรุณาระบุ Section"));
-        }
-
-        // 4. บันทึกรีวิว
         review.setCourseId(courseId);
         review.setUserId(userId);
         
@@ -89,6 +89,10 @@ public class ReviewController {
         }
 
         Review savedReview = reviewService.saveReview(review);
-        return ResponseEntity.status(HttpStatus.CREATED).body(savedReview);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(Map.of(
+            "reviewId", savedReview.getId(),
+            "message", "รีวิวสำเร็จ"
+        ));
     }
 }
