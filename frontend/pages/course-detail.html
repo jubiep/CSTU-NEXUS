@@ -142,7 +142,6 @@
       }
     }
 
-    window.toggleSection = function toggleSection() {
     function toggleSection() {
       // หากไม่มี Section ไม่ต้องเปิดแผงเลือก
       if (!allSections || allSections.length === 0) return;
@@ -159,7 +158,8 @@
           arrow.alt = isHidden ? "chevron up icon" : "chevron down icon";
         }
       }
-    };
+    }
+    window.toggleSection = toggleSection;
 
     // Render รายการปุ่ม Section
     function renderSectionButtons(list) {
