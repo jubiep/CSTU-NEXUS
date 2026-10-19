@@ -9,7 +9,7 @@
 ## เทคโนโลยีที่ใช้ (Backend & Database Tech Stack)
 
 - **Java 17:** ภาษาหลักที่ใช้ในการพัฒนา
-- **Spring Boot 4.1.x:** เฟรมเวิร์กหลัก (Spring Web MVC, Spring JDBC)
+- **Spring Boot 4.1.x:** เฟรมเวิร์กหลัก (Spring Web MVC, Spring Data JPA, Spring JDBC)
 - **Lombok:** ลด Boilerplate Code สำหรับ Model/DTO
 - **PostgreSQL 17:** ฐานข้อมูลเชิงสัมพันธ์ (Relational Database) รันบน Docker Container
 - **Docker & Docker Compose:** ควบคุม Container สภาพแวดล้อมฐานข้อมูลให้อยู่ในรูปแบบเดียวกัน
@@ -26,7 +26,12 @@ backend/
 │   │   └── th/ac/tu/cs/cstu_course_nexus/
 │   │       ├── CstuCourseNexusApplication.java  # Main Application Entry Point
 │   │       ├── HealthController.java            # Controller ตรวจสอบสถานะและทดสอบ DB
-│   │       ├── AuthController.java              # Login, profile และ logout session
+│   │       ├── AuthController.java              # Login, profile และ logout session (U2)
+│   │       ├── CourseController.java            # ค้นหารายวิชาและ Section (U4)
+│   │       ├── ReviewController.java            # จัดการอ่านและส่งรีวิว (U1, U3, U5)
+│   │       ├── ReviewService.java               # Logic ตรวจสิทธิ์ชั้นปีและบันทึกรีวิว
+│   │       ├── ReviewRepository.java            # Spring Data JPA Repository
+│   │       ├── Review.java                      # JPA Entity ตาราง review
 │   │       ├── AuthUser.java                    # ข้อมูลผู้ใช้ที่ยืนยันแล้วใน session
 │   │       ├── StudyYearCalculator.java         # คำนวณชั้นปีจากรหัสนักศึกษา
 │   │       ├── TuAuthService.java               # ยืนยันบัญชีกับ TU AD Verify API
@@ -436,16 +441,21 @@ PostgreSQL connection successful! Courses: 38
 
 ### 7.3 Endpoint ที่มีในปัจจุบัน
 
-| Method | Endpoint | หน้าที่ |
-|---|---|---|
-| `GET` | `/health` | ตรวจสอบว่า Backend ทำงานอยู่ |
-| `POST` | `/echo` | รับข้อความแล้วส่งข้อความตอบกลับ |
-| `GET` | `/db-test` | ตรวจสอบการเชื่อมต่อ PostgreSQL และนับ Courses |
-| `POST` | `/api/auth/login` | ยืนยันบัญชีกับ TU AD และสร้าง session |
-| `GET` | `/api/auth/me` | อ่านโปรไฟล์จาก session |
-| `POST` | `/api/auth/logout` | ยกเลิก session |
-| `GET` | `/api/courses?keyword={คำค้นหา}&year={1-4}` | ค้นหารหัสหรือชื่อรายวิชาแบบพิมพ์บางส่วนได้; ไม่ส่ง `keyword` จะคืนรายการทั้งหมด |
-| `GET` | `/api/courses/{courseId}` | อ่านข้อมูลรายวิชาและรายการ section |
+| Method | Endpoint | หน้าที่ | Use Case | สถานะ |
+|---|---|---|:---:|:---:|
+| `GET` | `/health` | ตรวจสอบว่า Backend ทำงานอยู่ | - | พร้อมใช้งาน |
+| `POST` | `/echo` | รับข้อความแล้วส่งข้อความตอบกลับ | - | พร้อมใช้งาน |
+| `GET` | `/db-test` | ตรวจสอบการเชื่อมต่อ PostgreSQL และนับ Courses | - | พร้อมใช้งาน |
+| `POST` | `/api/auth/login` | ยืนยันบัญชีกับ TU AD และสร้าง session | U2 | พร้อมใช้งาน |
+| `GET` | `/api/auth/me` | อ่านโปรไฟล์และชั้นปีจาก session | U2, U3 | พร้อมใช้งาน |
+| `POST` | `/api/auth/logout` | ยกเลิก session | U2 | พร้อมใช้งาน |
+| `GET` | `/api/courses?keyword={คำค้นหา}&year={1-4}` | ค้นหารหัสหรือชื่อรายวิชาแบบพิมพ์บางส่วนได้; ไม่ส่ง `keyword` จะคืนรายการทั้งหมด | U4 | พร้อมใช้งาน |
+| `GET` | `/api/courses/{courseId}` | อ่านข้อมูลรายวิชาและรายการ section | U4 | พร้อมใช้งาน |
+| `GET` | `/api/courses/{id}/reviews?sectionId=...` | ดึงประวัติรีวิวของรายวิชาทั้งหมด หรือแยกตาม Section | U1 | พร้อมใช้งาน |
+| `GET` | `/api/courses/{id}/reviews/eligibility` | ตรวจสอบสิทธิ์ชั้นปีก่อนส่งรีวิว (studentYear > recommendedYear) | U3 | พร้อมใช้งาน |
+| `POST` | `/api/courses/{id}/reviews` | บันทึกรีวิวรายวิชาใหม่แยกตาม Section ลงฐานข้อมูล | U5 | พร้อมใช้งาน |
+
+> 📖 **หมายเหตุ:** แผนผังลำดับการทำงาน (Sequence Diagrams) ของแต่ละ Endpoint ดูได้ที่ [docs/sequence-diagrams.md](../docs/sequence-diagrams.md)
 
 Endpoints สำหรับ Authentication ต้องตั้ง `TU_API_APPLICATION_KEY` ก่อนใช้งาน
 

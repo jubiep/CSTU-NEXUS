@@ -60,20 +60,35 @@ python -m http.server 5500
 
 ---
 
-## Login, Profile และ Courses API contract
+## ความสัมพันธ์ระหว่างหน้าเว็บและ Use Cases (U1–U5)
 
-หน้า Login และ Profile เรียก backend จริงผ่าน session cookie แบบ HttpOnly ไม่มี mock login หรือ token ที่เปิดอ่านได้จาก JavaScript
+| หน้าเว็บ | Use Case ที่เกี่ยวข้อง | REST API ที่เชื่อมต่อ | บทบาทหน้าที่ |
+|---|:---:|---|---|
+| [`index.html`](file:///c:/uni/CSTU-NEXUS/frontend/pages/index.html) | **U2** | `POST /api/auth/login` | เข้าสู่ระบบด้วย TU Authentication และรับ Session Cookie |
+| [`courses.html`](file:///c:/uni/CSTU-NEXUS/frontend/pages/courses.html) | **U4** | `GET /api/courses?keyword=&year=` | ค้นหาและคัดกรองรายวิชาตามชั้นปี |
+| [`course-detail.html`](file:///c:/uni/CSTU-NEXUS/frontend/pages/course-detail.html) | **U1, U3, U4** | `GET /api/courses/{id}`<br>`GET /api/courses/{id}/reviews`<br>`GET /api/courses/{id}/reviews/eligibility` | แสดงข้อมูลเซกชัน อาจารย์ผู้สอน ประวัติรีวิวจากรุ่นพี่ และเช็คสิทธิ์ปุ่มเขียนรีวิว |
+| [`write-review.html`](file:///c:/uni/CSTU-NEXUS/frontend/pages/write-review.html) | **U3, U5** | `GET /api/courses/{id}/reviews/eligibility`<br>`POST /api/courses/{id}/reviews` | ตรวจสอบสิทธิ์ชั้นปี และส่งฟอร์มรีวิววิชาแยกตาม Section |
+| [`profile.html`](file:///c:/uni/CSTU-NEXUS/frontend/pages/profile.html) | **U2** | `GET /api/auth/me`<br>`POST /api/auth/logout` | แสดงข้อมูลโปรไฟล์นักศึกษา และออกจากระบบ |
+
+> 📖 **ลำดับการทำงานและ Interaction:** ดูแผนผัง [Sequence Diagrams ฉบับสมบูรณ์ (U1–U5)](../docs/sequence-diagrams.md)
+
+---
+
+## Login, Profile, Courses และ Reviews API Contract
+
+หน้าเว็บเรียก Backend จริงผ่าน Session Cookie แบบ HttpOnly (ปลอดภัย ไม่มีเก็บ token ลง local storage):
 
 - เมื่อเปิด Frontend บน `localhost` หรือ `127.0.0.1` ค่า API เริ่มต้นจะใช้ hostname เดียวกันที่พอร์ต `8080` (เช่น `http://127.0.0.1:8080/api`) ไม่ขึ้นกับพอร์ตของ Frontend เพื่อให้ session cookie ใช้ได้ และตั้งค่าใหม่ได้โดยกำหนด `window.CSTU_API_BASE_URL` **ก่อน** โหลด `app.js`
-- `POST /auth/login` รับ `{ "username": "6800000000", "password": "..." }` โดย `username` คือเลขนักศึกษา 10 หลักจากฟอร์ม login แล้ว backend ส่งเลขนั้นเป็น `UserName` ไป TU AD Verify พร้อม `Application-Key`; สำเร็จแล้ว backend สร้าง session และตอบ `{ "user": { ... } }`
-- `GET /auth/me` ใช้ session cookie และตอบ `{ "displayName": "...", "studentId": "...", "year": 2, "faculty": "...", "department": "...", "email": "..." }`
-- หน้า Courses เรียก `/auth/me` เช่นกัน เพื่อแสดงชื่อและรหัสนักศึกษาจากบัญชีที่ยืนยันแล้ว; ถ้าโหลดไม่สำเร็จจะแสดงข้อผิดพลาดและปุ่มลองใหม่แทนข้อมูล mock
-- `POST /auth/logout` ยกเลิก session ฝั่ง backend
-- Frontend ใช้ `sessionStorage` เก็บเพียงสถานะนำทาง ไม่เก็บรหัสผ่าน, Application Key หรือ bearer token; โปรไฟล์จริงอ่านจาก `/auth/me`
-- หน้าที่ต้องเข้าสู่ระบบตรวจ session จริงด้วย `GET /auth/me` ก่อนเริ่มแสดงเนื้อหา; หาก API ตอบ `401` จะล้างสถานะใน `sessionStorage` และกลับไปหน้า Login
-- หากย้อนกลับไปยังหน้าที่เบราว์เซอร์เก็บไว้หลังออกจากระบบ ระบบจะพากลับไปหน้า Login เมื่อหน้าถูกกู้คืนจาก cache
-- Backend จำกัด CORS ด้วย `APP_CORS_ALLOWED_ORIGINS` และเปิด credentials สำหรับ session cookie
-- ค่า `year` คำนวณจากเลขสองหลักแรกของรหัสนักศึกษาเทียบกับปี พ.ศ. ปัจจุบัน (เช่น รหัสขึ้นต้น `68` ในปี พ.ศ. 2569 คือชั้นปี 2); หากอ่านรหัสไม่ได้หรือเป็นปีในอนาคต จะส่ง `null`
+- `POST /api/auth/login` (U2): รับ `{ "username": "6800000000", "password": "..." }` ยืนยันผ่าน TU AD Verify และสร้าง HttpOnly Session
+- `GET /api/auth/me` (U2, U3): คืนข้อมูลผู้ใช้และชั้นปีปัจจุบัน (`currentYear`) เพื่อตรวจสิทธิ์ก่อนเปิดฟอร์มรีวิว
+- `POST /api/auth/logout` (U2): ยกเลิก Session ฝั่ง Backend
+- `GET /api/courses` (U4): ดึงรายการวิชา รองรับ Query Parameters `keyword` และ `year`
+- `GET /api/courses/{id}` (U4): ดึงข้อมูลรายละเอียดวิชาและรายการ Section พร้อมอาจารย์ผู้สอน
+- `GET /api/courses/{id}/reviews` (U1): อ่านประวัติรีวิว รองรับ Query Parameter `sectionId` (คืนค่า `reviewText`, `reviewerYear`, `createdAt`)
+- `GET /api/courses/{id}/reviews/eligibility` (U3): ตรวจสอบว่าผู้ใช้มีสิทธิ์รีวิววิชานี้หรือไม่ (`studentYear > recommendedYear` และยังไม่เคยรีวิว)
+- `POST /api/courses/{id}/reviews` (U5): ส่งข้อมูลรีวิวใหม่ `{ "sectionId": "...", "reviewText": "..." }`
+- Frontend ใช้ `sessionStorage` เก็บเพียงสถานะนำทาง ไม่เก็บรหัสผ่านหรือ Application Key
+- ค่า `year` คำนวณจากเลขสองหลักแรกของรหัสนักศึกษาเทียบกับปี พ.ศ. ปัจจุบัน (เช่น รหัสขึ้นต้น `68` ในปี พ.ศ. 2569 คือชั้นปี 2)
 
 ตัวอย่างตั้ง API URL สำหรับ local development (วางก่อน `<script src="../app.js"></script>` ในหน้า):
 

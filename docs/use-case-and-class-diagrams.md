@@ -53,7 +53,7 @@ flowchart LR
 |:---:|---|:---:|:---:|---|
 | **U1** | อ่าน Review รายวิชาและ Section จากรุ่นพี่ | CSTU Student | `<<include>> U2` | เปิดดูประวัติรีวิวและคำแนะนำของแต่ละเซกชันจากรุ่นพี่ในหลักสูตร |
 | **U2** | การยืนยันตัวตนและการจัดการสิทธิ์ | CSTU Student,<br>TU AD Verify API | - | ตรวจสอบรหัสนักศึกษาและรหัสผ่านผ่านระบบของมหาวิทยาลัย และคัดกรองเฉพาะ นศ. CSTU |
-| **U3** | ตรวจสอบชั้นปีก่อนเขียน Review | CSTU Student (System Rule) | `<<included by>> U5` | ตรวจสอบว่าผู้ใช้มีชั้นปี $\ge$ ชั้นปีที่แนะนำ (`recommended_year`) ของวิชานั้นๆ หรือไม่ |
+| **U3** | ตรวจสอบชั้นปีก่อนเขียน Review | CSTU Student (System Rule) | `<<included by>> U5` | ตรวจสอบว่าผู้ใช้มีชั้นปี > ชั้นปีที่แนะนำ (`recommended_year`) ของวิชานั้นๆ และยังไม่เคยส่งรีวิวรายวิชานี้ |
 | **U4** | ค้นหารายวิชาที่ต้องการ และ Section | CSTU Student | `<<include>> U2` | ค้นหารายวิชาจากรหัส/ชื่อวิชา คัดกรองตามชั้นปี และดูรายชื่อเซกชันพร้อมผู้สอน |
 | **U5** | เขียน Review รายวิชาตาม Section | CSTU Student | `<<include>> U2, U3` | กรอกข้อความรีวิวประสบการณ์การเรียนและส่งบันทึกแยกตาม Section |
 
@@ -103,7 +103,7 @@ classDiagram
     %% =======================
     class AuthController {
         -tuAuthService: TuAuthService
-        +login(request): LoginResponse
+        +login(request, servletRequest): LoginResponse
         +currentUser(request): AuthUser
         +logout(request): ResponseEntity
     }
@@ -126,10 +126,27 @@ classDiagram
     }
 
     class ReviewController {
+        -reviewService: ReviewService
+        +getReviews(courseId, sectionId): ResponseEntity
+        +checkReviewEligibility(courseId, session): ResponseEntity
+        +submitReview(courseId, review, session): ResponseEntity
+    }
+
+    class ReviewService {
+        -reviewRepository: ReviewRepository
         -jdbcTemplate: JdbcTemplate
-        +getCourseReviews(courseId, sectionId): List~ReviewResponse~
-        +checkEligibility(courseId, session): EligibilityResult
-        +createReview(courseId, request, session): ReviewResponse
+        +getReviews(courseId, sectionId): List~Review~
+        +checkReviewEligibility(studentId, courseId): boolean
+        +getEligibilityStatus(studentId, courseId): EligibilityStatus
+        +deriveUserId(studentId): Integer
+        +saveReview(review): Review
+    }
+
+    class ReviewRepository {
+        <<interface>>
+        +findByCourseIdOrderByCreatedAtDesc(courseId): List~Review~
+        +findByCourseIdAndSectionIdOrderByCreatedAtDesc(courseId, sectionId): List~Review~
+        +existsByCourseIdAndUserId(courseId, userId): boolean
     }
 
     %% =======================
@@ -138,7 +155,7 @@ classDiagram
     class AuthUser {
         +displayName: String
         +studentId: String
-        +currentYear: Integer
+        +year: Integer
         +faculty: String
         +department: String
         +email: String
@@ -158,13 +175,14 @@ classDiagram
     }
 
     class Review {
-        +reviewId: Integer
+        +id: Long
         +courseId: String
         +sectionId: String
         +userId: Integer
         +reviewerYear: Integer
         +reviewText: String
-        +createdAt: Timestamp
+        +createdAt: LocalDateTime
+        +onCreate()
     }
 
     %% =======================
@@ -183,7 +201,10 @@ classDiagram
     CourseController ..> CourseDetail : produces
     CourseDetail "1" *-- "*" Section : contains
 
-    ReviewController ..> Review : manages
+    ReviewController --> ReviewService : uses
+    ReviewService --> ReviewRepository : uses
+    ReviewService ..> StudyYearCalculator : calls
+    ReviewRepository ..> Review : persists
     ReviewController ..> AuthUser : verifies session
 ```
 
@@ -200,7 +221,7 @@ flowchart TD
     end
 
     subgraph AppTier ["⚙️ Application Tier (Backend)"]
-        SpringBoot["Spring Boot 4.1.x (Java 17)<br/>- Spring Web MVC (REST APIs)<br/>- Spring JDBC (JdbcTemplate)<br/>- HttpOnly Session Security"]
+        SpringBoot["Spring Boot 4.1.x (Java 17)<br/>- Spring Web MVC (REST APIs)<br/>- Spring Data JPA (Review Repository)<br/>- Spring JDBC (JdbcTemplate)<br/>- HttpOnly Session Security"]
     end
 
     subgraph DataTier ["🗄️ Data Tier (PostgreSQL)"]

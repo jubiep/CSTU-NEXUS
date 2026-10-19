@@ -96,17 +96,18 @@ erDiagram
 
 ---
 
-## 2. ตารางความสัมพันธ์ API ↔ Controller ↔ DAO ↔ Database
+## 2. ตารางความสัมพันธ์ API ↔ Controller ↔ Data Access (DAO / Repository) ↔ Database
 
-| Use Case | HTTP Method & Endpoint | Controller & Method | DAO Class & Method | ตาราง Database | คำสั่ง SQL / หน้าที่การทำงาน |
+| Use Case | HTTP Method & Endpoint | Controller & Method | Data Access Layer (Service / Repository / DAO) | ตาราง Database | คำสั่ง SQL / การทำงาน |
 |:---:|---|---|---|:---:|---|
-| **U2** | `POST /api/auth/login` | `AuthController`<br>`.login(request)` | `UserDao`<br>`.findOrCreateUser(authUser)` | `mock_user` | `SELECT user_id FROM mock_user WHERE student_id = ?`<br>*(หากไม่พบให้ INSERT ข้อมูลผู้ใช้จาก TU Verify API)* |
-| **U2**<br>**U3** | `GET /api/auth/me` | `AuthController`<br>`.currentUser(request)` | *(อ่านจาก HttpSession)* | - | ดึง `AuthUser` จาก Session เพื่อตรวจสอบสิทธิ์และคำนวณชั้นปี |
+| **U2** | `POST /api/auth/login` | `AuthController`<br>`.login(request, servletRequest)` | `TuAuthService`<br>`.verify(username, password)` | - *(External API)* | เรียก TU AD Verify API ตรวจสอบรหัสนักศึกษาและรหัสผ่าน พร้อมคัดกรองสังกัด CSTU แล้วบันทึก `AuthUser` ลง Session |
+| **U2** | `GET /api/auth/me` | `AuthController`<br>`.currentUser(request)` | *(อ่านจาก HttpSession)* | - | ดึง `AuthUser` จาก Session เพื่อตรวจสอบสถานะการเข้าสู่ระบบและข้อมูลผู้ใช้ |
 | **U2** | `POST /api/auth/logout` | `AuthController`<br>`.logout(request)` | *(ทำลาย HttpSession)* | - | `session.invalidate()` ล้าง Session Cookie ผู้ใช้ |
-| **U4** | `GET /api/courses`<br>`?keyword=&year=` | `CourseController`<br>`.searchCourses(keyword, year)` | `CourseDao`<br>`.searchCourses(keyword, year)` | `courses`<br>`sections` | `SELECT c.course_id, c.course_name, c.recommended_year, COUNT(s.section_id) FROM courses c LEFT JOIN sections s ON s.course_id = c.course_id WHERE ... GROUP BY c.course_id` |
-| **U4** | `GET /api/courses/{id}` | `CourseController`<br>`.getCourse(id)` | `CourseDao`<br>`.findCourseById(id)`<br><br>`SectionDao`<br>`.findByCourseId(courseId)` | `courses`<br><br>`sections` | `SELECT course_id, course_name, recommended_year FROM courses WHERE UPPER(course_id) = ?`<br><br>`SELECT section_id, section_number, instructor_name FROM sections WHERE course_id = ? ORDER BY section_number` |
-| **U1** | `GET /api/courses/{id}/reviews`<br>`?sectionId=` | `ReviewController`<br>`.getCourseReviews(id, sectionId)` | `ReviewDao`<br>`.findByCourseAndSection(courseId, sectionId)` | `review`<br>`sections`<br>`mock_user` | `SELECT r.review_id, s.section_number, r.reviewer_year, r.review_text, r.created_at FROM review r LEFT JOIN sections s ON r.section_id = s.section_id WHERE r.course_id = ? AND (? IS NULL OR r.section_id = ?) ORDER BY r.created_at DESC` |
-| **U5** | `POST /api/courses/{id}/reviews` | `ReviewController`<br>`.createReview(id, request)` | `ReviewDao`<br>`.insertReview(courseId, reviewData, userId)` | `review` | `INSERT INTO review (course_id, section_id, user_id, reviewer_year, review_text, created_at) VALUES (?, ?, ?, ?, ?, NOW()) RETURNING review_id` |
+| **U4** | `GET /api/courses`<br>`?keyword=&year=` | `CourseController`<br>`.searchCourses(keyword, year)` | `JdbcTemplate`<br>*(Direct Query Pattern)* | `courses`<br>`sections` | `SELECT c.course_id, c.course_name, c.recommended_year, COUNT(s.section_id) FROM courses c LEFT JOIN sections s ON s.course_id = c.course_id WHERE ... GROUP BY c.course_id ORDER BY c.course_id` |
+| **U4** | `GET /api/courses/{id}` | `CourseController`<br>`.getCourse(id)` | `JdbcTemplate`<br>*(Direct Query Pattern)* | `courses`<br><br>`sections` | `SELECT course_id, course_name, recommended_year FROM courses WHERE UPPER(course_id) = ?`<br><br>`SELECT section_id, section_number, instructor_name FROM sections WHERE course_id = ? ORDER BY section_number, section_id` |
+| **U1** | `GET /api/courses/{id}/reviews`<br>`?sectionId=` | `ReviewController`<br>`.getReviews(id, sectionId)` | `ReviewService`<br>`.getReviews(courseId, sectionId)`<br><br>`ReviewRepository`<br>*(Spring Data JPA)* | `review` | `findByCourseIdOrderByCreatedAtDesc` หรือ `findByCourseIdAndSectionIdOrderByCreatedAtDesc`<br>ดึงรายการรีวิวทั้งหมดของวิชา/เซกชัน เรียงจากใหม่ไปเก่า |
+| **U3** | `GET /api/courses/{id}/reviews/eligibility` | `ReviewController`<br>`.checkReviewEligibility(id, session)` | `ReviewService`<br>`.getEligibilityStatus(studentId, courseId)`<br><br>`ReviewRepository`<br>`.existsByCourseIdAndUserId(...)`<br><br>`StudyYearCalculator`<br>`.calculate(studentId)` | `courses`<br>`review` | ตรวจสอบว่านักศึกษา CSTU มีชั้นปีปัจจุบัน (`studentYear`) > `recommended_year` และยังไม่เคยเขียนรีวิวในวิชานี้ (`!alreadyReviewed`) |
+| **U5** | `POST /api/courses/{id}/reviews` | `ReviewController`<br>`.submitReview(id, review, session)` | `ReviewService`<br>`.saveReview(review)`<br><br>`ReviewRepository`<br>`.save(review)` *(JPA)* | `review` | ตรวจสอบสิทธิ์ U3 ซ้ำฝั่ง Backend จากนั้นตั้งค่า `userId`, `reviewerYear`, `createdAt` และบันทึกลงตาราง `review` ผ่าน JPA |
 
 ---
 
@@ -154,9 +155,9 @@ flowchart TD
     ChooseAction -->|U4, U1: ค้นหาวิชา / ดู Section / อ่านรีวิว| AllowExplore[อนุญาตให้เข้าถึงข้อมูลได้<br/>HTTP 200 OK]
 
     %% U3, U5: การเขียนรีวิว
-    ChooseAction -->|U3, U5: เขียนรีวิวตาม Section| CheckYearEligibility{ตรวจสอบชั้นปี U3<br/>currentYear >= recommendedYear?}
+    ChooseAction -->|U3, U5: เขียนรีวิวตาม Section| CheckYearEligibility{ตรวจสอบชั้นปี U3<br/>studentYear > recommendedYear?}
     CheckYearEligibility -->|ไม่ผ่านเกณฑ์ชั้นปี| DenyReview[ปฏิเสธสิทธิ์การเขียนรีวิว<br/>HTTP 403 Forbidden<br/>แจ้งเตือน: สงวนสิทธิ์สำหรับรุ่นพี่ที่เคยเรียนวิชานี้]
-    CheckYearEligibility -->|ผ่านเกณฑ์| CheckDuplicate{เคยเขียนรีวิวใน<br/>Section นี้ไปแล้วหรือไม่?}
-    CheckDuplicate -->|เคยรีวิวแล้ว| DenyDuplicate[แจ้งเตือน: คุณเคยรีวิวเซกชันนี้แล้ว<br/>HTTP 409 Conflict]
+    CheckYearEligibility -->|ผ่านเกณฑ์| CheckDuplicate{เคยเขียนรีวิวใน<br/>วิชานี้ไปแล้วหรือไม่?<br/>existsByCourseIdAndUserId}
+    CheckDuplicate -->|เคยรีวิวแล้ว| DenyDuplicate[แจ้งเตือน: คุณเคยส่งรีวิวรายวิชานี้ไปแล้ว<br/>HTTP 403 Forbidden / eligible=false]
     CheckDuplicate -->|ยังไม่เคยรีวิว| AllowReview[อนุญาตให้ส่งรีวิว<br/>HTTP 201 Created บันทึกลงตาราง review]
 ```

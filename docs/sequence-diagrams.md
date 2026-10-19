@@ -24,23 +24,37 @@ sequenceDiagram
     actor Student as TU Student
     participant View as CourseDetailView<br/>(Boundary)
     participant Ctrl as ReviewController<br/>(Control)
-    participant DB as ReviewDatabase<br/>(Entity)
+    participant Svc as ReviewService<br/>(Control)
+    participant Repo as ReviewRepository<br/>(Entity)
+    participant DB as PostgreSQL Database<br/>(Entity)
 
     Student->>View: 1. เลือกวิชา หรือเลือกฟิลเตอร์ Section
     activate View
-    View->>Ctrl: 2. getReviews(courseId, sectionId)
+    View->>Ctrl: 2. GET /api/courses/{id}/reviews?sectionId=...
     activate Ctrl
     
-    Ctrl->>DB: 3. SELECT * FROM review WHERE course_id = ? AND section_id = ?
-    activate DB
-    DB-->>Ctrl: 4. return reviewList (reviewId, sectionNumber, reviewerYear, reviewText, createdAt)
-    deactivate DB
+    Ctrl->>Svc: 3. getReviews(courseId, sectionId)
+    activate Svc
     
-    Ctrl-->>View: 5. return JSON [ReviewResponse]
+    alt มีการระบุ sectionId
+        Svc->>Repo: 4. findByCourseIdAndSectionIdOrderByCreatedAtDesc(...)
+    else ดูรีวิวทั้งหมดของวิชา
+        Svc->>Repo: 4. findByCourseIdOrderByCreatedAtDesc(...)
+    end
+    activate Repo
+    Repo->>DB: 5. SQL SELECT review JOIN sections ...
+    activate DB
+    DB-->>Repo: 6. return review rows
+    deactivate DB
+    Repo-->>Svc: 7. return List~Review~
+    deactivate Repo
+    Svc-->>Ctrl: 8. return List~Review~
+    deactivate Svc
+    Ctrl-->>View: 9. 200 OK [JSON Review List]
     deactivate Ctrl
     
-    View->>View: 6. renderReviews(reviewList)
-    View-->>Student: 7. แสดงรายการรีวิวและชั้นปีของรุ่นพี่ผู้รีวิวบนหน้าจอ
+    View->>View: 10. renderReviews(reviewList)
+    View-->>Student: 11. แสดงรายการรีวิวและชั้นปีของรุ่นพี่ผู้รีวิวบนหน้าจอ
     deactivate View
 ```
 
@@ -98,8 +112,8 @@ sequenceDiagram
 
 ## U3: ตรวจสอบชั้นปีของนักศึกษาก่อนเขียน Review
 
-- **Endpoint:** `GET /api/auth/me`
-- **คำอธิบาย:** ตรวจสอบว่าผู้ใช้ล็อกอินอยู่หรือไม่ และมีชั้นปีที่มีสิทธิ์เขียนรีวิวหรือไม่ก่อนเปิดฟอร์มเขียนรีวิว
+- **Endpoint:** `GET /api/courses/{id}/reviews/eligibility`
+- **คำอธิบาย:** ระบบตรวจสอบว่าผู้ใช้ได้เข้าสู่ระบบ มีชั้นปีที่ผ่านเกณฑ์ (`studentYear > recommendedYear`) และยังไม่เคยส่งรีวิวในรายวิชานี้มาก่อน
 
 ```mermaid
 sequenceDiagram
@@ -108,10 +122,14 @@ sequenceDiagram
     participant View as CourseDetailView / WriteReviewView<br/>(Boundary)
     participant Ctrl as ReviewController<br/>(Control)
     participant Session as HttpSession<br/>(Entity)
+    participant Svc as ReviewService<br/>(Control)
+    participant Calc as StudyYearCalculator<br/>(Control)
+    participant Repo as ReviewRepository<br/>(Entity)
+    participant DB as PostgreSQL Database<br/>(Entity)
 
-    Student->>View: 1. กดปุ่ม "เขียนรีวิว" (Click Write Review)
+    Student->>View: 1. เปิดหน้ารายละเอียดวิชา / หน้าเขียนรีวิว
     activate View
-    View->>Ctrl: 2. checkReviewEligibility(courseId)
+    View->>Ctrl: 2. GET /api/courses/{id}/reviews/eligibility
     activate Ctrl
 
     Ctrl->>Session: 3. getAttribute("authenticatedUser")
@@ -119,15 +137,32 @@ sequenceDiagram
     Session-->>Ctrl: 4. return AuthUser (studentId, currentYear)
     deactivate Session
 
-    alt ตรวจสอบผ่าน (ล็อกอินแล้ว และมีชั้นปีที่มีสิทธิ์เขียนรีวิว)
-        Ctrl-->>View: 5. return 200 OK (eligible: true, currentYear)
-        View->>View: 6. displayReviewForm(courseId, sections)
-        View-->>Student: 7. แสดงฟอร์มสำหรับเขียนรีวิวและเลือก Section
-    else ไม่ผ่าน (ยังไม่ได้เข้าสู่ระบบ หรือ ชั้นปีไม่ตรงตามเกณฑ์)
-        Ctrl-->>View: 8. return 403 Forbidden / 401 Unauthorized (eligible: false)
-        deactivate Ctrl
-        View->>View: 9. showAccessDeniedModal("กรุณาเข้าสู่ระบบ หรือ นศ. ยังไม่มีสิทธิ์รีวิววิชานี้")
-        View-->>Student: 10. แสดงแจ้งเตือนปฏิเสธการเข้าถึงฟอร์ม
+    alt ยังไม่ได้เข้าสู่ระบบ
+        Ctrl-->>View: 5. 401 Unauthorized { eligible: false, message: "กรุณาเข้าสู่ระบบก่อนเช็กสิทธิ์" }
+        View->>View: 6. ซ่อนปุ่มเขียนรีวิว / นำทางไปหน้า Login
+    else ล็อกอินแล้ว
+        Ctrl->>Svc: 7. getEligibilityStatus(studentId, courseId)
+        activate Svc
+        Svc->>Calc: 8. calculate(studentId)
+        Calc-->>Svc: 9. return studentYear
+        Svc->>Repo: 10. existsByCourseIdAndUserId(courseId, userId)
+        Repo-->>Svc: 11. return alreadyReviewed (boolean)
+        Svc->>DB: 12. SELECT recommended_year FROM courses WHERE course_id = ?
+        DB-->>Svc: 13. return recommendedYear
+
+        alt เคยรีวิวแล้ว หรือ ชั้นปีไม่ผ่านเกณฑ์ (studentYear <= recommendedYear)
+            Svc-->>Ctrl: 14. return EligibilityStatus(eligible: false, message)
+            Ctrl-->>View: 15. 200 OK { eligible: false, message }
+            View->>View: 16. ซ่อนปุ่มรีวิว หรือ ปิดปุ่ม Submit และแสดงข้อความแจ้งเตือน
+            View-->>Student: 17. แสดงเหตุผลที่ไม่สามารถรีวิวได้
+        else ผ่านเกณฑ์ (studentYear > recommendedYear และยังไม่เคยรีวิว)
+            Svc-->>Ctrl: 18. return EligibilityStatus(eligible: true, message: "คุณได้รับสิทธิ์แบ่งปันประสบการณ์")
+            deactivate Svc
+            Ctrl-->>View: 19. 200 OK { eligible: true, studentYear, recommendedYear, message }
+            deactivate Ctrl
+            View->>View: 20. แสดงปุ่มเขียนรีวิว / เปิดให้กรอกแบบฟอร์มรีวิวได้
+            View-->>Student: 21. อนุญาตให้กรอกเนื้อหารีวิว
+        end
     end
     deactivate View
 ```
@@ -193,34 +228,55 @@ sequenceDiagram
     participant View as WriteReviewView<br/>(Boundary)
     participant Ctrl as ReviewController<br/>(Control)
     participant Session as HttpSession<br/>(Entity)
-    participant DB as ReviewDatabase<br/>(Entity)
+    participant Svc as ReviewService<br/>(Control)
+    participant Repo as ReviewRepository<br/>(Entity)
+    participant DB as PostgreSQL Database<br/>(Entity)
 
     Student->>View: 1. เลือก Section และพิมพ์ข้อความรีวิว
     activate View
     Student->>View: 2. กดปุ่ม "ส่งรีวิว" (Submit Review)
     
-    View->>Ctrl: 3. submitReview(courseId, sectionId, reviewText)
+    View->>Ctrl: 3. POST /api/courses/{id}/reviews { sectionId, reviewText }
     activate Ctrl
 
-    Ctrl->>Session: 4. getAuthenticatedUser()
+    Ctrl->>Session: 4. getAttribute("authenticatedUser")
     activate Session
-    Session-->>Ctrl: 5. return AuthUser (userId, currentYear)
+    Session-->>Ctrl: 5. return AuthUser (studentId, currentYear)
     deactivate Session
 
-    alt ตรวจสอบข้อมูลถูกต้อง (Valid Review)
-        Ctrl->>DB: 6. INSERT INTO review (course_id, section_id, user_id, reviewer_year, review_text) VALUES (...)
-        activate DB
-        DB-->>Ctrl: 7. return generated reviewId
-        deactivate DB
+    alt ยังไม่เข้าสู่ระบบ หรือ ข้อความรีวิวว่างเปล่า
+        Ctrl-->>View: 6. 401 / 400 Bad Request { error: "..." }
+        View->>View: 7. showValidationError(error)
+        View-->>Student: 8. แจ้งเตือนข้อผิดพลาดบนหน้าจอ
+    else ข้อมูลเบื้องต้นถูกต้อง
+        Ctrl->>Svc: 9. getEligibilityStatus(studentId, courseId)
+        activate Svc
+        Svc-->>Ctrl: 10. return status (eligible: boolean)
+        deactivate Svc
 
-        Ctrl-->>View: 8. return 201 Created { reviewId, message: "รีวิวสำเร็จ" }
-        View->>View: 9. showSuccessPopup()
-        View-->>Student: 10. แจ้งเตือนส่งรีวิวสำเร็จ และนำกลับไปหน้ารายละเอียดวิชา
-    else ข้อมูลไม่ครบถ้วน (เช่น ไม่ได้เลือก Section หรือข้อความว่างเปล่า)
-        Ctrl-->>View: 11. return 400 Bad Request { error: "กรุณากรอกข้อมูลให้ครบถ้วน" }
-        deactivate Ctrl
-        View->>View: 12. showValidationError()
-        View-->>Student: 13. แสดงข้อความแจ้งเตือนให้กรอกข้อมูลให้ครบ
+        alt ชั้นปีไม่ผ่านเกณฑ์ หรือ เคยรีวิววิชานี้แล้ว
+            Ctrl-->>View: 11. 403 Forbidden { error: status.message }
+            View->>View: 12. showAccessDeniedModal(message)
+            View-->>Student: 13. แสดงข้อความปฏิเสธการส่งรีวิว
+        else มีสิทธิ์รีวิว (Eligible)
+            Ctrl->>Svc: 14. saveReview(review)
+            activate Svc
+            Svc->>Repo: 15. save(review)
+            activate Repo
+            Repo->>DB: 16. INSERT INTO review (course_id, section_id, user_id, reviewer_year, review_text, created_at) ...
+            activate DB
+            DB-->>Repo: 17. return saved review row with ID
+            deactivate DB
+            Repo-->>Svc: 18. return saved Review entity
+            deactivate Repo
+            Svc-->>Ctrl: 19. return Review
+            deactivate Svc
+
+            Ctrl-->>View: 20. 201 Created { reviewId, message: "รีวิวสำเร็จ" }
+            deactivate Ctrl
+            View->>View: 21. showSuccessModal()
+            View-->>Student: 22. แจ้งเตือนส่งรีวิวสำเร็จ และนำกลับไปหน้ารายละเอียดวิชา
+        end
     end
     deactivate View
 ```
