@@ -10,6 +10,8 @@ import java.util.List;
 @Repository
 public interface ReviewRepository extends JpaRepository<Review, Long> {
     
+    List<Review> findByCourseIdOrderByCreatedAtDesc(String courseId);
+
     List<Review> findByCourseIdAndSectionIdOrderByCreatedAtDesc(String courseId, String sectionId);
 
     Page<Review> findByCourseIdAndSectionIdOrderByCreatedAtDesc(String courseId, String sectionId, Pageable pageable);

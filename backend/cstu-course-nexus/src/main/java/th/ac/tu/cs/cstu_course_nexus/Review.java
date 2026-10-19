@@ -15,7 +15,7 @@ public class Review {
     @Column(name = "course_id", nullable = false)
     private String courseId;
 
-    @Column(name = "section_id", nullable = false)
+    @Column(name = "section_id")
     private String sectionId;
 
     @Column(name = "user_id", nullable = false)
@@ -26,12 +26,6 @@ public class Review {
 
     @Column(name = "review_text", nullable = false, columnDefinition = "TEXT")
     private String reviewText;
-
-    @Column(name = "workload")
-    private String workload;
-
-    @Column(name = "teaching_style")
-    private String teachingStyle;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
@@ -67,12 +61,28 @@ public class Review {
     public String getReviewText() { return reviewText; }
     public void setReviewText(String reviewText) { this.reviewText = reviewText; }
 
-    public String getWorkload() { return workload; }
-    public void setWorkload(String workload) { this.workload = workload; }
-
-    public String getTeachingStyle() { return teachingStyle; }
-    public void setTeachingStyle(String teachingStyle) { this.teachingStyle = teachingStyle; }
-
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+
+    // Helper compatibility methods for frontend
+    public String getText() { return reviewText; }
+    public void setText(String text) {
+        if (this.reviewText == null || this.reviewText.isBlank()) {
+            this.reviewText = text;
+        }
+    }
+
+    public String getComment() { return reviewText; }
+    public void setComment(String comment) {
+        if (this.reviewText == null || this.reviewText.isBlank()) {
+            this.reviewText = comment;
+        }
+    }
+
+    public Integer getYear() { return reviewerYear; }
+
+    public String getDate() {
+        if (createdAt == null) return "";
+        return createdAt.toLocalDate().toString();
+    }
 }

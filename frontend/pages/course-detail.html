@@ -195,6 +195,7 @@
           updateWriteBtn();
           renderSectionButtons(allSections); // อัปเดตสถานะ active
           toggleSection(); // ปิดแผงเมื่อเลือกแล้ว
+          loadReviews(); // โหลดรีวิวของ Section ที่เลือก
         };
 
         sectionList.appendChild(btn);
@@ -275,6 +276,7 @@
 
     async function checkReviewPermission() {
       const writeBtn = document.getElementById("write-btn");
+      if (!writeBtn) return;
       try {
         const res = await apiRequest(`/courses/${encodeURIComponent(code)}/reviews/eligibility`);
         if (res && res.eligible) {
@@ -290,20 +292,26 @@
 
     async function loadReviews() {
       const reviewList = document.getElementById("review-list");
+      if (!reviewList) return;
       reviewList.innerHTML = `<p style="text-align:center;color:var(--gray-400);padding:32px 0;font-size:14px;">กำลังโหลดรีวิว...</p>`;
 
       try {
-        const reviews = await apiRequest(`/courses/${encodeURIComponent(code)}/reviews?sectionId=${encodeURIComponent(selectedSectionId)}`);
+        const query = selectedSectionId ? `?sectionId=${encodeURIComponent(selectedSectionId)}` : "";
+        const reviews = await apiRequest(`/courses/${encodeURIComponent(code)}/reviews${query}`);
         
         if (!reviews || reviews.length === 0) {
           reviewList.innerHTML = `<p style="text-align:center;color:var(--gray-400);padding:32px 0;font-size:14px;">ยังไม่มีรีวิว — เป็นคนแรกที่รีวิวรายวิชานี้!</p>`;
-          document.getElementById("pagination").innerHTML = "";
+          const pagEl = document.getElementById("pagination");
+          if (pagEl) pagEl.innerHTML = "";
           return;
         }
 
         reviewList.innerHTML = reviews.map(r => {
-          const yearText = r.year ? `ชั้นปีที่ ${r.year}` : '';
-          const dateText = r.date || '10/10/2569';
+          const yearVal = r.reviewerYear || r.year;
+          const yearText = yearVal ? `ชั้นปีที่ ${yearVal}` : '';
+          const dateText = r.date || (r.createdAt ? new Date(r.createdAt).toLocaleDateString('th-TH') : '10/10/2569');
+          const commentText = r.reviewText || r.text || r.comment || '';
+          const displayStudent = r.studentId || 'นักศึกษา CSTU';
           return `
             <div class="review-card">
               <div class="review-card-top">
@@ -311,13 +319,13 @@
                   <div class="review-verified-shield">
                     <img src="../src/verify-icon.png" alt="verified icon" height="30" width="30"/>
                   </div>
-                  <span class="review-student-id">${r.studentId || '6600000000'}</span>
+                  <span class="review-student-id">${displayStudent}</span>
                   <span class="review-student-year">${yearText}</span>
                 </div>
                 <span class="review-date">${dateText}</span>
               </div>
               <div class="review-comment-box">
-                <p class="review-comment-text">${r.text || r.comment}</p>
+                <p class="review-comment-text">${commentText}</p>
               </div>
             </div>`;
         }).join('');

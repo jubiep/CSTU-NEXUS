@@ -21,7 +21,7 @@ public class ReviewController {
     @GetMapping("/{id}/reviews")
     public ResponseEntity<List<Review>> getReviews(
             @PathVariable("id") String courseId,
-            @RequestParam("sectionId") String sectionId) {
+            @RequestParam(value = "sectionId", required = false) String sectionId) {
         
         List<Review> reviewList = reviewService.getReviews(courseId, sectionId);
         
@@ -40,16 +40,13 @@ public class ReviewController {
         }
 
         String studentId = authUser.studentId(); 
-        boolean isEligible = reviewService.checkReviewEligibility(studentId, courseId);
-        
-        if (!isEligible) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                                 .body(Map.of("eligible", false, "message", "ยังไม่มีสิทธิ์รีวิววิชานี้"));
-        }
+        ReviewService.EligibilityStatus status = reviewService.getEligibilityStatus(studentId, courseId);
 
         return ResponseEntity.ok(Map.of(
-            "eligible", true,
-            "currentYear", authUser.year() != null ? authUser.year() : 1
+            "eligible", status.isEligible(),
+            "studentYear", status.studentYear() != null ? status.studentYear() : 1,
+            "recommendedYear", status.recommendedYear() != null ? status.recommendedYear() : 0,
+            "message", status.message()
         ));
     }
 
@@ -65,27 +62,35 @@ public class ReviewController {
                                  .body(Map.of("error", "กรุณาเข้าสู่ระบบก่อนเขียนรีวิว"));
         }
 
-        if (review.getReviewText() == null || review.getReviewText().trim().isEmpty() ||
-            review.getSectionId() == null || review.getSectionId().trim().isEmpty()) {
-            
+        String text = review.getReviewText();
+        if (text == null || text.trim().isEmpty()) {
             return ResponseEntity.badRequest()
-                                 .body(Map.of("error", "กรุณากรอกข้อมูลให้ครบถ้วน"));
+                                 .body(Map.of("error", "กรุณากรอกข้อความรีวิวก่อนส่ง"));
         }
 
-        Integer userId;
-        try {
-            userId = Integer.parseInt(authUser.studentId());
-        } catch (NumberFormatException e) {
-            userId = 1;
+        String studentId = authUser.studentId();
+        ReviewService.EligibilityStatus status = reviewService.getEligibilityStatus(studentId, courseId);
+        if (!status.isEligible()) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                                 .body(Map.of("error", status.message()));
         }
+
+        Integer userId = ReviewService.deriveUserId(studentId);
 
         review.setCourseId(courseId);
         review.setUserId(userId);
+        review.setReviewText(text.trim());
+        
+        // Normalize empty string sectionId to null so foreign key matches
+        if (review.getSectionId() != null && review.getSectionId().trim().isEmpty()) {
+            review.setSectionId(null);
+        }
         
         if (authUser.year() != null) {
             review.setReviewerYear(authUser.year());
         } else if (review.getReviewerYear() == null) {
-            review.setReviewerYear(1);
+            Integer year = StudyYearCalculator.calculate(studentId);
+            review.setReviewerYear(year != null ? year : 1);
         }
 
         Review savedReview = reviewService.saveReview(review);
