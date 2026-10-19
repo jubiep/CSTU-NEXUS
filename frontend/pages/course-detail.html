@@ -74,7 +74,8 @@
 
   <script src="../app.js"></script>
   <script>
-    requireAuth();
+    requireAuth().then(user => {
+    if (!user) return;
     renderTopbar();
 
     const code = getParam("code") || "CS261";
@@ -141,6 +142,7 @@
       }
     }
 
+    window.toggleSection = function toggleSection() {
     function toggleSection() {
       // หากไม่มี Section ไม่ต้องเปิดแผงเลือก
       if (!allSections || allSections.length === 0) return;
@@ -157,7 +159,7 @@
           arrow.alt = isHidden ? "chevron up icon" : "chevron down icon";
         }
       }
-    }
+    };
 
     // Render รายการปุ่ม Section
     function renderSectionButtons(list) {
@@ -309,6 +311,7 @@
         <button class="page-btn">6</button>
         <button class="page-btn arrow">›</button>`;
     }
+    });
   </script>
 </body>
 </html>

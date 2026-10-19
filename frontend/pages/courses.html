@@ -59,7 +59,7 @@
     const profileLoadErrorMessage = document.getElementById("profile-load-error-message");
     const profileRetryButton = document.getElementById("profile-retry");
 
-    async function loadCurrentUser() {
+    async function loadCurrentUser(verifiedUser) {
       if (!userNameEl) return;
       if (profileLoadError) profileLoadError.hidden = true;
       if (profileRetryButton) profileRetryButton.disabled = true;
@@ -67,7 +67,7 @@
       if (userIdEl) userIdEl.textContent = "";
 
       try {
-        const user = await apiRequest("/auth/me");
+        const user = verifiedUser || await apiRequest("/auth/me");
         if (!user || typeof user.displayName !== "string" || !user.displayName.trim() ||
             typeof user.studentId !== "string" || !user.studentId.trim()) {
           throw new Error("ข้อมูลโปรไฟล์จาก backend ไม่ครบ");
@@ -76,12 +76,6 @@
         userNameEl.textContent = user.displayName;
         if (userIdEl) userIdEl.textContent = user.studentId;
       } catch (error) {
-        if (error.status === 401) {
-          sessionStorage.removeItem(AUTH_STATE_KEY);
-          window.location.replace("index.html?reason=session-expired");
-          return;
-        }
-
         userNameEl.textContent = "โหลดข้อมูลโปรไฟล์ไม่สำเร็จ";
         if (profileLoadErrorMessage) {
           profileLoadErrorMessage.textContent = error instanceof TypeError
@@ -159,11 +153,16 @@
       loadCourses("");
     }
 
-    if (requireAuth()) {
+    async function initializeCoursesPage() {
+      const verifiedUser = await requireAuth();
+      if (!verifiedUser) return;
+
       renderTopbar();
-      loadCurrentUser();
+      loadCurrentUser(verifiedUser);
       loadCourses("");
     }
+
+    initializeCoursesPage();
   </script>
 </body>
 </html>

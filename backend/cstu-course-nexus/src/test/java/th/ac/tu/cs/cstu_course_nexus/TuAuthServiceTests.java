@@ -6,6 +6,7 @@ import static org.springframework.test.web.client.match.MockRestRequestMatchers.
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.header;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
+import static org.springframework.test.web.client.response.MockRestResponseCreators.withBadRequest;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
 import org.junit.jupiter.api.Test;
@@ -76,6 +77,24 @@ class TuAuthServiceTests {
         );
 
         assertEquals(403, exception.getStatusCode().value());
+        server.verify();
+    }
+
+    @Test
+    void mapsBadRequestFromTuApiToInvalidCredentials() {
+        RestClient.Builder builder = RestClient.builder();
+        MockRestServiceServer server = MockRestServiceServer.bindTo(builder).build();
+        server.expect(requestTo(VERIFY_URL))
+                .andRespond(withBadRequest());
+
+        TuAuthService service = new TuAuthService(builder, VERIFY_URL, "test-application-key");
+        ResponseStatusException exception = assertThrows(
+                ResponseStatusException.class,
+                () -> service.verify("6800000000", "wrong-password")
+        );
+
+        assertEquals(401, exception.getStatusCode().value());
+        assertEquals("ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง", exception.getReason());
         server.verify();
     }
 

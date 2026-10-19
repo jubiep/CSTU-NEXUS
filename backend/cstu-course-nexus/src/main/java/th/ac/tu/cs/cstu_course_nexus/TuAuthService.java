@@ -64,7 +64,8 @@ public class TuAuthService {
                     .retrieve()
                     .body(RESPONSE_TYPE);
         } catch (RestClientResponseException exception) {
-            if (exception.getStatusCode().value() == HttpStatus.UNAUTHORIZED.value()) {
+            if (exception.getStatusCode().value() == HttpStatus.BAD_REQUEST.value()
+                    || exception.getStatusCode().value() == HttpStatus.UNAUTHORIZED.value()) {
                 throw invalidCredentials();
             }
             if (exception.getStatusCode().value() == HttpStatus.FORBIDDEN.value()) {

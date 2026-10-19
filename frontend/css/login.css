@@ -77,21 +77,46 @@ body {
 }
 
 .login-card .btn {
-  display: block;
-  width: 85px;
+  display: flex;
+  width: max-content;
+  min-width: 85px;
+  max-width: 100%;
   height: 30px;
   margin: 0 auto;
-  padding: 0;
+  padding: 0 12px;
   border-radius: 18px;
   background: linear-gradient(100deg, #ffe28a, #f8ce50);
   color: #111;
   font-size: 14px;
   line-height: 30px;
+  white-space: nowrap;
 }
 
 .login-card .btn:disabled {
   cursor: wait;
   opacity: .7;
+}
+
+.login-spinner {
+  width: 14px;
+  height: 14px;
+  flex: 0 0 14px;
+  border: 2px solid rgba(17, 17, 17, .25);
+  border-top-color: #111;
+  border-radius: 50%;
+  animation: login-spin .7s linear infinite;
+}
+
+@keyframes login-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .login-spinner {
+    animation: none;
+  }
 }
 
 @media (max-width: 600px) {
@@ -164,7 +189,7 @@ body {
   }
 
   .login-card .btn {
-    width: min(111px, 22.7vw);
+    min-width: min(111px, 22.7vw);
     height: min(39px, 8vw);
     font-size: max(14px, min(18px, 3.7vw));
     line-height: min(39px, 8vw);

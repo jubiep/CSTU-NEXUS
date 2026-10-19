@@ -76,7 +76,8 @@
 
   <script src="../app.js"></script>
   <script>
-    requireAuth();
+    requireAuth().then(user => {
+    if (!user) return;
 
     const code = getParam("code") || "CS261";
     let section = getParam("section") || "";
@@ -129,6 +130,7 @@
       }
     }
 
+    window.submitReview = function submitReview() {
     initWriteReview();
 
     function submitReview() {
@@ -145,8 +147,12 @@
       // TODO: POST /api/reviews (ส่ง sectionId หรือ null หากเป็นรีวิวรวมรายวิชา)
       // Mock: แสดง success modal
       document.getElementById("success-modal").classList.add("show");
-    }
+    };
 
+    window.goBack = function goBack() {
+      window.location.href = `course-detail.html?code=${code}&section=${section}`;
+    };
+    });
     function goBack() {
       if (section) {
         window.location.href = `course-detail.html?code=${encodeURIComponent(code)}&section=${encodeURIComponent(section)}`;
