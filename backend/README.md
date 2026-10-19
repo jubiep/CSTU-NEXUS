@@ -347,6 +347,12 @@ TU_API_APPLICATION_KEY=your_actual_key_here
 docker compose --env-file .env -f backend/database/compose.yaml up -d --build
 ```
 
+เช็คว่า key ถูกส่งเข้า container หรือไม่ โดยไม่แสดงค่าลับ:
+
+```powershell
+docker compose --env-file .env -f backend/database/compose.yaml exec backend sh -lc 'test -n "$TU_API_APPLICATION_KEY" && echo KEY_PRESENT || echo KEY_EMPTY'
+```
+
 ต้องระบุ `--env-file .env` เพราะไฟล์ Compose อยู่ใน `backend/database/` แต่ไฟล์ `.env` อยู่ที่ root ของ repository มิฉะนั้น Compose อาจไม่ส่ง `TU_API_APPLICATION_KEY` เข้า Backend container พร้อม build Spring Boot backend, เริ่ม PostgreSQL และเริ่ม backend โดย backend เปิดที่ `http://localhost:8080`
 
 ตรวจสถานะและ log:

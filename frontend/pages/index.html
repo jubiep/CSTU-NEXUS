@@ -26,7 +26,10 @@
           <input class="form-input" type="password" id="password" name="password" placeholder="Password" autocomplete="current-password" aria-label="รหัสผ่าน" required/>
         </div>
 
-        <button class="btn btn-primary" id="login-button" type="submit">Log in</button>
+        <button class="btn btn-primary" id="login-button" type="submit" aria-busy="false">
+          <span class="login-spinner" id="login-spinner" aria-hidden="true" hidden></span>
+          <span id="login-button-label">Log in</span>
+        </button>
       </form>
 
       <p class="login-note">
@@ -44,6 +47,8 @@
 
     const loginForm = document.getElementById("login-form");
     const loginButton = document.getElementById("login-button");
+    const loginSpinner = document.getElementById("login-spinner");
+    const loginButtonLabel = document.getElementById("login-button-label");
     const studentIdInput = document.getElementById("student-id");
     const passwordInput = document.getElementById("password");
     const err = document.getElementById("error-msg");
@@ -67,7 +72,10 @@
       err.textContent = "";
       err.classList.remove("show");
       loginButton.disabled = true;
-      loginButton.textContent = "กำลังเข้าสู่ระบบ...";
+      loginButton.setAttribute("aria-busy", "true");
+      loginButton.setAttribute("aria-label", "กำลังเข้าสู่ระบบ");
+      loginSpinner.hidden = false;
+      loginButtonLabel.hidden = true;
 
       try {
         const result = await apiRequest("/auth/login", {
@@ -87,12 +95,17 @@
       } catch (error) {
         if (error instanceof TypeError) {
           showLoginError("เชื่อมต่อ backend ไม่ได้ กรุณาตรวจสอบว่า backend ทำงานอยู่และลองอีกครั้ง");
+        } else if (error.status === 401) {
+          showLoginError("เลขนักศึกษาหรือรหัสผ่านไม่ถูกต้อง กรุณาตรวจสอบแล้วลองอีกครั้ง");
         } else {
           showLoginError(error.message || "เข้าสู่ระบบไม่สำเร็จ กรุณาลองใหม่");
         }
       } finally {
         loginButton.disabled = false;
-        loginButton.textContent = "Log in";
+        loginButton.setAttribute("aria-busy", "false");
+        loginButton.removeAttribute("aria-label");
+        loginSpinner.hidden = true;
+        loginButtonLabel.hidden = false;
       }
     });
   </script>
