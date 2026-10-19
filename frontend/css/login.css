@@ -78,15 +78,18 @@ body {
 
 .login-card .btn {
   display: block;
-  width: 85px;
+  width: max-content;
+  min-width: 85px;
+  max-width: 100%;
   height: 30px;
   margin: 0 auto;
-  padding: 0;
+  padding: 0 12px;
   border-radius: 18px;
   background: linear-gradient(100deg, #ffe28a, #f8ce50);
   color: #111;
   font-size: 14px;
   line-height: 30px;
+  white-space: nowrap;
 }
 
 .login-card .btn:disabled {
@@ -164,7 +167,7 @@ body {
   }
 
   .login-card .btn {
-    width: min(111px, 22.7vw);
+    min-width: min(111px, 22.7vw);
     height: min(39px, 8vw);
     font-size: max(14px, min(18px, 3.7vw));
     line-height: min(39px, 8vw);
