@@ -70,7 +70,8 @@
 
   <script src="../app.js"></script>
   <script>
-    requireAuth();
+    requireAuth().then(user => {
+    if (!user) return;
     renderTopbar();
 
     const code = getParam("code") || "CS261";
@@ -116,7 +117,7 @@
       });
     }
 
-    function toggleSection() {
+    window.toggleSection = function toggleSection() {
       const panel = document.getElementById("section-panel");
       const btn = document.getElementById("section-badge");
       if (!panel) return;
@@ -130,7 +131,7 @@
           arrow.alt = isHidden ? "chevron up icon" : "chevron down icon";
         }
       }
-    }
+    };
 
     const writeCourseCode = document.getElementById("write-course-code");
     if (writeCourseCode) writeCourseCode.textContent = code;
@@ -174,6 +175,7 @@
         <button class="page-btn">6</button>
         <button class="page-btn arrow">›</button>`;
     }
+    });
   </script>
 </body>
 </html>

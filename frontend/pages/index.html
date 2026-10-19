@@ -51,6 +51,8 @@
     const reason = getParam("reason");
     if (reason === "session-expired") {
       showLoginError("เซสชันหมดอายุ กรุณาเข้าสู่ระบบอีกครั้ง");
+    } else if (reason === "backend-disconnected") {
+      showLoginError("การเชื่อมต่อกับ backend หลุด กรุณาเข้าสู่ระบบอีกครั้ง");
     } else if (reason === "logout-failed") {
       showLoginError("ออกจากระบบบนอุปกรณ์นี้แล้ว แต่ backend ติดต่อไม่ได้ เซสชันฝั่ง server อาจยังไม่ถูกยกเลิก");
     }

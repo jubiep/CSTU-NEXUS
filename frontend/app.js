@@ -57,11 +57,29 @@ async function apiRequest(path, options = {}) {
     headers.set("Content-Type", "application/json");
   }
 
-  const response = await fetch(`${API_BASE_URL}${path}`, {
-    ...options,
-    headers,
-    credentials: "include",
-  });
+  let response;
+  try {
+    response = await fetch(`${API_BASE_URL}${path}`, {
+      ...options,
+      headers,
+      credentials: "include",
+    });
+  } catch (error) {
+    if (error instanceof TypeError && path !== "/auth/login" && path !== "/auth/logout") {
+      sessionStorage.removeItem(AUTH_STATE_KEY);
+      const isPages = window.location.pathname.includes("/pages/");
+      const loginUrl = isPages ? "index.html" : "pages/index.html";
+      window.location.replace(`${loginUrl}?reason=backend-disconnected`);
+    }
+    throw error;
+  }
+
+  if (response.status === 401 && path !== "/auth/login" && path !== "/auth/logout") {
+    sessionStorage.removeItem(AUTH_STATE_KEY);
+    const isPages = window.location.pathname.includes("/pages/");
+    const loginUrl = isPages ? "index.html" : "pages/index.html";
+    window.location.replace(`${loginUrl}?reason=session-expired`);
+  }
 
   const contentType = response.headers.get("content-type") || "";
   let payload = null;
@@ -84,14 +102,32 @@ async function apiRequest(path, options = {}) {
 }
 
 // ── Auth ────────────────────────────────────
-function requireAuth() {
-  if (!sessionStorage.getItem(AUTH_STATE_KEY)) {
-    const isPages = window.location.pathname.includes("/pages/");
-    window.location.replace(isPages ? "index.html" : "pages/index.html");
-    return false;
+async function requireAuth() {
+  const protectedContent = document.querySelector(".app-shell");
+  if (protectedContent) protectedContent.hidden = true;
+
+  try {
+    const user = await apiRequest("/auth/me");
+    sessionStorage.setItem(AUTH_STATE_KEY, "1");
+    if (protectedContent) protectedContent.hidden = false;
+    return user;
+  } catch (error) {
+    if (error.status !== 401) {
+      console.error("Session verification failed:", error);
+      if (!(error instanceof TypeError)) {
+        window.alert(error.message || "ตรวจสอบสถานะการเข้าสู่ระบบไม่สำเร็จ");
+      }
+    }
+    return null;
   }
-  return true;
 }
+
+window.addEventListener("pageshow", event => {
+  const isLoginPage = window.location.pathname.endsWith("/pages/index.html");
+  if (event.persisted && !isLoginPage && !sessionStorage.getItem(AUTH_STATE_KEY)) {
+    window.location.replace("index.html");
+  }
+});
 
 async function logout() {
   let logoutError = false;

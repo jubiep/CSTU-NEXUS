@@ -57,14 +57,14 @@
     const profileLoadErrorMessage = document.getElementById("profile-load-error-message");
     const profileRetryButton = document.getElementById("profile-retry");
 
-    async function loadCurrentUser() {
+    async function loadCurrentUser(verifiedUser) {
       profileLoadError.hidden = true;
       profileRetryButton.disabled = true;
       userNameEl.textContent = "กำลังโหลดข้อมูลโปรไฟล์...";
       userIdEl.textContent = "";
 
       try {
-        const user = await apiRequest("/auth/me");
+        const user = verifiedUser || await apiRequest("/auth/me");
         if (!user || typeof user.displayName !== "string" || !user.displayName.trim() ||
             typeof user.studentId !== "string" || !user.studentId.trim()) {
           throw new Error("ข้อมูลโปรไฟล์จาก backend ไม่ครบ");
@@ -73,12 +73,6 @@
         userNameEl.textContent = user.displayName;
         userIdEl.textContent = user.studentId;
       } catch (error) {
-        if (error.status === 401) {
-          sessionStorage.removeItem(AUTH_STATE_KEY);
-          window.location.replace("index.html?reason=session-expired");
-          return;
-        }
-
         userNameEl.textContent = "โหลดข้อมูลโปรไฟล์ไม่สำเร็จ";
         profileLoadErrorMessage.textContent = error instanceof TypeError
           ? "เชื่อมต่อ backend ไม่ได้"
@@ -123,11 +117,16 @@
       renderCourses(filtered);
     }
 
-    if (requireAuth()) {
+    async function initializeCoursesPage() {
+      const verifiedUser = await requireAuth();
+      if (!verifiedUser) return;
+
       renderTopbar();
-      loadCurrentUser();
+      loadCurrentUser(verifiedUser);
       renderCourses(mockCourses);
     }
+
+    initializeCoursesPage();
   </script>
 </body>
 </html>

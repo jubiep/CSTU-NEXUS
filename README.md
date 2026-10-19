@@ -171,7 +171,7 @@ Backend จะพร้อมทำงานที่ `http://localhost:8080`
 
 #### ทางเลือกที่ B: รันทั้ง Backend และ Database ผ่าน Docker Compose
 ```bash
-docker compose -f backend/database/compose.yaml up -d --build
+docker compose --env-file .env -f backend/database/compose.yaml up -d --build
 ```
 
 ---
