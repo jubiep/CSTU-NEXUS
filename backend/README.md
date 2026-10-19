@@ -444,6 +444,8 @@ PostgreSQL connection successful! Courses: 38
 | `POST` | `/api/auth/login` | ยืนยันบัญชีกับ TU AD และสร้าง session |
 | `GET` | `/api/auth/me` | อ่านโปรไฟล์จาก session |
 | `POST` | `/api/auth/logout` | ยกเลิก session |
+| `GET` | `/api/courses?keyword={คำค้นหา}&year={1-4}` | ค้นหารหัสหรือชื่อรายวิชาแบบพิมพ์บางส่วนได้; ไม่ส่ง `keyword` จะคืนรายการทั้งหมด |
+| `GET` | `/api/courses/{courseId}` | อ่านข้อมูลรายวิชาและรายการ section |
 
 Endpoints สำหรับ Authentication ต้องตั้ง `TU_API_APPLICATION_KEY` ก่อนใช้งาน
 

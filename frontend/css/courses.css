@@ -87,14 +87,16 @@
   margin-bottom: 16px;
 }
 
+.search-wrap .search-icon,
 .search-wrap svg {
   position: absolute;
   left: 12px;
   top: 50%;
   transform: translateY(-50%);
   color: var(--gray-400);
-  width: 16px;
-  height: 16px;
+  width: 18px;
+  height: 18px;
+  pointer-events: none;
 }
 
 .search-input {
@@ -112,6 +114,31 @@
 .search-input:focus {
   border-color: var(--red);
   background: var(--white);
+}
+
+/* ปุ่มล้างคำค้นหา (Clear / X) */
+.clear-btn {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 20px;
+  height: 20px;
+  background: var(--gray-300);
+  color: var(--white);
+  border: none;
+  border-radius: 50%;
+  font-size: 14px;
+  line-height: 1;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+}
+
+.clear-btn:hover {
+  background: var(--gray-500);
 }
 
 /* Course grid & cards */

@@ -35,16 +35,18 @@
 
       <!-- Search -->
       <div class="search-wrap">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-        </svg>
-        <input class="search-input" type="text" id="search-input" placeholder="ช่องค้นหา" oninput="filterCourses()"/>
+        <img class="search-icon" src="../src/search-icon.png" alt="search icon" height="18" width="18"/>
+        <input class="search-input" type="text" id="search-input" placeholder="ค้นหารหัสวิชา หรือชื่อวิชา..." oninput="handleSearchInput()"/>
+        
+        <!-- เพิ่มปุ่มล้างคำค้นหา (Clear / X) -->
+        <button type="button" id="clear-btn" class="clear-btn" onclick="clearSearch()" aria-label="ล้างคำค้นหา">&times;</button>
       </div>
 
       <div class="course-grid" id="course-grid"></div>
 
+      <!-- แก้ไขข้อความตาม Test case 2 -->
       <p id="empty-msg" style="display:none;text-align:center;color:var(--gray-400);padding:32px 0;font-size:14px;">
-        ไม่พบรายวิชาที่ค้นหา
+        ไม่พบรายวิชาที่ตรงกับการค้นหา
       </p>
     </div>
   </div>
@@ -60,8 +62,12 @@
     async function loadCurrentUser(verifiedUser) {
       profileLoadError.hidden = true;
       profileRetryButton.disabled = true;
+    async function loadCurrentUser() {
+      if (!userNameEl) return;
+      if (profileLoadError) profileLoadError.hidden = true;
+      if (profileRetryButton) profileRetryButton.disabled = true;
       userNameEl.textContent = "กำลังโหลดข้อมูลโปรไฟล์...";
-      userIdEl.textContent = "";
+      if (userIdEl) userIdEl.textContent = "";
 
       try {
         const user = verifiedUser || await apiRequest("/auth/me");
@@ -71,50 +77,83 @@
         }
 
         userNameEl.textContent = user.displayName;
-        userIdEl.textContent = user.studentId;
+        if (userIdEl) userIdEl.textContent = user.studentId;
       } catch (error) {
         userNameEl.textContent = "โหลดข้อมูลโปรไฟล์ไม่สำเร็จ";
-        profileLoadErrorMessage.textContent = error instanceof TypeError
-          ? "เชื่อมต่อ backend ไม่ได้"
-          : error.message || "โหลดข้อมูลโปรไฟล์ไม่สำเร็จ";
-        profileLoadError.hidden = false;
+        if (profileLoadErrorMessage) {
+          profileLoadErrorMessage.textContent = error instanceof TypeError
+            ? "เชื่อมต่อ backend ไม่ได้"
+            : error.message || "โหลดข้อมูลโปรไฟล์ไม่สำเร็จ";
+        }
+        if (profileLoadError) profileLoadError.hidden = false;
       } finally {
-        profileRetryButton.disabled = false;
+        if (profileRetryButton) profileRetryButton.disabled = false;
       }
     }
 
-    profileRetryButton.addEventListener("click", loadCurrentUser);
+    if (profileRetryButton) {
+      profileRetryButton.addEventListener("click", loadCurrentUser);
+    }
 
+    const searchInput = document.getElementById("search-input");
+    const clearBtn = document.getElementById("clear-btn");
+    const grid = document.getElementById("course-grid");
+    const emptyMsg = document.getElementById("empty-msg");
+    let debounceTimer = null;
+
+    // Render รายการวิชา (รองรับ API: courseId, courseName)
     function renderCourses(list) {
-      const grid = document.getElementById("course-grid");
-      const empty = document.getElementById("empty-msg");
-
-      if (list.length === 0) {
+      if (!list || list.length === 0) {
         grid.innerHTML = "";
-        empty.style.display = "block";
+        emptyMsg.style.display = "block"; // แสดง "ไม่พบรายวิชาที่ตรงกับการค้นหา" (Test case 2)
         return;
       }
-      empty.style.display = "none";
+      emptyMsg.style.display = "none";
       grid.innerHTML = list.map(c => `
-        <a class="course-card" href="course-detail.html?code=${c.code}">
+        <a class="course-card" href="course-detail.html?code=${encodeURIComponent(c.courseId || c.code)}">
           <div class="course-indicator"></div>
           <div style="flex-grow: 1;">
-            <div class="course-code">${c.code}</div>
-            <div class="course-name">${c.name}</div>
+            <div class="course-code">${c.courseId || c.code}</div>
+            <div class="course-name">${c.courseName || c.name}</div>
           </div>
         </a>
       `).join('');
     }
 
-    function filterCourses() {
-      const q = document.getElementById("search-input").value.trim().toLowerCase();
-      const filtered = q
-        ? mockCourses.filter(c =>
-            c.code.toLowerCase().includes(q) ||
-            c.name.toLowerCase().includes(q) ||
-            c.teacher.toLowerCase().includes(q))
-        : mockCourses;
-      renderCourses(filtered);
+    // ฟังก์ชันยิง API ไปยัง Database
+    async function loadCourses(keyword = "") {
+      try {
+        const courses = await apiFetchCourses(keyword);
+        renderCourses(courses);
+      } catch (err) {
+        console.error("Failed to load courses:", err);
+        renderCourses([]);
+      }
+    }
+
+    // จัดการเมื่อมีการพิมพ์ค้นหา (Test case 1 & 3)
+    function handleSearchInput() {
+      const val = searchInput.value;
+      clearBtn.style.display = val.length > 0 ? "flex" : "none";
+
+      clearTimeout(debounceTimer);
+      // หากลบจนว่าง ให้รีเซ็ตแสดงทั้งหมดทันที (Test case 3)
+      if (val.trim() === "") {
+        loadCourses("");
+        return;
+      }
+      // พิมพ์ค้นหาแบบ Real-time หน่วงเวลา 250ms (Test case 1)
+      debounceTimer = setTimeout(() => {
+        loadCourses(val);
+      }, 250);
+    }
+
+    // ฟังก์ชันปุ่มล้างคำค้นหา X (Test case 3)
+    function clearSearch() {
+      searchInput.value = "";
+      clearBtn.style.display = "none";
+      searchInput.focus();
+      loadCourses("");
     }
 
     async function initializeCoursesPage() {
@@ -124,6 +163,8 @@
       renderTopbar();
       loadCurrentUser(verifiedUser);
       renderCourses(mockCourses);
+      loadCurrentUser();
+      loadCourses("");
     }
 
     initializeCoursesPage();
