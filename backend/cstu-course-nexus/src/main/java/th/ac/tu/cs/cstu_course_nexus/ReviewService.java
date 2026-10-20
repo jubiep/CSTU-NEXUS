@@ -34,9 +34,7 @@ public class ReviewService {
     }
 
     public Integer upsertUser(AuthUser user) {
-        Integer year = user.year() != null && user.year() >= 1 && user.year() <= 4
-                ? user.year()
-                : 1;
+        int year = normalizeStoredYear(user.year());
         return jdbcTemplate.queryForObject("""
                 INSERT INTO mock_user (
                     user_id, student_id, display_name_th, current_year, faculty, department, email
@@ -58,6 +56,10 @@ public class ReviewService {
                 user.faculty(),
                 user.department(),
                 user.email());
+    }
+
+    public static int normalizeStoredYear(Integer year) {
+        return year == null ? 1 : Math.min(Math.max(year, 1), 4);
     }
 
     private Integer findUserId(String studentId) {

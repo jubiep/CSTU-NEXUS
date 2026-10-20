@@ -102,10 +102,10 @@ public class ReviewController {
         }
         
         if (authUser.year() != null) {
-            review.setReviewerYear(authUser.year());
+            review.setReviewerYear(ReviewService.normalizeStoredYear(authUser.year()));
         } else if (review.getReviewerYear() == null) {
             Integer year = StudyYearCalculator.calculate(studentId);
-            review.setReviewerYear(year != null ? year : 1);
+            review.setReviewerYear(ReviewService.normalizeStoredYear(year));
         }
 
         Review savedReview = reviewService.saveReview(review);
