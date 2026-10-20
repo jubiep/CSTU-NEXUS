@@ -26,14 +26,48 @@ public class ReviewService {
 
     public String getStudentId(Integer userId) {
         if (userId == null) return null;
-        // Existing reviews store deriveUserId(studentId), a Java String.hashCode based value.
-        List<String> candidates = jdbcTemplate.query(
-                "SELECT student_id FROM mock_user",
-                (rs, rowNum) -> rs.getString("student_id"));
-        return candidates.stream()
-                .filter(studentId -> deriveUserId(studentId).equals(userId))
-                .findFirst()
-                .orElse(null);
+        List<String> studentIds = jdbcTemplate.query(
+                "SELECT student_id FROM mock_user WHERE user_id = ?",
+                (rs, rowNum) -> rs.getString("student_id"),
+                userId);
+        return studentIds.isEmpty() ? null : studentIds.get(0);
+    }
+
+    public Integer upsertUser(AuthUser user) {
+        int year = normalizeStoredYear(user.year());
+        return jdbcTemplate.queryForObject("""
+                INSERT INTO mock_user (
+                    user_id, student_id, display_name_th, current_year, faculty, department, email
+                )
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+                ON CONFLICT (student_id) DO UPDATE SET
+                    display_name_th = EXCLUDED.display_name_th,
+                    current_year = EXCLUDED.current_year,
+                    faculty = EXCLUDED.faculty,
+                    department = EXCLUDED.department,
+                    email = EXCLUDED.email
+                RETURNING user_id
+                """,
+                Integer.class,
+                deriveUserId(user.studentId()),
+                user.studentId(),
+                user.displayName(),
+                year,
+                user.faculty(),
+                user.department(),
+                user.email());
+    }
+
+    public static int normalizeStoredYear(Integer year) {
+        return year == null ? 1 : Math.min(Math.max(year, 1), 4);
+    }
+
+    private Integer findUserId(String studentId) {
+        List<Integer> userIds = jdbcTemplate.query(
+                "SELECT user_id FROM mock_user WHERE student_id = ?",
+                (rs, rowNum) -> rs.getInt("user_id"),
+                studentId);
+        return userIds.isEmpty() ? null : userIds.get(0);
     }
 
     // ตรงตาม U3: checkReviewEligibility(courseId)
@@ -48,7 +82,10 @@ public class ReviewService {
             return false;
         }
 
-        Integer userIdInt = deriveUserId(studentId);
+        Integer userIdInt = findUserId(studentId);
+        if (userIdInt == null) {
+            return false;
+        }
         boolean alreadyReviewed = reviewRepository.existsByCourseIdAndUserId(courseId, userIdInt);
         if (alreadyReviewed) {
             return false;
@@ -85,7 +122,10 @@ public class ReviewService {
             return new EligibilityStatus(false, studentYear, null, "ไม่สามารถคำนวณชั้นปีจากรหัสนักศึกษาได้");
         }
 
-        Integer userIdInt = deriveUserId(studentId);
+        Integer userIdInt = findUserId(studentId);
+        if (userIdInt == null) {
+            return new EligibilityStatus(false, studentYear, null, "ไม่พบข้อมูลผู้ใช้ในระบบ กรุณาเข้าสู่ระบบอีกครั้ง");
+        }
         boolean alreadyReviewed = reviewRepository.existsByCourseIdAndUserId(courseId, userIdInt);
         if (alreadyReviewed) {
             return new EligibilityStatus(false, studentYear, null, "คุณได้เคยส่งรีวิวรายวิชานี้ไปแล้ว");
@@ -120,7 +160,8 @@ public class ReviewService {
         if (studentId == null || studentId.isBlank() || courseId == null || courseId.isBlank()) {
             return false;
         }
-        return reviewRepository.existsByCourseIdAndUserId(courseId, deriveUserId(studentId));
+        Integer userId = findUserId(studentId);
+        return userId != null && reviewRepository.existsByCourseIdAndUserId(courseId, userId);
     }
 
     /**

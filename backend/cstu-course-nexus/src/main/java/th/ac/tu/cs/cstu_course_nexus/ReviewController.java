@@ -55,6 +55,7 @@ public class ReviewController {
         }
 
         String studentId = authUser.studentId(); 
+        reviewService.upsertUser(authUser);
         ReviewService.EligibilityStatus status = reviewService.getEligibilityStatus(studentId, courseId);
 
         return ResponseEntity.ok(Map.of(
@@ -83,15 +84,13 @@ public class ReviewController {
             return ResponseEntity.badRequest()
                                  .body(Map.of("error", "กรุณากรอกข้อความรีวิวก่อนส่ง"));
         }
-
         String studentId = authUser.studentId();
+        Integer userId = reviewService.upsertUser(authUser);
         ReviewService.EligibilityStatus status = reviewService.getEligibilityStatus(studentId, courseId);
         if (!status.isEligible()) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
                                  .body(Map.of("error", status.message()));
         }
-
-        Integer userId = ReviewService.deriveUserId(studentId);
 
         review.setCourseId(courseId);
         review.setUserId(userId);
@@ -103,10 +102,10 @@ public class ReviewController {
         }
         
         if (authUser.year() != null) {
-            review.setReviewerYear(authUser.year());
+            review.setReviewerYear(ReviewService.normalizeStoredYear(authUser.year()));
         } else if (review.getReviewerYear() == null) {
             Integer year = StudyYearCalculator.calculate(studentId);
-            review.setReviewerYear(year != null ? year : 1);
+            review.setReviewerYear(ReviewService.normalizeStoredYear(year));
         }
 
         Review savedReview = reviewService.saveReview(review);
