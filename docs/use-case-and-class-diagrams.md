@@ -232,7 +232,7 @@ flowchart TD
         TuAD["TU Authentication API<br/>(https://restapi.tu.ac.th)"]
     end
 
-    Browser <-->|HTTP / JSON (REST APIs)<br/>Port 8080| SpringBoot
-    SpringBoot <-->|JDBC (Port 5432)| Postgres
-    SpringBoot <-->|HTTPS POST (Application-Key)| TuAD
+    Browser <-->|"HTTP / JSON (REST APIs)<br/>Port 8080"| SpringBoot
+    SpringBoot <-->|"JDBC (Port 5432)"| Postgres
+    SpringBoot <-->|"HTTPS POST (Application-Key)"| TuAD
 ```

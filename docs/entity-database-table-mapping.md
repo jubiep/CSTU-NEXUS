@@ -131,33 +131,33 @@ erDiagram
 
 ```mermaid
 flowchart TD
-    Start([ผู้ใช้งานเข้าสู่ระบบ CSTU-NEXUS]) --> CheckSession{มี Session Cookie<br/>(Login แล้วหรือไม่?)}
+    Start(["ผู้ใช้งานเข้าสู่ระบบ CSTU-NEXUS"]) --> CheckSession{"มี Session Cookie<br/>(Login แล้วหรือไม่?)"}
 
     %% Path 1: ยังไม่ล็อกอิน
-    CheckSession -->|ยังไม่ได้ Login| CheckIsLoginAction{ส่งคำขอ Login<br/>POST /api/auth/login?}
-    CheckIsLoginAction -->|ไม่ใช่| RedirectLogin[ปฏิเสธการเข้าถึงทุกฟังก์ชัน<br/>Redirect ไปหน้า Login<br/>HTTP 401 Unauthorized]
-    CheckIsLoginAction -->|ใช่ U2: เข้าสู่ระบบ| ProcessLogin[ส่ง UserName / Password ไปยัง TU AD Verify API]
+    CheckSession -->|ยังไม่ได้ Login| CheckIsLoginAction{"ส่งคำขอ Login<br/>POST /api/auth/login?"}
+    CheckIsLoginAction -->|ไม่ใช่| RedirectLogin["ปฏิเสธการเข้าถึงทุกฟังก์ชัน<br/>Redirect ไปหน้า Login<br/>HTTP 401 Unauthorized"]
+    CheckIsLoginAction -->|"ใช่ U2: เข้าสู่ระบบ"| ProcessLogin["ส่ง UserName / Password ไปยัง TU AD Verify API"]
 
-    ProcessLogin --> VerifyTU{TU Verify สำเร็จ<br/>และเป็น นศ. หรือไม่?}
-    VerifyTU -->|รหัสผ่านผิด/ไม่พบบัญชี| LoginFailed[แจ้งเตือนข้อมูลไม่ถูกต้อง<br/>HTTP 401 Unauthorized]
+    ProcessLogin --> VerifyTU{"TU Verify สำเร็จ<br/>และเป็น นศ. หรือไม่?"}
+    VerifyTU -->|รหัสผ่านผิด/ไม่พบบัญชี| LoginFailed["แจ้งเตือนข้อมูลไม่ถูกต้อง<br/>HTTP 401 Unauthorized"]
     
-    VerifyTU -->|สำเร็จ| CheckIsCSTU{ตรวจสอบสังกัดสาขา<br/>เป็น นศ. วิทยาการคอมพิวเตอร์<br/>(CSTU) หรือไม่?}
-    CheckIsCSTU -->|ไม่ใช่ CSTU| DenyNonCSTU[ปฏิเสธการเข้าสู่ระบบ<br/>HTTP 403 Forbidden<br/>แจ้งเตือน: สงวนสิทธิ์เฉพาะนักศึกษา CSTU เท่านั้น]
-    CheckIsCSTU -->|เป็น CSTU| CreateSession[คำนวณ currentYear<br/>สร้าง HttpOnly Session Cookie]
-    CreateSession --> EnterSystem[เข้าสู่ระบบ CSTU-NEXUS สำเร็จ]
+    VerifyTU -->|สำเร็จ| CheckIsCSTU{"ตรวจสอบสังกัดสาขา<br/>เป็น นศ. วิทยาการคอมพิวเตอร์<br/>(CSTU) หรือไม่?"}
+    CheckIsCSTU -->|ไม่ใช่ CSTU| DenyNonCSTU["ปฏิเสธการเข้าสู่ระบบ<br/>HTTP 403 Forbidden<br/>แจ้งเตือน: สงวนสิทธิ์เฉพาะนักศึกษา CSTU เท่านั้น"]
+    CheckIsCSTU -->|เป็น CSTU| CreateSession["คำนวณ currentYear<br/>สร้าง HttpOnly Session Cookie"]
+    CreateSession --> EnterSystem["เข้าสู่ระบบ CSTU-NEXUS สำเร็จ"]
 
     %% Path 2: ล็อกอินแล้ว และเป็น CSTU
-    CheckSession -->|Login แล้ว| VerifyExistingSession{ตรวจสอบ Session<br/>ยังคงสถานะ CSTU หรือไม่?}
-    VerifyExistingSession -->|Session หมดอายุ| InvalidateSession[ล้าง Session และให้ Login ใหม่<br/>HTTP 401 Unauthorized]
-    VerifyExistingSession -->|CSTU Session ถูกต้อง| ChooseAction{เลือกฟังก์ชันที่ต้องการ}
+    CheckSession -->|Login แล้ว| VerifyExistingSession{"ตรวจสอบ Session<br/>ยังคงสถานะ CSTU หรือไม่?"}
+    VerifyExistingSession -->|Session หมดอายุ| InvalidateSession["ล้าง Session และให้ Login ใหม่<br/>HTTP 401 Unauthorized"]
+    VerifyExistingSession -->|CSTU Session ถูกต้อง| ChooseAction{"เลือกฟังก์ชันที่ต้องการ"}
 
     %% U4, U1: ค้นหาและอ่านรีวิว
-    ChooseAction -->|U4, U1: ค้นหาวิชา / ดู Section / อ่านรีวิว| AllowExplore[อนุญาตให้เข้าถึงข้อมูลได้<br/>HTTP 200 OK]
+    ChooseAction -->|"U4, U1: ค้นหาวิชา / ดู Section / อ่านรีวิว"| AllowExplore["อนุญาตให้เข้าถึงข้อมูลได้<br/>HTTP 200 OK"]
 
     %% U3, U5: การเขียนรีวิว
-    ChooseAction -->|U3, U5: เขียนรีวิวตาม Section| CheckYearEligibility{ตรวจสอบชั้นปี U3<br/>studentYear > recommendedYear?}
-    CheckYearEligibility -->|ไม่ผ่านเกณฑ์ชั้นปี| DenyReview[ปฏิเสธสิทธิ์การเขียนรีวิว<br/>HTTP 403 Forbidden<br/>แจ้งเตือน: สงวนสิทธิ์สำหรับรุ่นพี่ที่เคยเรียนวิชานี้]
-    CheckYearEligibility -->|ผ่านเกณฑ์| CheckDuplicate{เคยเขียนรีวิวใน<br/>วิชานี้ไปแล้วหรือไม่?<br/>existsByCourseIdAndUserId}
-    CheckDuplicate -->|เคยรีวิวแล้ว| DenyDuplicate[แจ้งเตือน: คุณเคยส่งรีวิวรายวิชานี้ไปแล้ว<br/>HTTP 403 Forbidden / eligible=false]
-    CheckDuplicate -->|ยังไม่เคยรีวิว| AllowReview[อนุญาตให้ส่งรีวิว<br/>HTTP 201 Created บันทึกลงตาราง review]
+    ChooseAction -->|"U3, U5: เขียนรีวิวตาม Section"| CheckYearEligibility{"ตรวจสอบชั้นปี U3<br/>studentYear > recommendedYear?"}
+    CheckYearEligibility -->|ไม่ผ่านเกณฑ์ชั้นปี| DenyReview["ปฏิเสธสิทธิ์การเขียนรีวิว<br/>HTTP 403 Forbidden<br/>แจ้งเตือน: สงวนสิทธิ์สำหรับรุ่นพี่ที่เคยเรียนวิชานี้"]
+    CheckYearEligibility -->|ผ่านเกณฑ์| CheckDuplicate{"เคยเขียนรีวิวใน<br/>วิชานี้ไปแล้วหรือไม่?<br/>existsByCourseIdAndUserId"}
+    CheckDuplicate -->|เคยรีวิวแล้ว| DenyDuplicate["แจ้งเตือน: คุณเคยส่งรีวิวรายวิชานี้ไปแล้ว<br/>HTTP 403 Forbidden / eligible=false"]
+    CheckDuplicate -->|ยังไม่เคยรีวิว| AllowReview["อนุญาตให้ส่งรีวิว<br/>HTTP 201 Created บันทึกลงตาราง review"]
 ```
