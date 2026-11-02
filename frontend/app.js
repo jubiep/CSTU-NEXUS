@@ -15,24 +15,91 @@ const mockCurrentUser = {
   faculty: "คณะวิทยาศาสตร์และเทคโนโลยี สาขาวิทยาการคอมพิวเตอร์"
 };
 
-/* ค้นหารายวิชาจาก Backend (หากยังเชื่อมไม่ได้ ให้ใช้ mockCourses แทนอัตโนมัติ) */
-async function apiFetchCourses(keyword = "") {
+/* ค้นหารายวิชาจาก Backend (รองรับ keyword, year, years, category, categories และ fallback เป็น mockCourses) */
+async function apiFetchCourses(keywordOrOptions = "", maybeYear = null, maybeCategory = "") {
+  let keyword = "";
+  let yearList = [];
+  let catList = [];
+
+  if (typeof keywordOrOptions === "object" && keywordOrOptions !== null) {
+    keyword = keywordOrOptions.keyword || "";
+
+    if (keywordOrOptions.years && Array.isArray(keywordOrOptions.years)) {
+      yearList = keywordOrOptions.years.map(String).filter(Boolean);
+    } else if (keywordOrOptions.years) {
+      yearList = String(keywordOrOptions.years).split(",").map(s => s.trim()).filter(Boolean);
+    } else if (keywordOrOptions.year !== undefined && keywordOrOptions.year !== null && String(keywordOrOptions.year).trim() !== "") {
+      yearList = [String(keywordOrOptions.year).trim()];
+    }
+
+    if (keywordOrOptions.categories && Array.isArray(keywordOrOptions.categories)) {
+      catList = keywordOrOptions.categories.map(c => String(c).trim().toUpperCase()).filter(Boolean);
+    } else if (keywordOrOptions.categories) {
+      catList = String(keywordOrOptions.categories).split(",").map(s => s.trim().toUpperCase()).filter(Boolean);
+    } else if (keywordOrOptions.category) {
+      catList = [String(keywordOrOptions.category).trim().toUpperCase()];
+    }
+  } else {
+    keyword = keywordOrOptions || "";
+    if (maybeYear !== undefined && maybeYear !== null && String(maybeYear).trim() !== "") {
+      yearList = [String(maybeYear).trim()];
+    }
+    if (maybeCategory) {
+      catList = [String(maybeCategory).trim().toUpperCase()];
+    }
+  }
+
   const trimmed = keyword.trim();
-  const url = trimmed 
-    ? `${API_BASE_URL}/courses?keyword=${encodeURIComponent(trimmed)}`
-    : `${API_BASE_URL}/courses`;
+  const params = new URLSearchParams();
+  if (trimmed) params.append("keyword", trimmed);
+  if (yearList.length === 1) {
+    params.append("year", yearList[0]);
+  } else if (yearList.length > 1) {
+    params.append("years", yearList.join(","));
+  }
+  if (catList.length === 1) {
+    params.append("category", catList[0]);
+  } else if (catList.length > 1) {
+    params.append("categories", catList.join(","));
+  }
+
+  const queryString = params.toString();
+  const url = queryString ? `${API_BASE_URL}/courses?${queryString}` : `${API_BASE_URL}/courses`;
+
+  const filterList = (list) => {
+    let results = Array.isArray(list) ? list : [];
+    if (trimmed) {
+      const q = trimmed.toLowerCase();
+      results = results.filter(c => {
+        const id = (c.courseId || c.code || "").toLowerCase();
+        const name = (c.courseName || c.name || "").toLowerCase();
+        return id.includes(q) || name.includes(q);
+      });
+    }
+    if (yearList.length > 0) {
+      results = results.filter(c => yearList.includes(String(c.recommendedYear)));
+    }
+    if (catList.length > 0) {
+      results = results.filter(c => {
+        const id = (c.courseId || c.code || "").toUpperCase();
+        return catList.some(cat => {
+          if (cat === "OTHER") {
+            return !/^(CS|TU|EL|ST)/i.test(id);
+          }
+          return id.startsWith(cat);
+        });
+      });
+    }
+    return results;
+  };
 
   try {
     const response = await fetch(url);
     if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-    return await response.json();
+    const data = await response.json();
+    return filterList(data);
   } catch (error) {
-    if (!trimmed) return mockCourses;
-    const q = trimmed.toLowerCase();
-    return mockCourses.filter(c =>
-      c.courseId.toLowerCase().includes(q) ||
-      c.courseName.toLowerCase().includes(q)
-    );
+    return filterList(mockCourses);
   }
 }
 
@@ -195,6 +262,62 @@ const mockCourses = [
     description: "หัวข้อคัดสรรทางวิทยาการคอมพิวเตอร์ (ไม่มี Section - รีวิวรวมรายวิชา)",
     sectionCount: 0,
     sections: []
+  },
+  { 
+    courseId: "MA211", 
+    code: "MA211", 
+    courseName: "Calculus 1", 
+    name: "Calculus 1", 
+    recommendedYear: 1, 
+    credits: "3 (3-0-6)",
+    teacher: "รศ.ดร.ญาณิศา ชัยยา",
+    description: "แคลคูลัส 1 อนุพันธ์ ปริพันธ์ และการประยุกต์",
+    sectionCount: 2,
+    sections: [
+      { sectionId: "ma211_020001", sectionNumber: "020001", instructorName: "รศ.ดร.ญาณิศา ชัยยา" }
+    ]
+  },
+  { 
+    courseId: "ST216", 
+    code: "ST216", 
+    courseName: "Statistics for Social Science 1", 
+    name: "Statistics for Social Science 1", 
+    recommendedYear: 1, 
+    credits: "3 (3-0-6)",
+    teacher: "ผศ.ดร.ปารวัณ ไพจิตรรัตนะ",
+    description: "สถิติสำหรับสังคมศาสตร์ ความน่าจะเป็น และการทดสอบสมมติฐาน",
+    sectionCount: 2,
+    sections: [
+      { sectionId: "st216_040001", sectionNumber: "040001", instructorName: "ผศ.ดร.ปารวัณ ไพจิตรรัตนะ" }
+    ]
+  },
+  { 
+    courseId: "LAS101", 
+    code: "LAS101", 
+    courseName: "Critical Thinking, Reading, and Writing", 
+    name: "Critical Thinking, Reading, and Writing", 
+    recommendedYear: 1, 
+    credits: "3 (3-0-6)",
+    teacher: "ผศ.ดร.อำนาจ ปักษาสุข",
+    description: "การคิดเชิงวิพากษ์ การอ่านและการเขียนเชิงวิชาการ",
+    sectionCount: 2,
+    sections: [
+      { sectionId: "las101_450001", sectionNumber: "450001", instructorName: "ผศ.ดร.อำนาจ ปักษาสุข" }
+    ]
+  },
+  { 
+    courseId: "CS401", 
+    code: "CS401", 
+    courseName: "Special Projects 2 (Senior Project)", 
+    name: "Special Projects 2 (Senior Project)", 
+    recommendedYear: 4, 
+    credits: "3 (0-6-3)",
+    teacher: "คณาจารย์สาขาวิทยาการคอมพิวเตอร์",
+    description: "โครงงานวิจัยและพัฒนาทางวิทยาการคอมพิวเตอร์สำหรับนักศึกษาชั้นปีที่ 4",
+    sectionCount: 1,
+    sections: [
+      { sectionId: "cs401_010001", sectionNumber: "010001", instructorName: "คณาจารย์สาขาวิทยาการคอมพิวเตอร์" }
+    ]
   }
 ];
 
