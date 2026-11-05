@@ -428,3 +428,26 @@
   background-color: #F3F4F6;
   color: #4B5563;
 }
+
+.reviews-scroll-container {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  scrollbar-width: none; /* สำหรับ Firefox */
+  -ms-overflow-style: none; /* สำหรับ IE/Edge */
+  padding-bottom: 8px;
+}
+
+.reviews-scroll-container::-webkit-scrollbar {
+  display: none; /* สำหรับ Chrome, Safari, Opera */
+}
+
+/* สไตล์สำหรับปุ่มเมื่ออยู่ในสถานะ Disabled */
+button:disabled,
+.review-prev-btn:disabled,
+.review-next-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  pointer-events: none;
+}

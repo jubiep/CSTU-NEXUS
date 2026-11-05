@@ -355,10 +355,31 @@ function renderTopbar() {
 
 
 // Auto-render default topbar on DOMContentLoaded if not already rendered
-document.addEventListener("DOMContentLoaded", () => {
-  const topbar = document.getElementById("topbar");
-  if (topbar && !topbar.hasAttribute("data-rendered")) {
-    topbar.setAttribute("data-rendered", "true");
-    renderTopbar();
+document.addEventListener('DOMContentLoaded', () => {
+  const reviewContainer = document.querySelector('.reviews-scroll-container'); // ปรับ selector ตามโครงสร้าง HTML จริงของคุณ
+  const prevBtn = document.querySelector('.review-prev-btn');
+  const nextBtn = document.querySelector('.review-next-btn');
+
+  if (reviewContainer && prevBtn && nextBtn) {
+    const scrollAmount = 300;
+
+    const updateButtonStates = () => {
+      const maxScrollLeft = reviewContainer.scrollWidth - reviewContainer.clientWidth;
+      prevBtn.disabled = reviewContainer.scrollLeft <= 0;
+      nextBtn.disabled = reviewContainer.scrollLeft >= maxScrollLeft - 5;
+    };
+
+    nextBtn.addEventListener('click', () => {
+      reviewContainer.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+    });
+
+    prevBtn.addEventListener('click', () => {
+      reviewContainer.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
+    });
+
+    reviewContainer.addEventListener('scroll', updateButtonStates);
+    window.addEventListener('resize', updateButtonStates);
+    
+    updateButtonStates();
   }
 });
