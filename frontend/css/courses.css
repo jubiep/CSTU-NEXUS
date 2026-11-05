@@ -141,7 +141,7 @@
   background: var(--gray-500);
 }
 
-/* Filter Dropdowns Row (สไตล์ปุ่มสีเหลืองตาม UI Mockup) */
+/* Filter Dropdowns Row (สไตล์ปุ่มสีเหลืองตามภาพ UI Mockup) */
 .filter-dropdowns-row {
   display: flex;
   align-items: center;
@@ -171,12 +171,14 @@
   box-shadow: 0 4px 10px rgba(255, 210, 54, 0.4);
   user-select: none;
   -webkit-tap-highlight-color: transparent;
-  min-width: 105px;
+  min-width: 126px;
+  min-height: 39.2px;
+  box-sizing: border-box;
 }
 
 .dropdown-btn.has-value {
-  background: linear-gradient(105deg, #ffd236 0%, #f5b800 100%);
-  box-shadow: 0 4px 12px rgba(245, 184, 0, 0.5);
+  background: linear-gradient(105deg, #ffe58e 0%, #ffd236 100%);
+  box-shadow: 0 4px 10px rgba(255, 210, 54, 0.4);
 }
 
 .dropdown-chevron {
