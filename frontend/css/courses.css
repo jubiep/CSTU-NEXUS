@@ -169,20 +169,9 @@
   justify-content: center;
   gap: 8px;
   box-shadow: 0 4px 10px rgba(255, 210, 54, 0.4);
-  transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
   user-select: none;
   -webkit-tap-highlight-color: transparent;
   min-width: 105px;
-}
-
-.dropdown-btn:hover {
-  filter: brightness(0.97);
-  transform: translateY(-1px);
-  box-shadow: 0 6px 14px rgba(255, 210, 54, 0.5);
-}
-
-.dropdown-btn:active {
-  transform: translateY(0);
 }
 
 .dropdown-btn.has-value {
@@ -233,7 +222,7 @@
   display: block;
 }
 
-/* Single-select Item ภายใน Dropdown (เช่น ชั้นปี เมื่อเลือกแล้วขึ้นสีแดง) */
+/* Single-select Item ภายใน Dropdown (ชั้นปี - ไม่มี hover สีแดง จะขึ้นสีแดงเฉพาะเมื่อถูกเลือก active เท่านั้น) */
 .dropdown-item {
   padding: 9px 14px;
   font-size: 14px;
@@ -241,7 +230,6 @@
   color: var(--gray-800);
   border-radius: 8px;
   cursor: pointer;
-  transition: all 0.15s ease;
   white-space: nowrap;
   text-align: center;
   margin-bottom: 3px;
@@ -252,11 +240,6 @@
   margin-bottom: 0;
 }
 
-.dropdown-item:hover {
-  background-color: var(--gray-100);
-  color: var(--red);
-}
-
 .dropdown-item.active {
   background-color: var(--red) !important;
   color: var(--white) !important;
@@ -264,7 +247,7 @@
   box-shadow: 0 2px 6px rgba(195, 0, 47, 0.35);
 }
 
-/* Checkbox Item ภายใน Dropdown (ตาม UI Mockup ติ๊กข้างหน้า) */
+/* Checkbox Item ภายใน Dropdown (หมวดหมู่ - ไม่มี hover) */
 .dropdown-checkbox-item {
   display: flex;
   align-items: center;
@@ -273,11 +256,6 @@
   border-radius: 8px;
   cursor: pointer;
   user-select: none;
-  transition: background-color 0.15s ease;
-}
-
-.dropdown-checkbox-item:hover {
-  background-color: var(--gray-100);
 }
 
 .dropdown-checkbox-item input[type="checkbox"] {
@@ -340,11 +318,9 @@
   cursor: pointer;
   padding: 2px 6px;
   border-radius: 4px;
-  transition: background-color 0.15s;
 }
 
 .btn-reset-filters:hover {
-  background-color: rgba(195, 0, 47, 0.08);
   text-decoration: underline;
 }
 
