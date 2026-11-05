@@ -434,16 +434,22 @@
   gap: 12px;
   overflow-x: auto;
   scroll-behavior: smooth;
-  scrollbar-width: none; /* สำหรับ Firefox */
-  -ms-overflow-style: none; /* สำหรับ IE/Edge */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
   padding-bottom: 8px;
 }
 
 .reviews-scroll-container::-webkit-scrollbar {
-  display: none; /* สำหรับ Chrome, Safari, Opera */
+  display: none;
 }
 
-/* สไตล์สำหรับปุ่มเมื่ออยู่ในสถานะ Disabled */
+.review-controls {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 12px;
+}
+
 button:disabled,
 .review-prev-btn:disabled,
 .review-next-btn:disabled {
