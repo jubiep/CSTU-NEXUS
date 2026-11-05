@@ -343,8 +343,10 @@
       const studentId = r.studentId || r.authorStudentId || "ไม่พบรหัสนักศึกษา";
       
       // จัดรูปแบบแท็ก Section
-      const sectionBadgeHtml = r.sectionId 
-        ? `<span class="review-section-badge">Section ${r.sectionId}</span>` 
+      const rawSection = r.sectionNumber || r.sectionId || '';
+      const displaySection = String(rawSection).includes('_') ? String(rawSection).split('_').pop() : rawSection;
+      const sectionBadgeHtml = displaySection 
+        ? `<span class="review-section-badge">Section ${displaySection}</span>` 
         : `<span class="review-section-badge general">ทั่วไป</span>`;
 
       return `
