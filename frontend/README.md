@@ -60,6 +60,29 @@ python -m http.server 5500
 
 ---
 
+## รัน Frontend และ Backend ด้วย Docker Compose
+
+จาก root ของ repository ให้เตรียม `.env` แล้วรัน:
+
+```bash
+docker compose --env-file .env up -d --build
+```
+
+เปิดเว็บที่ `http://localhost:3000` หรือ `http://localhost:3000/pages/index.html`
+
+Frontend container ใช้ Nginx เสิร์ฟไฟล์ static และ reverse proxy path `/api` ไปยัง Backend service (`backend:8080`) ภายใน Docker network ทำให้ Browser เรียก API แบบ same-origin และไม่ต้องรู้จัก hostname ภายใน Docker
+
+ตัวแปรที่ปรับได้ใน `.env`:
+
+| ตัวแปร | ค่าเริ่มต้น | หน้าที่ |
+|---|---|---|
+| `FRONTEND_PORT` | `3000` | พอร์ตที่เปิดให้ Browser เข้าถึง Frontend |
+| `FRONTEND_TARGET` | `production` | Docker build target: `development` หรือ `production` |
+
+เมื่อใช้ local server ที่พอร์ตอื่น ค่า API จะใช้ `http://<frontend-host>:8080/api` อัตโนมัติ หรือกำหนด `window.CSTU_API_BASE_URL` ก่อนโหลด `app.js` เพื่อ override
+
+---
+
 ## ความสัมพันธ์ระหว่างหน้าเว็บและ Use Cases (U1–U5)
 
 | หน้าเว็บ | Use Case ที่เกี่ยวข้อง | REST API ที่เชื่อมต่อ | บทบาทหน้าที่ |
@@ -78,7 +101,7 @@ python -m http.server 5500
 
 หน้าเว็บเรียก Backend จริงผ่าน Session Cookie แบบ HttpOnly (ปลอดภัย ไม่มีเก็บ token ลง local storage):
 
-- เมื่อเปิด Frontend บน `localhost` หรือ `127.0.0.1` ค่า API เริ่มต้นจะใช้ hostname เดียวกันที่พอร์ต `8080` (เช่น `http://127.0.0.1:8080/api`) ไม่ขึ้นกับพอร์ตของ Frontend เพื่อให้ session cookie ใช้ได้ และตั้งค่าใหม่ได้โดยกำหนด `window.CSTU_API_BASE_URL` **ก่อน** โหลด `app.js`
+- เมื่อเปิด Frontend ผ่าน Docker ที่ `http://localhost:3000` ค่า API เริ่มต้นคือ same-origin `/api` ซึ่ง Nginx จะ proxy ไปยัง Backend; เมื่อใช้ local server ที่พอร์ตอื่น ค่าเริ่มต้นจะใช้ `http://<frontend-host>:8080/api` และ override ได้ด้วย `window.CSTU_API_BASE_URL` **ก่อน** โหลด `app.js`
 - `POST /api/auth/login` (U2): รับ `{ "username": "6800000000", "password": "..." }` ยืนยันผ่าน TU AD Verify และสร้าง HttpOnly Session
 - `GET /api/auth/me` (U2, U3): คืนข้อมูลผู้ใช้และชั้นปีปัจจุบัน (`currentYear`) เพื่อตรวจสิทธิ์ก่อนเปิดฟอร์มรีวิว
 - `POST /api/auth/logout` (U2): ยกเลิก Session ฝั่ง Backend

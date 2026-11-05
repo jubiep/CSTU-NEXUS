@@ -5,7 +5,9 @@
 const isLocalFrontend = ["localhost", "127.0.0.1"].includes(window.location.hostname);
 const API_BASE_URL = (
   window.CSTU_API_BASE_URL
-  || (isLocalFrontend ? `http://${window.location.hostname}:8080/api` : `${window.location.origin}/api`)
+  || (isLocalFrontend && window.location.port !== "3000"
+    ? `http://${window.location.hostname}:8080/api`
+    : `${window.location.origin}/api`)
 ).replace(/\/+$/, "");
 const AUTH_STATE_KEY = "cstu_authenticated";
 const mockCurrentUser = {
