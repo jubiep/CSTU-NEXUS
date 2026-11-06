@@ -457,3 +457,19 @@ button:disabled,
   cursor: not-allowed;
   pointer-events: none;
 }
+
+.review-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+}
+
+.review-list .review-card {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.review-controls {
+  display: none !important;
+}
