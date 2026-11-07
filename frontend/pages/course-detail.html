@@ -64,9 +64,10 @@
         <h2 class="section-title-text">Reviews</h2>
       </div>
 
+      <!-- Container สำหรับแสดงรายการรีวิวแนวตั้ง -->
       <div id="review-list" class="review-list"></div>
 
-      <!-- Pagination -->
+      <!-- Pagination (ปุ่มเลขหน้า 1, 2, <, >) -->
       <div class="pagination" id="pagination"></div>
     </div>
 
@@ -314,63 +315,71 @@
       }
     }
 
-    async function loadReviews() {
-      const reviewList = document.getElementById("review-list");
-      const paginationEl = document.getElementById("pagination");
+  async function loadReviews() {
+  const reviewList = document.getElementById("review-list");
+  const paginationEl = document.getElementById("pagination");
 
-      if (!selectedSection) {
-        reviewList.innerHTML = `<p style="text-align:center;color:var(--gray-400);padding:32px 0;font-size:14px;">กรุณาเลือก Section</p>`;
-        if (paginationEl) paginationEl.innerHTML = "";
-        return;
-      }
+  reviewList.innerHTML = `<p style="text-align:center;color:var(--gray-400);padding:32px 0;font-size:14px;">กำลังโหลดรีวิว...</p>`;
 
-      reviewList.innerHTML = `<p style="text-align:center;color:var(--gray-400);padding:32px 0;font-size:14px;">กำลังโหลดรีวิว...</p>`;
-
-      try {
-        const res = await apiRequest(`/courses/${encodeURIComponent(code)}/reviews?sectionId=${encodeURIComponent(selectedSectionId)}`);
-        const reviews = Array.isArray(res) ? res : (res.reviews || []);
-
-        if (reviews.length === 0) {
-          reviewList.innerHTML = `<p style="text-align:center;color:var(--gray-400);padding:32px 0;font-size:14px;">ยังไม่มีรีวิว — เป็นคนแรกที่รีวิวรายวิชานี้!</p>`;
-          if (paginationEl) paginationEl.innerHTML = "";
-          return;
-        }
-
-        reviewList.innerHTML = reviews.map(r => {
-          const yearText = r.year ? `ชั้นปีที่ ${r.year}` : '';
-          const dateText = r.date || '10/10/2569';
-          const studentId = r.studentId || r.authorStudentId || "ไม่พบรหัสนักศึกษา";
-
-          return `
-            <div class="review-card">
-              <div class="review-card-top">
-                <div class="review-user-info">
-                  <div class="review-verified-shield">
-                    <img src="../src/verify-icon.png" alt="verified icon" height="30" width="30"/>
-                  </div>
-                  <span class="review-student-id">${studentId}</span>
-                  <span class="review-student-year">${yearText}</span>
-                </div>
-                <span class="review-date">${dateText}</span>
-              </div>
-              <div class="review-comment-box">
-                <p class="review-comment-text">${r.text || r.comment}</p>
-              </div>
-            </div>`;
-        }).join('');
-
-        if (paginationEl) {
-          paginationEl.innerHTML = `
-            <button class="page-btn arrow">‹</button>
-            <button class="page-btn active">1</button>
-            <button class="page-btn">2</button>
-            <button class="page-btn arrow">›</button>`;
-        }
-      } catch (err) {
-        console.error("Failed to load reviews:", err);
-        reviewList.innerHTML = `<p style="text-align:center;color:var(--red);padding:32px 0;font-size:14px;">ไม่สามารถโหลดรีวิวได้</p>`;
-      }
+  try {
+    // 1. สร้าง URL โดยถ้าเลือก Section ให้ส่ง sectionId ไป แต่ถ้าไม่เลือกให้เรียก API สั้นเพื่อดึงทั้งหมด
+    let url = `/courses/${encodeURIComponent(code)}/reviews`;
+    if (selectedSectionId) {
+      url += `?sectionId=${encodeURIComponent(selectedSectionId)}`;
     }
+
+    const res = await apiRequest(url);
+    const reviews = Array.isArray(res) ? res : (res.reviews || []);
+
+    if (reviews.length === 0) {
+      reviewList.innerHTML = `<p style="text-align:center;color:var(--gray-400);padding:32px 0;font-size:14px;">ยังไม่มีรีวิว — เป็นคนแรกที่รีวิวรายวิชานี้!</p>`;
+      if (paginationEl) paginationEl.innerHTML = "";
+      return;
+    }
+
+    // 2. Render แสดงผลการ์ดรีวิวพร้อมแท็ก Section Badge
+    reviewList.innerHTML = reviews.map(r => {
+      const yearText = r.year ? `ชั้นปีที่ ${r.year}` : '';
+      const dateText = r.date || '10/10/2569';
+      const studentId = r.studentId || r.authorStudentId || "ไม่พบรหัสนักศึกษา";
+      
+      // จัดรูปแบบแท็ก Section
+      const rawSection = r.sectionNumber || r.sectionId || '';
+      const displaySection = String(rawSection).includes('_') ? String(rawSection).split('_').pop() : rawSection;
+      const sectionBadgeHtml = displaySection 
+        ? `<span class="review-section-badge">Section ${displaySection}</span>` 
+        : `<span class="review-section-badge general">ทั่วไป</span>`;
+
+      return `
+        <div class="review-card">
+          <div class="review-card-top">
+            <div class="review-user-info">
+              <div class="review-verified-shield">
+                <img src="../src/verify-icon.png" alt="verified icon" height="30" width="30"/>
+              </div>
+              <span class="review-student-id">${studentId}</span>
+              ${sectionBadgeHtml}
+            </div>
+            <span class="review-date">${dateText}</span>
+          </div>
+          <div class="review-comment-box">
+            <p class="review-comment-text">${r.text || r.comment}</p>
+          </div>
+        </div>`;
+    }).join('');
+
+    if (paginationEl) {
+      paginationEl.innerHTML = `
+        <button class="page-btn arrow">‹</button>
+        <button class="page-btn active">1</button>
+        <button class="page-btn">2</button>
+        <button class="page-btn arrow">›</button>`;
+    }
+  } catch (err) {
+    console.error("Failed to load reviews:", err);
+    reviewList.innerHTML = `<p style="text-align:center;color:var(--red);padding:32px 0;font-size:14px;">ไม่สามารถโหลดรีวิวได้</p>`;
+  }
+}
 
     checkReviewPermission();
     loadReviews();
