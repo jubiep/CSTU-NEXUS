@@ -8,6 +8,8 @@ import static org.springframework.test.web.client.match.MockRestRequestMatchers.
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withBadRequest;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
+import static org.springframework.test.web.client.response.MockRestResponseCreators.withStatus;
+import static org.springframework.test.web.client.response.MockRestResponseCreators.withException;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpMethod;
@@ -15,6 +17,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.web.client.RestClient;
+import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.server.ResponseStatusException;
 
 class TuAuthServiceTests {
@@ -110,5 +113,53 @@ class TuAuthServiceTests {
         ResponseStatusException ex2 = assertThrows(ResponseStatusException.class,
                 () -> serviceWithQuotes.verify("6800000000", "pass"));
         assertEquals(HttpStatus.SERVICE_UNAVAILABLE, ex2.getStatusCode());
+    }
+
+    @Test
+    void mapsUnauthorizedTuResponseToInvalidCredentials() {
+        RestClient.Builder builder = RestClient.builder();
+        MockRestServiceServer server = MockRestServiceServer.bindTo(builder).build();
+        server.expect(requestTo(VERIFY_URL))
+                .andRespond(withStatus(HttpStatus.UNAUTHORIZED));
+
+        TuAuthService service = new TuAuthService(builder, VERIFY_URL, "test-application-key");
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class,
+                () -> service.verify("6800000000", "wrong-password"));
+
+        assertEquals(HttpStatus.UNAUTHORIZED, exception.getStatusCode());
+        assertEquals("ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง", exception.getReason());
+        server.verify();
+    }
+
+    @Test
+    void mapsTuServerFailureToBadGateway() {
+        RestClient.Builder builder = RestClient.builder();
+        MockRestServiceServer server = MockRestServiceServer.bindTo(builder).build();
+        server.expect(requestTo(VERIFY_URL))
+                .andRespond(withStatus(HttpStatus.INTERNAL_SERVER_ERROR));
+
+        TuAuthService service = new TuAuthService(builder, VERIFY_URL, "test-application-key");
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class,
+                () -> service.verify("6800000000", "password"));
+
+        assertEquals(HttpStatus.BAD_GATEWAY, exception.getStatusCode());
+        assertEquals(true, exception.getReason().contains("500"));
+        server.verify();
+    }
+
+    @Test
+    void mapsNetworkTimeoutOrConnectionFailureToBadGateway() {
+        RestClient.Builder builder = RestClient.builder();
+        MockRestServiceServer server = MockRestServiceServer.bindTo(builder).build();
+        server.expect(requestTo(VERIFY_URL))
+                .andRespond(withException(new java.io.IOException("connection timed out")));
+
+        TuAuthService service = new TuAuthService(builder, VERIFY_URL, "test-application-key");
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class,
+                () -> service.verify("6800000000", "password"));
+
+        assertEquals(HttpStatus.BAD_GATEWAY, exception.getStatusCode());
+        assertEquals(true, exception.getReason().contains("ไม่สามารถเชื่อมต่อ TU Authentication ได้"));
+        server.verify();
     }
 }
