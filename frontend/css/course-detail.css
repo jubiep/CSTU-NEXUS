@@ -408,6 +408,15 @@
   color: var(--white);
   font-weight: 700;
 }
+.page-btn.active:hover {
+  background: var(--red);
+  color: var(--white);
+}
+.page-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  pointer-events: none;
+}
 .page-btn.arrow {
   font-size: 16px;
   color: var(--gray-400);
