@@ -2,6 +2,8 @@ package th.ac.tu.cs.cstu_course_nexus;
 
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessResourceFailureException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -113,6 +115,20 @@ public class ReviewController {
         return ResponseEntity.status(HttpStatus.CREATED).body(Map.of(
             "reviewId", savedReview.getId(),
             "message", "รีวิวสำเร็จ"
+        ));
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<?> handleReviewConstraintError(DataIntegrityViolationException exception) {
+        return ResponseEntity.badRequest().body(Map.of(
+                "error", "ข้อมูลรายวิชาหรือ Section ไม่ถูกต้อง กรุณาตรวจสอบแล้วลองอีกครั้ง"
+        ));
+    }
+
+    @ExceptionHandler(DataAccessResourceFailureException.class)
+    public ResponseEntity<?> handleReviewDatabaseUnavailable(DataAccessResourceFailureException exception) {
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(Map.of(
+                "error", "ระบบฐานข้อมูลไม่พร้อมใช้งาน กรุณาลองใหม่ภายหลัง"
         ));
     }
 }
