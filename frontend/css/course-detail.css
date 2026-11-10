@@ -525,22 +525,3 @@ button:disabled,
   color: #9CA3AF;
   background: transparent;
 }
-
-.page-btn.active {
-  background: transparent;
-  color: #111827;
-  font-weight: 700;
-  border-bottom: 2px solid #FFD236;
-  border-radius: 0;
-}
-
-.page-btn.active:hover {
-  background: transparent;
-  color: #111827;
-}
-
-.page-btn.arrow {
-  font-size: 16px;
-  font-weight: 700;
-  color: #111827;
-}
