@@ -92,12 +92,87 @@
     const sectionCountBadge = document.getElementById("section-count-badge");
     const teacherEl = document.getElementById("detail-teacher");
 
-    async function updateWriteBtn() {
+    let hasReviewedCourse = false;
+    let eligibilityData = null;
+
+    function checkIfUserReviewedThisCourse() {
+      if (hasReviewedCourse) return true;
+      const studentId = user && user.studentId;
+      if (!studentId) return false;
+
+      if (localStorage.getItem(`cstu_reviewed_${code}_${studentId}`) === "true") {
+        return true;
+      }
+      try {
+        const storedKey = `cstu_reviews_${code}`;
+        const localList = JSON.parse(localStorage.getItem(storedKey) || "[]");
+        if (localList.some(r => r.studentId === studentId)) {
+          return true;
+        }
+      } catch (e) {}
+
+      if (typeof mockReviews !== "undefined" && mockReviews[code]) {
+        if (mockReviews[code].some(r => r.studentId === studentId)) {
+          return true;
+        }
+      }
+      return false;
+    }
+
+    function setReviewedState() {
+      const writeBtn = document.getElementById("write-btn");
+      if (!writeBtn) return;
+      writeBtn.style.display = "flex";
+      writeBtn.className = "reviewed-card";
+      writeBtn.removeAttribute("href");
+      writeBtn.onclick = null;
+      writeBtn.innerHTML = `
+        <div class="reviewed-card-content">
+          <div class="reviewed-icon-wrap" aria-hidden="true">
+            <img src="../src/success-icon.png" alt="verified icon" height="28" width="28"/>
+          </div>
+          <span class="reviewed-text">คุณเคยแบ่งปันประสบการณ์แล้ว</span>
+        </div>`;
+    }
+
+    function setIneligibleState(message) {
+      const writeBtn = document.getElementById("write-btn");
+      if (!writeBtn) return;
+      writeBtn.style.display = "flex";
+      writeBtn.className = "write-review-card disabled";
+      writeBtn.removeAttribute("href");
+      writeBtn.onclick = event => event.preventDefault();
+      const writeText = writeBtn.querySelector(".write-review-card-text");
+      if (writeText) {
+        writeText.innerHTML = `<div>${message || "ยังไม่มีสิทธิ์เขียนรีวิว"}</div>`;
+      }
+    }
+
+    function updateWriteBtn() {
       const writeBtn = document.getElementById("write-btn");
       const writeText = document.querySelector(".write-review-card-text");
       if (!writeBtn) return;
 
+      // 1 คนเรียนได้ 1 เซค เพราะฉะนั้นจะรีวิวได้เพียง 1 เซค 1 ครั้ง รีวิวไปแล้วจะไปรีวิวอีกเซคในวิชาเดียวกันไม่ได้
+      if (hasReviewedCourse || checkIfUserReviewedThisCourse()) {
+        hasReviewedCourse = true;
+        setReviewedState();
+        return;
+      }
+
+      if (eligibilityData && eligibilityData.alreadyReviewed) {
+        hasReviewedCourse = true;
+        setReviewedState();
+        return;
+      }
+
+      if (eligibilityData && !eligibilityData.eligible) {
+        setIneligibleState(eligibilityData.message || "ยังไม่มีสิทธิ์เขียนรีวิว");
+        return;
+      }
+
       if (!selectedSection) {
+        writeBtn.style.display = "flex";
         writeBtn.className = "write-review-card disabled";
         writeBtn.removeAttribute("href");
         writeBtn.onclick = (e) => {
@@ -117,32 +192,9 @@
         return;
       }
 
-      try {
-        const eligibility = await apiRequest(`/courses/${encodeURIComponent(code)}/reviews/eligibility`);
-        
-        if (eligibility && eligibility.alreadyReviewed) {
-          writeBtn.className = "reviewed-card";
-          writeBtn.removeAttribute("href");
-          writeBtn.onclick = null;
-          writeBtn.innerHTML = `
-            <div class="reviewed-card-content">
-              <div class="reviewed-icon-wrap">
-                <svg viewBox="0 0 24 24" fill="none" stroke="#22C55E" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" width="28" height="28">
-                  <circle cx="12" cy="12" r="10" stroke="#22C55E" stroke-width="2" fill="none"/>
-                  <polyline points="8 12 11 15 16 9" />
-                </svg>
-              </div>
-              <span class="reviewed-text">คุณเคยแบ่งปันประสบการณ์แล้ว</span>
-            </div>
-          `;
-          return;
-        }
-      } catch (e) {
-        console.error("Check eligibility error:", e);
-      }
-
+      writeBtn.style.display = "flex";
       writeBtn.className = "write-review-card";
-      writeBtn.href = `write-review.html?code=${encodeURIComponent(code)}&section=${encodeURIComponent(selectedSection)}`;
+      writeBtn.href = `write-review.html?code=${encodeURIComponent(code)}&section=${encodeURIComponent(selectedSection)}&sectionId=${encodeURIComponent(selectedSectionId)}`;
       writeBtn.onclick = null;
       if (writeText) {
         writeText.innerHTML = `
@@ -263,6 +315,7 @@
           if (teacherEl) teacherEl.textContent = instructor;
           if (badgeText) badgeText.textContent = "Section " + selectedSection;
         } else {
+
           // หากเลข section ใน URL ไม่ตรงกับที่มี ให้กลับสู่ค่าเริ่มต้น (Test case 1)
           selectedSection = "";
           selectedSectionId = "";
@@ -286,32 +339,31 @@
     initCourseDetail();
 
     async function checkReviewPermission() {
-      const writeBtn = document.getElementById("write-btn");
-      if (!writeBtn) return;
+      if (hasReviewedCourse || checkIfUserReviewedThisCourse()) {
+        hasReviewedCourse = true;
+        setReviewedState();
+        return;
+      }
+
       try {
         const res = await apiRequest(`/courses/${encodeURIComponent(code)}/reviews/eligibility`);
-        writeBtn.style.display = "flex";
+        eligibilityData = res;
         if (res && res.alreadyReviewed) {
-          writeBtn.className = "reviewed-card";
-          writeBtn.removeAttribute("href");
-          writeBtn.onclick = null;
-          writeBtn.innerHTML = `
-            <div class="reviewed-card-content">
-              <div class="reviewed-icon-wrap" aria-hidden="true">
-                <img src="../src/success-icon.png" alt="verified icon" height="28" width="28"/>
-              </div>
-              <span class="reviewed-text">คุณเคยแบ่งปันประสบการณ์แล้ว</span>
-            </div>`;
+          hasReviewedCourse = true;
+          setReviewedState();
         } else if (res && !res.eligible) {
-          writeBtn.className = "write-review-card disabled";
-          writeBtn.removeAttribute("href");
-          writeBtn.onclick = event => event.preventDefault();
-          const writeText = writeBtn.querySelector(".write-review-card-text");
-          if (writeText) writeText.innerHTML = `<div>${res.message || "ยังไม่มีสิทธิ์เขียนรีวิว"}</div>`;
+          setIneligibleState(res.message || "ยังไม่มีสิทธิ์เขียนรีวิว");
+        } else {
+          updateWriteBtn();
         }
       } catch (err) {
         console.error("Check permission error:", err);
-        writeBtn.style.display = "none";
+        if (checkIfUserReviewedThisCourse()) {
+          hasReviewedCourse = true;
+          setReviewedState();
+        } else {
+          updateWriteBtn();
+        }
       }
     }
 
@@ -340,8 +392,9 @@
       // Render รายการรีวิวแนวตั้ง (Vertical list) สูงสุด 5 รายการต่อหน้า
       reviewList.innerHTML = currentSlice.map(r => {
         const yearText = r.year ? `ชั้นปีที่ ${r.year}` : '';
-        const dateText = r.date || '10/10/2569';
-        const studentId = r.studentId || r.authorStudentId || "ไม่พบรหัสนักศึกษา";
+        const dateText = r.date || '9-11-2569';
+        const rawStudentId = r.studentId || r.authorStudentId || "";
+        const studentId = rawStudentId;
         
         // จัดรูปแบบแท็ก Section
         const rawSection = r.sectionNumber || r.sectionId || '';
@@ -349,6 +402,23 @@
         const sectionBadgeHtml = displaySection 
           ? `<span class="review-section-badge">Section ${displaySection}</span>` 
           : `<span class="review-section-badge general">ทั่วไป</span>`;
+
+        // จัดรูปแบบแท็กการประเมิน (Tags)
+        const tagsList = Array.isArray(r.tags) && r.tags.length > 0
+          ? r.tags
+          : ["เน้นทฤษฎี", "สมดุล"];
+        const tagsHtml = `
+          <div class="review-tags-wrap">
+            ${tagsList.map(t => `<span class="review-tag-badge">${t}</span>`).join('')}
+          </div>
+        `;
+
+        const commentText = (r.text || r.comment || "").trim();
+        const hasComment = commentText && commentText !== "-";
+        const commentHtml = hasComment ? `
+          <div class="review-comment-box">
+            <p class="review-comment-text">${commentText}</p>
+          </div>` : "";
 
         return `
           <div class="review-card">
@@ -362,9 +432,8 @@
               </div>
               <span class="review-date">${dateText}</span>
             </div>
-            <div class="review-comment-box">
-              <p class="review-comment-text">${r.text || r.comment || ''}</p>
-            </div>
+            ${tagsHtml}
+            ${commentHtml}
           </div>`;
       }).join('');
 
@@ -449,12 +518,40 @@
         if (allReviews.length === 0 && typeof getReviews === "function") {
           allReviews = getReviews(code, selectedSection) || [];
         }
+
+        // รวมรีวิวที่ผู้ใช้เพิ่งเขียนและบันทึกไว้ใน localStorage (โครงสร้างข้อมูลส่วน frontend)
+        try {
+          const storedKey = `cstu_reviews_${code}`;
+          let localList = JSON.parse(localStorage.getItem(storedKey) || "[]");
+          if (selectedSection) {
+            localList = localList.filter(r => !r.sectionNumber || String(r.sectionNumber).trim() === String(selectedSection).trim());
+          }
+          if (localList.length > 0) {
+            allReviews = [...localList, ...allReviews];
+          }
+        } catch (storageErr) {
+          console.warn("Could not load reviews from localStorage:", storageErr);
+        }
       } catch (err) {
         console.warn("Failed to load reviews from API, using fallback if available:", err);
         if (typeof getReviews === "function") {
           allReviews = getReviews(code, selectedSection) || [];
-        } else {
-          allReviews = [];
+        }
+
+        // รวมรีวิวที่ผู้ใช้เพิ่งเขียนและบันทึกไว้ใน localStorage (โครงสร้างข้อมูลส่วน frontend)
+        try {
+          const storedKey = `cstu_reviews_${code}`;
+          let localList = JSON.parse(localStorage.getItem(storedKey) || "[]");
+          if (selectedSection) {
+            localList = localList.filter(r => !r.sectionNumber || String(r.sectionNumber).trim() === String(selectedSection).trim());
+          }
+          if (localList.length > 0) {
+            allReviews = [...localList, ...allReviews];
+          }
+        } catch (storageErr) {
+          console.warn("Could not load reviews from localStorage:", storageErr);
+
+
         }
       }
 

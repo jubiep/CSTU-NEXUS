@@ -334,16 +334,16 @@ function getCourse(code) {
 // ── Mock reviews ────────────────────────────
 const mockReviews = {
   "CS261": [
-    { id: 1, sectionNumber: "100001", sectionId: "cs261_100001", studentId: "6600000000", year: 4, date: "10/10/2569", tags: ["เน้นทฤษฎี"], text: "อาจารย์สอนดีมาก สอนเข้าใจ ไม่เร็วเกินไป", workload: "ปานกลาง", style: "ทฤษฎี", detail: "ละเอียด" },
-    { id: 2, sectionNumber: "100001", sectionId: "cs261_100001", studentId: "6700000000", year: 3, date: "10/10/2569", tags: ["เน้นทฤษฎี"], text: "เนื้อหาแน่น มีแบบฝึกหัดให้ทำตลอด ช่วยให้เข้าใจ concept ได้ดี", workload: "น้อย", style: "ปฏิบัติ", detail: "กลาง" },
-    { id: 3, sectionNumber: "100001", sectionId: "cs261_100001", studentId: "6800000000", year: 2, date: "10/10/2569", tags: ["เน้นทฤษฎี"], text: "วิชานี้ต้องอ่านหนังสือสม่ำเสมอ เตรียมตัวสอบแต่เนิ่นๆ จะทำคะแนนได้ดี", workload: "มาก", style: "ทฤษฎี", detail: "กลาง" },
-    { id: 4, sectionNumber: "100001", sectionId: "cs261_100001", studentId: "6609650001", year: 4, date: "11/10/2569", tags: ["เน้นทฤษฎี"], text: "สไลด์และเอกสารประกอบการสอนครบถ้วนมาก แนะนำให้เข้าเรียนทุกคาบ", workload: "ปานกลาง", style: "ทฤษฎี", detail: "ละเอียด" },
+    { id: 1, sectionNumber: "870001", sectionId: "cs261_870001", studentId: "6600000000", year: 4, date: "9-11-2569", tags: ["เน้นทฤษฎี", "เน้นทฤษฎี"], text: "อาจารย์สอนดีมาก สอนเข้าใจ ไม่เร็วเกินไป", workload: "ปานกลาง", style: "ทฤษฎี", detail: "ละเอียด" },
+    { id: 2, sectionNumber: "870001", sectionId: "cs261_870001", studentId: "6600000000", year: 3, date: "9-11-2569", tags: ["เน้นทฤษฎี", "เน้นทฤษฎี"], text: "อาจารย์สอนดีมาก สอนเข้าใจ ไม่เร็วเกินไป", workload: "น้อย", style: "ปฏิบัติ", detail: "กลาง" },
+    { id: 3, sectionNumber: "870001", sectionId: "cs261_870001", studentId: "6600000000", year: 2, date: "9-11-2569", tags: ["เน้นทฤษฎี", "เน้นทฤษฎี"], text: "อาจารย์สอนดีมาก สอนเข้าใจ ไม่เร็วเกินไป", workload: "มาก", style: "ทฤษฎี", detail: "กลาง" },
+    { id: 4, sectionNumber: "870001", sectionId: "cs261_870001", studentId: "6609650001", year: 4, date: "11-11-2569", tags: ["เน้นทฤษฎี", "สมดุล"], text: "สไลด์และเอกสารประกอบการสอนครบถ้วนมาก แนะนำให้เข้าเรียนทุกคาบ", workload: "ปานกลาง", style: "ทฤษฎี", detail: "ละเอียด" },
     { id: 5, sectionNumber: "100001", sectionId: "cs261_100001", studentId: "6709650002", year: 3, date: "12/10/2569", tags: ["เน้นปฏิบัติ"], text: "มีการบ้านท้ายคาบช่วยทบทวน มีประโยชน์กับการสอบมาก", workload: "ปานกลาง", style: "ปฏิบัติ", detail: "กลาง" },
     { id: 6, sectionNumber: "100001", sectionId: "cs261_100001", studentId: "6809650003", year: 2, date: "13/10/2569", tags: ["เน้นทฤษฎี"], text: "ข้อสอบตรงกับสิ่งที่สอนในห้อง ถ้าตั้งใจเรียนเก็บเกรดสวยแน่นอน", workload: "น้อย", style: "ทฤษฎี", detail: "ละเอียด" },
     { id: 7, sectionNumber: "100001", sectionId: "cs261_100001", studentId: "6609650004", year: 4, date: "14/10/2569", tags: ["เน้นปฏิบัติ"], text: "เป็นวิชาพื้นฐานที่ดีมาก ช่วยต่อยอดวิชาขั้นสูงได้ดี", workload: "ปานกลาง", style: "ปฏิบัติ", detail: "ละเอียด" },
   ],
   "CS262": [
-    { id: 1, anonymous: true, studentId: "6800000000", year: 2, date: "10/10/2569", tags: ["เน้นปฏิบัติ"], text: "งาน Lab เยอะ แต่ได้ความรู้จริง", workload: "มาก", style: "ปฏิบัติ", detail: "ละเอียด" },
+    { id: 1, studentId: "6800000000", year: 2, date: "10/10/2569", tags: ["เน้นปฏิบัติ"], text: "งาน Lab เยอะ แต่ได้ความรู้จริง", workload: "มาก", style: "ปฏิบัติ", detail: "ละเอียด" },
   ],
 };
 

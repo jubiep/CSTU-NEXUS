@@ -209,3 +209,99 @@
 .btn-submit-review:active {
   transform: scale(.97);
 }
+
+
+/* ==========================================
+   Rating Dimension Cards & Squircle Radios
+   ========================================== */
+
+.rating-card {
+  margin-bottom: 16px;
+  padding: 16px;
+  border: 1px solid #f0f0f0;
+  border-radius: 20px;
+  background: #fff;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, .06);
+}
+
+.rating-card-header {
+  margin-bottom: 14px;
+  padding: 10px 16px;
+  border-radius: 12px;
+  background: linear-gradient(105deg, #ffe58e 0%, #ffd236 100%);
+  color: #1e1e1e;
+  font-size: 15px;
+  font-weight: 700;
+  text-align: center;
+  user-select: none;
+}
+
+.rating-options-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.rating-option {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 12px;
+  border-radius: 10px;
+  cursor: pointer;
+  user-select: none;
+  transition: background-color .15s ease;
+}
+
+.rating-option:hover {
+  background-color: #f8f9fa;
+}
+
+.rating-option input[type="radio"] {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+  margin: 0;
+}
+
+.custom-radio-icon {
+  width: 20px;
+  height: 20px;
+  border-radius: 6px;
+  background-color: #d1d5db;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all .2s ease;
+}
+
+.rating-option:hover .custom-radio-icon {
+  background-color: #9ca3af;
+}
+
+.rating-option input[type="radio"]:checked + .custom-radio-icon {
+  background: linear-gradient(105deg, #ffe58e 0%, #ffd236 100%);
+  box-shadow: 0 2px 6px rgba(254, 208, 83, .45);
+}
+
+.rating-option input[type="radio"]:checked + .custom-radio-icon::after {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  background-color: #1e1e1e;
+}
+
+.rating-option-label {
+  color: #4b5563;
+  font-size: 14px;
+  font-weight: 500;
+  transition: color .15s;
+}
+
+.rating-option input[type="radio"]:checked ~ .rating-option-label {
+  color: #111827;
+  font-weight: 600;
+}
