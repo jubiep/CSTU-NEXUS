@@ -44,6 +44,8 @@ CSTU-NEXUS/
 │   └── entity-database-table-mapping.md # ER Diagram, API-DAO Mapping & Permission Flow
 │
 ├── frontend/                     # ฝั่งหน้าเว็บผู้ใช้งาน
+│   ├── Dockerfile                # Frontend image (development/production)
+│   ├── nginx.conf.template       # Static hosting และ reverse proxy ไป Backend
 │   ├── pages/                    # ไฟล์หน้าเว็บ HTML แต่ละหน้า
 │   │   ├── index.html            # หน้าเข้าสู่ระบบ (Login)
 │   │   ├── courses.html          # หน้ารายการวิชาทั้งหมด (Course List)
@@ -153,7 +155,9 @@ cp .env.example .env
 
 ```env
 TU_API_APPLICATION_KEY=your_actual_key_here
-APP_CORS_ALLOWED_ORIGINS=http://localhost:5500,http://127.0.0.1:5500,http://localhost:5501,http://127.0.0.1:5501
+APP_CORS_ALLOWED_ORIGINS=http://localhost:3000,http://localhost:5500,http://127.0.0.1:5500,http://localhost:5501,http://127.0.0.1:5501
+FRONTEND_PORT=3000
+FRONTEND_TARGET=production
 ```
 
 *(ไฟล์ `.env` นี้จะไม่ถูกนำขึ้น Git เนื่องจากมี `.gitignore` ดักไว้แล้ว)*
@@ -211,10 +215,30 @@ docker compose --env-file .env -f backend/database/compose.yaml up -d --build
 
 Frontend ถูกพัฒนาด้วย Vanilla HTML/CSS/JS บริสุทธิ์ สามารถเปิดได้ทันที:
 
-#### วิธีที่ 1: ใช้ Live Server (VS Code Extension)
+#### วิธีที่ 1: รันทั้งระบบด้วย Docker Compose (แนะนำ)
+
+จาก root ของ repository:
+
+```bash
+docker compose --env-file .env up -d --build
+```
+
+เปิด Browser ที่ `http://localhost:3000` ระบบจะส่งคำขอ `/api` ผ่าน Frontend container ไปยัง Backend container บน Docker network จึงไม่ต้องใช้ hostname `backend` จาก Browser และไม่เกิด CORS ระหว่างหน้าเว็บกับ API
+
+ตรวจสอบสถานะหรือหยุดบริการ:
+
+```bash
+docker compose ps
+docker compose logs -f frontend
+docker compose down
+```
+
+เลือก Docker build target ได้ด้วย `FRONTEND_TARGET=development` หรือ `FRONTEND_TARGET=production` ใน `.env` ส่วน `BACKEND_HOST` และ `BACKEND_PORT` เป็น environment variables ที่ Nginx ใช้ชี้ไปยัง Backend service ภายใน network
+
+#### วิธีที่ 2: ใช้ Live Server (VS Code Extension)
 - คลิกขวาที่ไฟล์ `frontend/pages/index.html` → เลือก **Open with Live Server**
 
-#### วิธีที่ 2: ใช้ Python Simple HTTP Server
+#### วิธีที่ 3: ใช้ Python Simple HTTP Server
 ```bash
 cd frontend/
 python -m http.server 5500

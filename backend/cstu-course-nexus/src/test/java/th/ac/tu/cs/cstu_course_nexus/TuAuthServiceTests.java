@@ -37,7 +37,7 @@ class TuAuthServiceTests {
                           "type": "student",
                           "username": "6800000000",
                           "displayname_th": "นักศึกษา ทดสอบ",
-                          "email": "student@dome.tu.ac.th",
+                          "email": "student@tu.ac.th",
                           "faculty": "คณะทดสอบ",
                           "department": "วิทยาการคอมพิวเตอร์"
                         }
@@ -50,7 +50,7 @@ class TuAuthServiceTests {
         assertEquals("6800000000", user.studentId());
         assertEquals("คณะทดสอบ", user.faculty());
         assertEquals("วิทยาการคอมพิวเตอร์", user.department());
-        assertEquals("student@dome.tu.ac.th", user.email());
+        assertEquals("student@tu.ac.th", user.email());
         assertEquals(StudyYearCalculator.calculate("6800000000"), user.year());
         server.verify();
     }
@@ -77,6 +77,26 @@ class TuAuthServiceTests {
         );
 
         assertEquals(403, exception.getStatusCode().value());
+        server.verify();
+    }
+
+    @Test
+    void usesLoginStudentIdWhenTuResponseOmitsStudentMetadata() {
+        RestClient.Builder builder = RestClient.builder();
+        MockRestServiceServer server = MockRestServiceServer.bindTo(builder).build();
+        server.expect(requestTo(VERIFY_URL))
+                .andRespond(withSuccess("""
+                        {
+                          "status": true,
+                          "displayname_th": "นักศึกษา ทดสอบ",
+                          "email": "student@tu.ac.th"
+                        }
+                        """, MediaType.APPLICATION_JSON));
+
+        TuAuthService service = new TuAuthService(builder, VERIFY_URL, "test-application-key");
+        AuthUser user = service.verify("6800000000", "test-password");
+
+        assertEquals("6800000000", user.studentId());
         server.verify();
     }
 
