@@ -251,11 +251,6 @@
   border-radius: 10px;
   cursor: pointer;
   user-select: none;
-  transition: background-color .15s ease;
-}
-
-.rating-option:hover {
-  background-color: #f8f9fa;
 }
 
 .rating-option input[type="radio"] {
@@ -275,10 +270,6 @@
   justify-content: center;
   flex-shrink: 0;
   transition: all .2s ease;
-}
-
-.rating-option:hover .custom-radio-icon {
-  background-color: #9ca3af;
 }
 
 .rating-option input[type="radio"]:checked + .custom-radio-icon {
