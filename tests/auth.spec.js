@@ -36,7 +36,7 @@ test('แสดงข้อความเมื่อบัญชีถูก�
   await page.locator('#password').fill('test-password');
   await page.locator('#login-button').click();
 
-  await expect(page.locator('.alert')).toContainText(
+  await expect(page.locator('#error-msg')).toContainText(
     'ระบบนี้อนุญาตให้ใช้งานเฉพาะนักศึกษาสาขาวิชาวิทยาการคอมพิวเตอร์ เท่านั้น'
   );
 });
