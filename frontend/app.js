@@ -519,3 +519,79 @@ document.addEventListener('DOMContentLoaded', () => {
     updateButtonStates();
   }
 });
+
+/* ==========================================
+   Rating & Preference Matching Logic (0.0 - 1.0)
+   ========================================== */
+
+const RATING_SCALE_MAP = {
+  teaching_method: {
+    "เน้นทฤษฎี": 0.0,
+    "สมดุล": 0.5,
+    "เน้นปฏิบัติ": 1.0,
+    "ไม่แน่ใจ": null
+  },
+  evaluation: {
+    "เน้นคะแนนสอบ": 0.0,
+    "สมดุล": 0.5,
+    "เน้นโครงงาน": 1.0,
+    "ไม่แน่ใจ": null
+  },
+  teaching_speed: {
+    "สอนช้า": 0.0,
+    "สอนค่อนข้างช้า": 0.25,
+    "ปานกลาง": 0.5,
+    "สอนค่อนข้างเร็ว": 0.75,
+    "สอนเร็ว": 1.0,
+    "ไม่แน่ใจ": null
+  },
+  assignment_style: {
+    "เน้นงานเดี่ยว": 0.0,
+    "สมดุล": 0.5,
+    "เน้นงานกลุ่ม": 1.0,
+    "ไม่แน่ใจ": null
+  },
+  workload: {
+    "งานน้อย": 0.0,
+    "งานค่อนข้างน้อย": 0.25,
+    "ปริมาณงานสมดุล": 0.5,
+    "งานค่อนข้างเยอะ": 0.75,
+    "งานเยอะ": 1.0,
+    "ไม่แน่ใจ": null
+  }
+};
+
+const DIMENSION_LABELS = {
+  teaching_method: "แนวทางการสอน",
+  evaluation: "สัดส่วนการวัดผล",
+  teaching_speed: "ความเร็วในการสอน",
+  assignment_style: "รูปแบบงาน",
+  workload: "ปริมาณงาน"
+};
+
+/**
+ * แปลงค่าตัวเลือกภาษาไทยเป็นคะแนน 0.0 - 1.0
+ * @param {string} dimension ชื่อหมวดหมู่ (เช่น 'teaching_method')
+ * @param {string} value ตัวเลือกที่เลือก (เช่น 'เน้นปฏิบัติ')
+ * @returns {number|null} คะแนน 0.0 - 1.0 หรือ null ถ้าเป็น 'ไม่แน่ใจ'
+ */
+function convertRatingToScore(dimension, value) {
+  if (!dimension || !value) return null;
+  const dimMap = RATING_SCALE_MAP[dimension];
+  if (!dimMap || !(value in dimMap)) return null;
+  return dimMap[value];
+}
+
+/**
+ * แปลงชุด ratings ที่เลือกจากฟอร์มให้เป็นตัวเลข 0.0 - 1.0
+ * @param {Object} ratingsObj เช่น { teaching_method: 'เน้นทฤษฎี', ... }
+ * @returns {Object} { teaching_method: 0.0, evaluation: 0.5, ... }
+ */
+function normalizeRatings(ratingsObj) {
+  if (!ratingsObj || typeof ratingsObj !== "object") return {};
+  const result = {};
+  for (const [dim, val] of Object.entries(ratingsObj)) {
+    result[dim] = convertRatingToScore(dim, val);
+  }
+  return result;
+}

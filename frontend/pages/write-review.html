@@ -399,8 +399,9 @@
         const text = textarea ? textarea.value.trim() : "";
         errEl.style.display = "none";
 
-        // บันทึกรีวิวพร้อมแท็กไว้ใน localStorage เพื่อแสดงผลทันทีในหน้ารายละเอียดวิชา
+        // บันทึกรีวิวพร้อมแท็กและคะแนนสเกล 0-1 ไว้ใน localStorage เพื่อแสดงผลทันทีในหน้ารายละเอียดวิชา
         const currentStudentId = (user && user.studentId) || "";
+        const dimensionScores = typeof normalizeRatings === "function" ? normalizeRatings(ratings) : {};
         try {
           const storedKey = `cstu_reviews_${code}`;
           const currentLocal = JSON.parse(localStorage.getItem(storedKey) || "[]");
@@ -414,6 +415,7 @@
             date: new Date().toLocaleDateString("th-TH", { day: "numeric", month: "numeric", year: "numeric" }).replace(/\//g, "-"),
             tags: selectedTags.length > 0 ? selectedTags : ["เน้นทฤษฎี"],
             ratings: ratings,
+            scores: dimensionScores,
             text: text,
             comment: text
           };
