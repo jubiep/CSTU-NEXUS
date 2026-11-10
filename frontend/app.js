@@ -595,3 +595,49 @@ function normalizeRatings(ratingsObj) {
   }
   return result;
 }
+
+/**
+ * ส่งรีวิวรายวิชาไปยัง Backend พร้อมส่งค่าทั้ง 5 เกณฑ์การประเมิน
+ * @param {string} courseId รหัสวิชา เช่น 'CS261'
+ * @param {Object} reviewData ข้อมูลรีวิว { sectionId, reviewText, ratings, ... }
+ * @returns {Promise<Object>}
+ */
+async function submitReview(courseId, reviewData = {}) {
+  if (!courseId) throw new Error("ไม่พบรหัสวิชาที่ต้องการรีวิว");
+
+  const ratings = reviewData.ratings || {};
+  const scores = typeof normalizeRatings === "function" ? normalizeRatings(ratings) : {};
+  const text = (reviewData.reviewText || reviewData.text || reviewData.comment || "-").trim();
+
+  // จัดเตรียม Payload ส่งค่าทั้ง 5 เกณฑ์ไปยัง Backend
+  const payload = {
+    sectionId: reviewData.sectionId || null,
+    reviewText: text || "-",
+    comment: text || "-",
+    text: text || "-",
+
+    // 5 เกณฑ์การประเมิน
+    teachingMethod: ratings.teaching_method || null,
+    evaluation: ratings.evaluation || null,
+    teachingSpeed: ratings.teaching_speed || null,
+    assignmentStyle: ratings.assignment_style || null,
+    workload: ratings.workload || null,
+
+    // ค่าสเกล 0.0 - 1.0 ของทั้ง 5 เกณฑ์
+    teachingMethodScore: scores.teaching_method ?? null,
+    evaluationScore: scores.evaluation ?? null,
+    teachingSpeedScore: scores.teaching_speed ?? null,
+    assignmentStyleScore: scores.assignment_style ?? null,
+    workloadScore: scores.workload ?? null,
+
+    ratings: ratings,
+    scores: scores
+  };
+
+  return await apiRequest(`/courses/${encodeURIComponent(courseId)}/reviews`, {
+    method: "POST",
+    body: JSON.stringify(payload)
+  });
+}
+
+const apiSubmitReview = submitReview;

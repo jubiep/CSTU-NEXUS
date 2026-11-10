@@ -210,6 +210,15 @@
   transform: scale(.97);
 }
 
+.btn-submit-review:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  box-shadow: none;
+  filter: grayscale(0.3);
+  transform: none;
+}
+
+
 
 /* ==========================================
    Rating Dimension Cards & Squircle Radios

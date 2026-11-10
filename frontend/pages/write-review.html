@@ -349,7 +349,47 @@
         }
       }
 
-      window.submitReview = async function submitReview() {
+      const dimensionKeys = [
+        { name: "teaching_method", label: "แนวทางการสอน" },
+        { name: "evaluation", label: "สัดส่วนการวัดผลและตัดเกรด" },
+        { name: "teaching_speed", label: "ความเร็วในการสอน" },
+        { name: "assignment_style", label: "รูปแบบงาน" },
+        { name: "workload", label: "ปริมาณงาน" }
+      ];
+
+      // Form Validation: ตรวจสอบว่าเลือกครบทั้ง 5 หัวข้อหรือยัง เพื่อเปิด/ปิดปุ่มส่ง
+      function validateFormCompletion() {
+        const submitBtn = document.querySelector(".btn-submit-review");
+        if (!submitBtn) return false;
+        if (alreadyReviewed || checkIfUserReviewedThisCourse()) {
+          submitBtn.disabled = true;
+          return false;
+        }
+
+        const isComplete = dimensionKeys.every(dim => {
+          const checked = document.querySelector(`input[name="${dim.name}"]:checked`);
+          return checked && checked.value;
+        });
+
+        submitBtn.disabled = !isComplete;
+        return isComplete;
+      }
+
+      // ดักจับการเลือก radio ทุกข้อแบบ Real-time
+      document.querySelectorAll('input[type="radio"]').forEach(radio => {
+        radio.addEventListener("change", () => {
+          const isComplete = validateFormCompletion();
+          const errEl = document.getElementById("form-error");
+          if (errEl && isComplete) {
+            errEl.style.display = "none";
+          }
+        });
+      });
+
+      // ตรวจสอบสถานะฟอร์มครั้งแรกตอนโหลดหน้า
+      validateFormCompletion();
+
+      window.submitReview = async function submitReviewHandler() {
         const errEl = document.getElementById("form-error");
         const submitBtn = document.querySelector(".btn-submit-review");
 
@@ -358,21 +398,11 @@
           errEl.style.display = "block";
           if (submitBtn) {
             submitBtn.disabled = true;
-            submitBtn.style.opacity = "0.5";
-            submitBtn.style.cursor = "not-allowed";
           }
           return;
         }
 
-        // ตรวจสอบว่าเลือกครบทุกหมวดหมู่การประเมินหรือไม่ (จำเป็นต้องเลือกทุกหมวดหมู่)
-        const dimensionKeys = [
-          { name: "teaching_method", label: "แนวทางการสอน" },
-          { name: "evaluation", label: "สัดส่วนการวัดผลและตัดเกรด" },
-          { name: "teaching_speed", label: "ความเร็วในการสอน" },
-          { name: "assignment_style", label: "รูปแบบงาน" },
-          { name: "workload", label: "ปริมาณงาน" }
-        ];
-
+        // ตรวจสอบว่าเลือกครบทุกหมวดหมู่การประเมินหรือไม่
         const selectedTags = [];
         const ratings = {};
         const missingCategories = [];
@@ -391,6 +421,7 @@
           errEl.textContent = "กรุณาเลือกการประเมินให้ครบทุกหมวดหมู่";
           errEl.style.display = "block";
           errEl.scrollIntoView({ behavior: "smooth", block: "center" });
+          if (submitBtn) submitBtn.disabled = true;
           return;
         }
 
@@ -432,15 +463,32 @@
         submitBtn.textContent = "กำลังส่ง...";
 
         try {
-          await apiRequest(`/courses/${encodeURIComponent(code)}/reviews`, {
-            method: "POST",
-            body: JSON.stringify({
+          // เรียกใช้งานฟังก์ชัน submitReview ใน app.js ที่ส่งค่าทั้ง 5 เกณฑ์ไปยัง Backend
+          if (typeof window.submitReview === "function" && window.submitReview !== submitReviewHandler) {
+            await window.submitReview(code, {
               sectionId: sectionId || null,
               reviewText: text || "-",
-              comment: text || "-",
-              text: text || "-"
-            }),
-          });
+              ratings: ratings
+            });
+          } else if (typeof apiSubmitReview === "function") {
+            await apiSubmitReview(code, {
+              sectionId: sectionId || null,
+              reviewText: text || "-",
+              ratings: ratings
+            });
+          } else {
+            await apiRequest(`/courses/${encodeURIComponent(code)}/reviews`, {
+              method: "POST",
+              body: JSON.stringify({
+                sectionId: sectionId || null,
+                reviewText: text || "-",
+                comment: text || "-",
+                text: text || "-",
+                ratings: ratings,
+                scores: dimensionScores
+              }),
+            });
+          }
 
           if (currentStudentId) {
             localStorage.setItem(`cstu_reviewed_${code}_${currentStudentId}`, "true");
@@ -454,6 +502,7 @@
         } finally {
           submitBtn.disabled = false;
           submitBtn.textContent = "ส่ง";
+          validateFormCompletion();
         }
       };
     });
