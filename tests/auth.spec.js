@@ -19,7 +19,10 @@ test('แสดงข้อความเมื่อบัญชีถูก�
         status: 403,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          detail: 'ระบบนี้อนุญาตให้ใช้งานเฉพาะนักศึกษาสาขาวิชาวิทยาการคอมพิวเตอร์ เท่านั้น',
+          timestamp: '2026-11-11T15:10:50.441Z',
+          status: 403,
+          error: 'Forbidden',
+          path: '/api/auth/login',
         }),
       });
     }
