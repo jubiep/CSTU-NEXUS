@@ -29,13 +29,13 @@ class TuAuthServiceTests {
                 .andExpect(method(HttpMethod.POST))
                 .andExpect(header("Application-Key", "test-application-key"))
                 .andExpect(content().json("""
-                        {"UserName":"student@dome.tu.ac.th","PassWord":"test-password"}
+                        {"UserName":"6809000000","PassWord":"test-password"}
                         """))
                 .andRespond(withSuccess("""
                         {
                           "status": true,
                           "type": "student",
-                          "username": "6800000000",
+                          "username": "6809000000",
                           "displayname_th": "นักศึกษา ทดสอบ",
                           "email": "student@tu.ac.th",
                           "faculty": "คณะทดสอบ",
@@ -44,14 +44,14 @@ class TuAuthServiceTests {
                         """, MediaType.APPLICATION_JSON));
 
         TuAuthService service = new TuAuthService(builder, VERIFY_URL, "test-application-key");
-        AuthUser user = service.verify("student@dome.tu.ac.th", "test-password");
+        AuthUser user = service.verify("6809000000", "test-password");
 
         assertEquals("นักศึกษา ทดสอบ", user.displayName());
-        assertEquals("6800000000", user.studentId());
+        assertEquals("6809000000", user.studentId());
         assertEquals("คณะทดสอบ", user.faculty());
         assertEquals("วิทยาการคอมพิวเตอร์", user.department());
         assertEquals("student@tu.ac.th", user.email());
-        assertEquals(StudyYearCalculator.calculate("6800000000"), user.year());
+        assertEquals(StudyYearCalculator.calculate("6809000000"), user.year());
         server.verify();
     }
 
@@ -81,6 +81,37 @@ class TuAuthServiceTests {
     }
 
     @Test
+    void rejectsStudentOutsideConfiguredCstuIdPrefix() {
+        RestClient.Builder builder = RestClient.builder();
+        MockRestServiceServer server = MockRestServiceServer.bindTo(builder).build();
+        server.expect(requestTo(VERIFY_URL))
+                .andRespond(withSuccess("""
+                        {
+                          "status": true,
+                          "type": "student",
+                          "username": "6808000000",
+                          "displayname_th": "นักศึกษาต่างสาขา",
+                          "email": "student@tu.ac.th",
+                          "faculty": "คณะทดสอบ",
+                          "department": "สาขาอื่น"
+                        }
+                        """, MediaType.APPLICATION_JSON));
+
+        TuAuthService service = new TuAuthService(builder, VERIFY_URL, "test-application-key");
+        ResponseStatusException exception = assertThrows(
+                ResponseStatusException.class,
+                () -> service.verify("6808000000", "test-password")
+        );
+
+        assertEquals(HttpStatus.FORBIDDEN, exception.getStatusCode());
+        assertEquals(
+                "ระบบนี้อนุญาตให้ใช้งานเฉพาะนักศึกษาสาขาวิชาวิทยาการคอมพิวเตอร์ เท่านั้น",
+                exception.getReason()
+        );
+        server.verify();
+    }
+
+    @Test
     void usesLoginStudentIdWhenTuResponseOmitsStudentMetadata() {
         RestClient.Builder builder = RestClient.builder();
         MockRestServiceServer server = MockRestServiceServer.bindTo(builder).build();
@@ -94,9 +125,9 @@ class TuAuthServiceTests {
                         """, MediaType.APPLICATION_JSON));
 
         TuAuthService service = new TuAuthService(builder, VERIFY_URL, "test-application-key");
-        AuthUser user = service.verify("6800000000", "test-password");
+        AuthUser user = service.verify("6809000000", "test-password");
 
-        assertEquals("6800000000", user.studentId());
+        assertEquals("6809000000", user.studentId());
         server.verify();
     }
 
@@ -110,7 +141,7 @@ class TuAuthServiceTests {
         TuAuthService service = new TuAuthService(builder, VERIFY_URL, "test-application-key");
         ResponseStatusException exception = assertThrows(
                 ResponseStatusException.class,
-                () -> service.verify("6800000000", "wrong-password")
+                () -> service.verify("6809000000", "wrong-password")
         );
 
         assertEquals(401, exception.getStatusCode().value());
@@ -123,12 +154,12 @@ class TuAuthServiceTests {
         RestClient.Builder builder = RestClient.builder();
         TuAuthService serviceWithCr = new TuAuthService(builder, VERIFY_URL, "\r\n");
         ResponseStatusException ex1 = assertThrows(ResponseStatusException.class,
-                () -> serviceWithCr.verify("6800000000", "pass"));
+                () -> serviceWithCr.verify("6809000000", "pass"));
         assertEquals(HttpStatus.SERVICE_UNAVAILABLE, ex1.getStatusCode());
 
         TuAuthService serviceWithQuotes = new TuAuthService(builder, VERIFY_URL, "\"\"");
         ResponseStatusException ex2 = assertThrows(ResponseStatusException.class,
-                () -> serviceWithQuotes.verify("6800000000", "pass"));
+                () -> serviceWithQuotes.verify("6809000000", "pass"));
         assertEquals(HttpStatus.SERVICE_UNAVAILABLE, ex2.getStatusCode());
     }
 }
