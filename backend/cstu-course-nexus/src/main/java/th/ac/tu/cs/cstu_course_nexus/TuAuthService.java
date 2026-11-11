@@ -15,6 +15,9 @@ import org.springframework.web.server.ResponseStatusException;
 @Service
 public class TuAuthService {
 
+    private static final String CSTU_STUDENT_ID_PREFIX = "6809";
+    private static final String CSTU_ONLY_MESSAGE =
+            "ระบบนี้อนุญาตให้ใช้งานเฉพาะนักศึกษาสาขาวิชาวิทยาการคอมพิวเตอร์ เท่านั้น";
     private static final ParameterizedTypeReference<Map<String, Object>> RESPONSE_TYPE =
             new ParameterizedTypeReference<>() { };
 
@@ -95,16 +98,21 @@ public class TuAuthService {
         }
 
         String accountType = value(response, "type", "accountType");
-        if (!"student".equalsIgnoreCase(accountType)) {
+        if (!accountType.isBlank() && !"student".equalsIgnoreCase(accountType)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "อนุญาตเฉพาะบัญชีนักศึกษา TU");
         }
 
+        String studentId = studentId(response);
+        if (studentId.isBlank() && username.matches("\\d{10}")) {
+            studentId = username;
+        }
+        if (!studentId.matches("\\d{10}")) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "อนุญาตเฉพาะบัญชีนักศึกษา TU");
+        }
+        if (!studentId.startsWith(CSTU_STUDENT_ID_PREFIX)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, CSTU_ONLY_MESSAGE);
+        }
         String email = value(response, "email");
-        if (!email.toLowerCase().endsWith("@dome.tu.ac.th")) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "อนุญาตเฉพาะบัญชีนักศึกษา TU");
-        }
-
-        String studentId = value(response, "username", "student_id", "studentId");
         String displayName = value(response, "displayname_th", "displayName", "displayname_en");
         if (studentId.isBlank() || displayName.isBlank()) {
             throw new ResponseStatusException(
@@ -132,6 +140,16 @@ public class TuAuthService {
             Object value = response.get(key);
             if (value instanceof String text && !text.isBlank()) {
                 return text.trim();
+            }
+        }
+        return "";
+    }
+
+    private static String studentId(Map<String, Object> response) {
+        for (String key : new String[] {"student_id", "studentId", "username"}) {
+            String candidate = value(response, key);
+            if (candidate.matches("\\d{10}")) {
+                return candidate;
             }
         }
         return "";

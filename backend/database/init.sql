@@ -42,9 +42,14 @@ CREATE TABLE review (
         REFERENCES mock_user(user_id),
     reviewer_year INTEGER NOT NULL
         CHECK (reviewer_year BETWEEN 1 AND 4),
+    review_text TEXT NOT NULL,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
 
     CONSTRAINT review_section_course_match
         FOREIGN KEY (course_id, section_id)
-        REFERENCES sections(course_id, section_id)
+        REFERENCES sections(course_id, section_id),
+
+    -- Prevent concurrent duplicate reviews for the same course by one student.
+    CONSTRAINT review_course_user_unique
+        UNIQUE (course_id, user_id)
 );

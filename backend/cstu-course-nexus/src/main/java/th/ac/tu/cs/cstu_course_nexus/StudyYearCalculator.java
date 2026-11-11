@@ -17,7 +17,7 @@ public final class StudyYearCalculator {
     }
 
     static Integer calculate(String studentId, int gregorianYear) {
-        if (studentId == null || !studentId.matches("\\d{2}.*")) {
+        if (studentId == null || !studentId.matches("\\d{10}")) {
             return null;
         }
 

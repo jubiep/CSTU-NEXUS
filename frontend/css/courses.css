@@ -84,7 +84,7 @@
 
 .search-wrap {
   position: relative;
-  margin-bottom: 16px;
+  margin-bottom: 12px;
 }
 
 .search-wrap .search-icon,
@@ -141,6 +141,191 @@
   background: var(--gray-500);
 }
 
+/* Filter Dropdowns Row (สไตล์ปุ่มสีเหลืองตามภาพ UI Mockup) */
+.filter-dropdowns-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  margin: 10px 0 16px;
+  position: relative;
+}
+
+.dropdown {
+  position: relative;
+}
+
+.dropdown-btn {
+  background: linear-gradient(105deg, #ffe58e 0%, #ffd236 100%);
+  color: #000000;
+  border: none;
+  border-radius: 22px;
+  padding: 8px 18px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  box-shadow: 0 4px 10px rgba(255, 210, 54, 0.4);
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  min-width: 126px;
+  min-height: 39.2px;
+  box-sizing: border-box;
+}
+
+.dropdown-btn.has-value {
+  background: linear-gradient(105deg, #ffe58e 0%, #ffd236 100%);
+  box-shadow: 0 4px 10px rgba(255, 210, 54, 0.4);
+}
+
+.dropdown-chevron {
+  transition: transform 0.2s ease;
+  flex-shrink: 0;
+  stroke: #000000;
+}
+
+.dropdown.open .dropdown-chevron {
+  transform: rotate(180deg);
+}
+
+.dropdown-menu {
+  display: none;
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--white);
+  border: 1px solid var(--gray-200);
+  border-radius: 14px;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.14);
+  min-width: 165px;
+  max-width: 240px;
+  z-index: 200;
+  overflow: hidden;
+  padding: 6px;
+  animation: dropdownPop 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes dropdownPop {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -6px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0) scale(1);
+  }
+}
+
+.dropdown.open .dropdown-menu {
+  display: block;
+}
+
+/* Single-select Item ภายใน Dropdown (ชั้นปี - ไม่มี hover สีแดง จะขึ้นสีแดงเฉพาะเมื่อถูกเลือก active เท่านั้น) */
+.dropdown-item {
+  padding: 9px 14px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--gray-800);
+  border-radius: 8px;
+  cursor: pointer;
+  white-space: nowrap;
+  text-align: center;
+  margin-bottom: 3px;
+  user-select: none;
+}
+
+.dropdown-item:last-child {
+  margin-bottom: 0;
+}
+
+.dropdown-item.active {
+  background-color: var(--red) !important;
+  color: var(--white) !important;
+  font-weight: 600;
+  box-shadow: 0 2px 6px rgba(195, 0, 47, 0.35);
+}
+
+/* Checkbox Item ภายใน Dropdown (หมวดหมู่ - ไม่มี hover) */
+.dropdown-checkbox-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.dropdown-checkbox-item input[type="checkbox"] {
+  display: none;
+}
+
+.custom-checkbox {
+  width: 20px;
+  height: 20px;
+  border-radius: 6px;
+  background-color: #9E9E9E;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: background-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.dropdown-checkbox-item input[type="checkbox"]:checked + .custom-checkbox {
+  background-color: var(--red);
+  box-shadow: 0 2px 6px rgba(195, 0, 47, 0.35);
+}
+
+.dropdown-checkbox-item input[type="checkbox"]:checked + .custom-checkbox::after {
+  content: "";
+  width: 5px;
+  height: 9px;
+  border: solid #ffffff;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+  margin-bottom: 2px;
+}
+
+.checkbox-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--gray-800);
+  white-space: nowrap;
+}
+
+.filter-action-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 4px 10px;
+}
+
+.filter-result-count {
+  font-size: 12px;
+  color: var(--gray-600);
+  font-weight: 500;
+}
+
+.btn-reset-filters {
+  background: none;
+  border: none;
+  color: var(--red);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.btn-reset-filters:hover {
+  text-decoration: underline;
+}
+
 /* Course grid & cards */
 .course-grid {
   display: grid;
@@ -173,9 +358,35 @@
   flex-shrink: 0;
 }
 
+.course-card-content {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.course-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+}
+
 .course-code {
   font-size: 16px;
   font-weight: 700;
+}
+
+.course-year-tag {
+  flex-shrink: 0;
+  font-size: 11px;
+  font-weight: 600;
+  color: #B7791F;
+  background: #FFF8E7;
+  border: 1px solid #FFE494;
+  border-radius: 10px;
+  padding: 1px 7px;
+  line-height: 1.3;
 }
 
 .course-name {

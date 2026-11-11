@@ -5,7 +5,9 @@
 const isLocalFrontend = ["localhost", "127.0.0.1"].includes(window.location.hostname);
 const API_BASE_URL = (
   window.CSTU_API_BASE_URL
-  || (isLocalFrontend ? `http://${window.location.hostname}:8080/api` : `${window.location.origin}/api`)
+  || (isLocalFrontend && window.location.port !== "3000"
+    ? `http://${window.location.hostname}:8080/api`
+    : `${window.location.origin}/api`)
 ).replace(/\/+$/, "");
 const AUTH_STATE_KEY = "cstu_authenticated";
 const mockCurrentUser = {
@@ -15,24 +17,91 @@ const mockCurrentUser = {
   faculty: "คณะวิทยาศาสตร์และเทคโนโลยี สาขาวิทยาการคอมพิวเตอร์"
 };
 
-/* ค้นหารายวิชาจาก Backend (หากยังเชื่อมไม่ได้ ให้ใช้ mockCourses แทนอัตโนมัติ) */
-async function apiFetchCourses(keyword = "") {
+/* ค้นหารายวิชาจาก Backend (รองรับ keyword, year, years, category, categories และ fallback เป็น mockCourses) */
+async function apiFetchCourses(keywordOrOptions = "", maybeYear = null, maybeCategory = "") {
+  let keyword = "";
+  let yearList = [];
+  let catList = [];
+
+  if (typeof keywordOrOptions === "object" && keywordOrOptions !== null) {
+    keyword = keywordOrOptions.keyword || "";
+
+    if (keywordOrOptions.years && Array.isArray(keywordOrOptions.years)) {
+      yearList = keywordOrOptions.years.map(String).filter(Boolean);
+    } else if (keywordOrOptions.years) {
+      yearList = String(keywordOrOptions.years).split(",").map(s => s.trim()).filter(Boolean);
+    } else if (keywordOrOptions.year !== undefined && keywordOrOptions.year !== null && String(keywordOrOptions.year).trim() !== "") {
+      yearList = [String(keywordOrOptions.year).trim()];
+    }
+
+    if (keywordOrOptions.categories && Array.isArray(keywordOrOptions.categories)) {
+      catList = keywordOrOptions.categories.map(c => String(c).trim().toUpperCase()).filter(Boolean);
+    } else if (keywordOrOptions.categories) {
+      catList = String(keywordOrOptions.categories).split(",").map(s => s.trim().toUpperCase()).filter(Boolean);
+    } else if (keywordOrOptions.category) {
+      catList = [String(keywordOrOptions.category).trim().toUpperCase()];
+    }
+  } else {
+    keyword = keywordOrOptions || "";
+    if (maybeYear !== undefined && maybeYear !== null && String(maybeYear).trim() !== "") {
+      yearList = [String(maybeYear).trim()];
+    }
+    if (maybeCategory) {
+      catList = [String(maybeCategory).trim().toUpperCase()];
+    }
+  }
+
   const trimmed = keyword.trim();
-  const url = trimmed 
-    ? `${API_BASE_URL}/courses?keyword=${encodeURIComponent(trimmed)}`
-    : `${API_BASE_URL}/courses`;
+  const params = new URLSearchParams();
+  if (trimmed) params.append("keyword", trimmed);
+  if (yearList.length === 1) {
+    params.append("year", yearList[0]);
+  } else if (yearList.length > 1) {
+    params.append("years", yearList.join(","));
+  }
+  if (catList.length === 1) {
+    params.append("category", catList[0]);
+  } else if (catList.length > 1) {
+    params.append("categories", catList.join(","));
+  }
+
+  const queryString = params.toString();
+  const url = queryString ? `${API_BASE_URL}/courses?${queryString}` : `${API_BASE_URL}/courses`;
+
+  const filterList = (list) => {
+    let results = Array.isArray(list) ? list : [];
+    if (trimmed) {
+      const q = trimmed.toLowerCase();
+      results = results.filter(c => {
+        const id = (c.courseId || c.code || "").toLowerCase();
+        const name = (c.courseName || c.name || "").toLowerCase();
+        return id.includes(q) || name.includes(q);
+      });
+    }
+    if (yearList.length > 0) {
+      results = results.filter(c => yearList.includes(String(c.recommendedYear)));
+    }
+    if (catList.length > 0) {
+      results = results.filter(c => {
+        const id = (c.courseId || c.code || "").toUpperCase();
+        return catList.some(cat => {
+          if (cat === "OTHER") {
+            return !/^(CS|TU|EL|ST)/i.test(id);
+          }
+          return id.startsWith(cat);
+        });
+      });
+    }
+    return results;
+  };
 
   try {
     const response = await fetch(url);
     if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-    return await response.json();
+    const data = await response.json();
+    return filterList(data);
   } catch (error) {
-    if (!trimmed) return mockCourses;
-    const q = trimmed.toLowerCase();
-    return mockCourses.filter(c =>
-      c.courseId.toLowerCase().includes(q) ||
-      c.courseName.toLowerCase().includes(q)
-    );
+    return filterList(mockCourses);
   }
 }
 
@@ -195,6 +264,62 @@ const mockCourses = [
     description: "หัวข้อคัดสรรทางวิทยาการคอมพิวเตอร์ (ไม่มี Section - รีวิวรวมรายวิชา)",
     sectionCount: 0,
     sections: []
+  },
+  { 
+    courseId: "MA211", 
+    code: "MA211", 
+    courseName: "Calculus 1", 
+    name: "Calculus 1", 
+    recommendedYear: 1, 
+    credits: "3 (3-0-6)",
+    teacher: "รศ.ดร.ญาณิศา ชัยยา",
+    description: "แคลคูลัส 1 อนุพันธ์ ปริพันธ์ และการประยุกต์",
+    sectionCount: 2,
+    sections: [
+      { sectionId: "ma211_020001", sectionNumber: "020001", instructorName: "รศ.ดร.ญาณิศา ชัยยา" }
+    ]
+  },
+  { 
+    courseId: "ST216", 
+    code: "ST216", 
+    courseName: "Statistics for Social Science 1", 
+    name: "Statistics for Social Science 1", 
+    recommendedYear: 1, 
+    credits: "3 (3-0-6)",
+    teacher: "ผศ.ดร.ปารวัณ ไพจิตรรัตนะ",
+    description: "สถิติสำหรับสังคมศาสตร์ ความน่าจะเป็น และการทดสอบสมมติฐาน",
+    sectionCount: 2,
+    sections: [
+      { sectionId: "st216_040001", sectionNumber: "040001", instructorName: "ผศ.ดร.ปารวัณ ไพจิตรรัตนะ" }
+    ]
+  },
+  { 
+    courseId: "LAS101", 
+    code: "LAS101", 
+    courseName: "Critical Thinking, Reading, and Writing", 
+    name: "Critical Thinking, Reading, and Writing", 
+    recommendedYear: 1, 
+    credits: "3 (3-0-6)",
+    teacher: "ผศ.ดร.อำนาจ ปักษาสุข",
+    description: "การคิดเชิงวิพากษ์ การอ่านและการเขียนเชิงวิชาการ",
+    sectionCount: 2,
+    sections: [
+      { sectionId: "las101_450001", sectionNumber: "450001", instructorName: "ผศ.ดร.อำนาจ ปักษาสุข" }
+    ]
+  },
+  { 
+    courseId: "CS401", 
+    code: "CS401", 
+    courseName: "Special Projects 2 (Senior Project)", 
+    name: "Special Projects 2 (Senior Project)", 
+    recommendedYear: 4, 
+    credits: "3 (0-6-3)",
+    teacher: "คณาจารย์สาขาวิทยาการคอมพิวเตอร์",
+    description: "โครงงานวิจัยและพัฒนาทางวิทยาการคอมพิวเตอร์สำหรับนักศึกษาชั้นปีที่ 4",
+    sectionCount: 1,
+    sections: [
+      { sectionId: "cs401_010001", sectionNumber: "010001", instructorName: "คณาจารย์สาขาวิทยาการคอมพิวเตอร์" }
+    ]
   }
 ];
 
@@ -209,9 +334,13 @@ function getCourse(code) {
 // ── Mock reviews ────────────────────────────
 const mockReviews = {
   "CS261": [
-    { id: 1, anonymous: true, studentId: "6600000000", year: 4, date: "10/10/2569", tags: ["เน้นทฤษฎี", "เน้นทฤษฎี"], text: "อาจารย์สอนดีมาก สอนเข้าใจ ไม่เร็วเกินไป", workload: "ปานกลาง", style: "ทฤษฎี", detail: "ละเอียด" },
-    { id: 2, anonymous: true, studentId: "6700000000", year: 3, date: "10/10/2569", tags: ["เน้นทฤษฎี", "เน้นทฤษฎี"], text: "อาจารย์สอนดีมาก สอนเข้าใจ ไม่เร็วเกินไป", workload: "น้อย", style: "ปฏิบัติ", detail: "กลาง" },
-    { id: 3, anonymous: true, studentId: "6800000000", year: 2, date: "10/10/2569", tags: ["เน้นทฤษฎี", "เน้นทฤษฎี"], text: "อาจารย์สอนดีมาก สอนเข้าใจ ไม่เร็วเกินไป", workload: "มาก", style: "ทฤษฎี", detail: "กลาง" },
+    { id: 1, sectionNumber: "100001", sectionId: "cs261_100001", studentId: "6600000000", year: 4, date: "10/10/2569", tags: ["เน้นทฤษฎี"], text: "อาจารย์สอนดีมาก สอนเข้าใจ ไม่เร็วเกินไป", workload: "ปานกลาง", style: "ทฤษฎี", detail: "ละเอียด" },
+    { id: 2, sectionNumber: "100001", sectionId: "cs261_100001", studentId: "6700000000", year: 3, date: "10/10/2569", tags: ["เน้นทฤษฎี"], text: "เนื้อหาแน่น มีแบบฝึกหัดให้ทำตลอด ช่วยให้เข้าใจ concept ได้ดี", workload: "น้อย", style: "ปฏิบัติ", detail: "กลาง" },
+    { id: 3, sectionNumber: "100001", sectionId: "cs261_100001", studentId: "6800000000", year: 2, date: "10/10/2569", tags: ["เน้นทฤษฎี"], text: "วิชานี้ต้องอ่านหนังสือสม่ำเสมอ เตรียมตัวสอบแต่เนิ่นๆ จะทำคะแนนได้ดี", workload: "มาก", style: "ทฤษฎี", detail: "กลาง" },
+    { id: 4, sectionNumber: "100001", sectionId: "cs261_100001", studentId: "6609650001", year: 4, date: "11/10/2569", tags: ["เน้นทฤษฎี"], text: "สไลด์และเอกสารประกอบการสอนครบถ้วนมาก แนะนำให้เข้าเรียนทุกคาบ", workload: "ปานกลาง", style: "ทฤษฎี", detail: "ละเอียด" },
+    { id: 5, sectionNumber: "100001", sectionId: "cs261_100001", studentId: "6709650002", year: 3, date: "12/10/2569", tags: ["เน้นปฏิบัติ"], text: "มีการบ้านท้ายคาบช่วยทบทวน มีประโยชน์กับการสอบมาก", workload: "ปานกลาง", style: "ปฏิบัติ", detail: "กลาง" },
+    { id: 6, sectionNumber: "100001", sectionId: "cs261_100001", studentId: "6809650003", year: 2, date: "13/10/2569", tags: ["เน้นทฤษฎี"], text: "ข้อสอบตรงกับสิ่งที่สอนในห้อง ถ้าตั้งใจเรียนเก็บเกรดสวยแน่นอน", workload: "น้อย", style: "ทฤษฎี", detail: "ละเอียด" },
+    { id: 7, sectionNumber: "100001", sectionId: "cs261_100001", studentId: "6609650004", year: 4, date: "14/10/2569", tags: ["เน้นปฏิบัติ"], text: "เป็นวิชาพื้นฐานที่ดีมาก ช่วยต่อยอดวิชาขั้นสูงได้ดี", workload: "ปานกลาง", style: "ปฏิบัติ", detail: "ละเอียด" },
   ],
   "CS262": [
     { id: 1, anonymous: true, studentId: "6800000000", year: 2, date: "10/10/2569", tags: ["เน้นปฏิบัติ"], text: "งาน Lab เยอะ แต่ได้ความรู้จริง", workload: "มาก", style: "ปฏิบัติ", detail: "ละเอียด" },
@@ -220,8 +349,14 @@ const mockReviews = {
 
 // ── Helpers ─────────────────────────────────
 
-function getReviews(code) {
-  return mockReviews[code] || [];
+function getReviews(code, section = "") {
+  const list = mockReviews[code] || [];
+  if (!section) return list;
+  const filtered = list.filter(r => {
+    const sec = r.sectionNumber || r.sectionId;
+    return !sec || String(sec).includes(String(section).trim());
+  });
+  return filtered.length > 0 ? filtered : list;
 }
 
 function navigate(page, params = {}) {
@@ -353,12 +488,34 @@ function renderTopbar() {
   `;
 }
 
+const ITEMS_PER_PAGE = 5;
 
 // Auto-render default topbar on DOMContentLoaded if not already rendered
-document.addEventListener("DOMContentLoaded", () => {
-  const topbar = document.getElementById("topbar");
-  if (topbar && !topbar.hasAttribute("data-rendered")) {
-    topbar.setAttribute("data-rendered", "true");
-    renderTopbar();
+document.addEventListener('DOMContentLoaded', () => {
+  const reviewContainer = document.querySelector('.reviews-scroll-container');
+  const prevBtn = document.querySelector('.review-prev-btn');
+  const nextBtn = document.querySelector('.review-next-btn');
+
+  if (reviewContainer && prevBtn && nextBtn) {
+    const scrollAmount = 300;
+
+    const updateButtonStates = () => {
+      const maxScrollLeft = reviewContainer.scrollWidth - reviewContainer.clientWidth;
+      prevBtn.disabled = reviewContainer.scrollLeft <= 0;
+      nextBtn.disabled = reviewContainer.scrollLeft >= maxScrollLeft - 5;
+    };
+
+    nextBtn.addEventListener('click', () => {
+      reviewContainer.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+    });
+
+    prevBtn.addEventListener('click', () => {
+      reviewContainer.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
+    });
+
+    reviewContainer.addEventListener('scroll', updateButtonStates);
+    window.addEventListener('resize', updateButtonStates);
+    
+    updateButtonStates();
   }
 });

@@ -429,4 +429,30 @@ textarea.form-input {
   margin-bottom: 18px;
 }
 
+/* Custom Scrollbar Styles */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #F8F8F8;
+  border-radius: 8px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #E0E0E0;
+  border-radius: 8px;
+  transition: background 0.2s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #C3002F;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #E0E0E0 #F8F8F8;
+}
+
 /* ── 7. Utilities ── */
