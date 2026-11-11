@@ -502,6 +502,18 @@
       const reviewList = document.getElementById("review-list");
       const paginationEl = document.getElementById("pagination");
 
+      const mergeReviewsWithoutDuplicates = (preferred, fallback) => {
+        const merged = [];
+        const seenStudents = new Set();
+        [...preferred, ...fallback].forEach(review => {
+          const studentId = String(review.studentId || review.authorStudentId || "").trim();
+          if (studentId && seenStudents.has(studentId)) return;
+          if (studentId) seenStudents.add(studentId);
+          merged.push(review);
+        });
+        return merged;
+      };
+
       reviewList.innerHTML = `<p style="text-align:center;color:var(--gray-400);padding:32px 0;font-size:14px;">กำลังโหลดรีวิว...</p>`;
       if (paginationEl) paginationEl.innerHTML = "";
 
@@ -527,7 +539,7 @@
             localList = localList.filter(r => !r.sectionNumber || String(r.sectionNumber).trim() === String(selectedSection).trim());
           }
           if (localList.length > 0) {
-            allReviews = [...localList, ...allReviews];
+            allReviews = mergeReviewsWithoutDuplicates(localList, allReviews);
           }
         } catch (storageErr) {
           console.warn("Could not load reviews from localStorage:", storageErr);
@@ -546,7 +558,7 @@
             localList = localList.filter(r => !r.sectionNumber || String(r.sectionNumber).trim() === String(selectedSection).trim());
           }
           if (localList.length > 0) {
-            allReviews = [...localList, ...allReviews];
+            allReviews = mergeReviewsWithoutDuplicates(localList, allReviews);
           }
         } catch (storageErr) {
           console.warn("Could not load reviews from localStorage:", storageErr);

@@ -43,6 +43,11 @@ CREATE TABLE review (
     reviewer_year INTEGER NOT NULL
         CHECK (reviewer_year BETWEEN 1 AND 4),
     review_text TEXT NOT NULL,
+    teaching_method_score DOUBLE PRECISION CHECK (teaching_method_score BETWEEN 0 AND 1),
+    evaluation_score DOUBLE PRECISION CHECK (evaluation_score BETWEEN 0 AND 1),
+    teaching_speed_score DOUBLE PRECISION CHECK (teaching_speed_score BETWEEN 0 AND 1),
+    assignment_style_score DOUBLE PRECISION CHECK (assignment_style_score BETWEEN 0 AND 1),
+    workload_score DOUBLE PRECISION CHECK (workload_score BETWEEN 0 AND 1),
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
 
     CONSTRAINT review_section_course_match
