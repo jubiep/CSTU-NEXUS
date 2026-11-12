@@ -5,15 +5,22 @@
 ---
 
 ## สารบัญ Use Cases
+
+### Sprint 1
 - [U1: อ่าน Review ของรายวิชาและ Section จากรุ่นพี่](#u1-อ่าน-review-ของรายวิชาและ-section-จากรุ่นพี่)
 - [U2: การยืนยันตัวตนและการจัดการสิทธิ์ก่อนใช้งานระบบ (Authentication & Authorization)](#u2-การยืนยันตัวตนและการจัดการสิทธิ์ก่อนใช้งานระบบ-authentication--authorization)
 - [U3: ตรวจสอบชั้นปีของนักศึกษาก่อนเขียน Review](#u3-ตรวจสอบชั้นปีของนักศึกษาก่อนเขียน-review)
 - [U4: ค้นหารายวิชาที่ต้องการ และ Section](#u4-ค้นหารายวิชาที่ต้องการ-และ-section)
 - [U5: เขียน Review รายวิชาตาม Section](#u5-เขียน-review-รายวิชาตาม-section)
 
+### Sprint 2
+- [U6: ให้คะแนนรายวิชาตามหัวข้อที่กำหนด](#u6-ให้คะแนนรายวิชาตามหัวข้อที่กำหนด)
+
 ---
 
-## U1: อ่าน Review ของรายวิชาและ Section จากรุ่นพี่
+## Sprint 1 (U1–U5)
+
+### U1: อ่าน Review ของรายวิชาและ Section จากรุ่นพี่
 
 - **Endpoint:** `GET /api/courses/{id}/reviews?sectionId=...`
 - **คำอธิบาย:** นักศึกษาเปิดหน้ารายละเอียดรายวิชาเพื่ออ่านรีวิวทั้งหมด หรือเลือกกรองเฉพาะ Section ที่ต้องการศึกษา
@@ -60,7 +67,7 @@ sequenceDiagram
 
 ---
 
-## U2: การยืนยันตัวตนและการจัดการสิทธิ์ก่อนใช้งานระบบ (Authentication & Authorization)
+### U2: การยืนยันตัวตนและการจัดการสิทธิ์ก่อนใช้งานระบบ (Authentication & Authorization)
 
 - **Endpoint:** `POST /api/auth/login`
 - **คำอธิบาย:** นักศึกษาเข้าสู่ระบบด้วยเลขทะเบียนนักศึกษาและรหัสผ่าน โดยระบบจะทำการยืนยันตัวตนผ่าน TU AD Verify API คำนวณชั้นปี และสร้าง Session
@@ -110,7 +117,7 @@ sequenceDiagram
 
 ---
 
-## U3: ตรวจสอบชั้นปีของนักศึกษาก่อนเขียน Review
+### U3: ตรวจสอบชั้นปีของนักศึกษาก่อนเขียน Review
 
 - **Endpoint:** `GET /api/courses/{id}/reviews/eligibility`
 - **คำอธิบาย:** ระบบตรวจสอบว่าผู้ใช้ได้เข้าสู่ระบบ มีชั้นปีที่ผ่านเกณฑ์ (`studentYear > recommendedYear`) และยังไม่เคยส่งรีวิวในรายวิชานี้มาก่อน
@@ -169,7 +176,7 @@ sequenceDiagram
 
 ---
 
-## U4: ค้นหารายวิชาที่ต้องการ และ Section
+### U4: ค้นหารายวิชาที่ต้องการ และ Section
 
 - **Endpoint:** `GET /api/courses?keyword=...&year=...` และ `GET /api/courses/{id}`
 - **คำอธิบาย:** ค้นหารายวิชาตามคีย์เวิร์ดหรือชั้นปีที่แนะนำ และกดเข้าไปดูข้อมูลเซกชันและอาจารย์ผู้สอน
@@ -216,7 +223,7 @@ sequenceDiagram
 
 ---
 
-## U5: เขียน Review รายวิชาตาม Section
+### U5: เขียน Review รายวิชาตาม Section
 
 - **Endpoint:** `POST /api/courses/{id}/reviews`
 - **คำอธิบาย:** นักศึกษากรอกเนื้อหารีวิว เลือกเซกชัน และบันทึกข้อมูลลงฐานข้อมูล
@@ -280,3 +287,139 @@ sequenceDiagram
     end
     deactivate View
 ```
+
+---
+
+## Sprint 2 (U6)
+
+### U6: ให้คะแนนรายวิชาตามหัวข้อที่กำหนด
+
+- **Endpoint:** `POST /api/courses/{id}/reviews`
+- **คำอธิบาย:** นักศึกษา CSTU ให้คะแนนประเมินรายวิชาตามหัวข้อมาตรฐานที่กำหนด โดยเลือกประเมินบางหัวข้อหรือเลือก `"ไม่แน่ใจ"` ได้ (ต้องประเมินจริงอย่างน้อย 1 หัวข้อ) ระบบแปลงตัวเลือกเป็นค่าตัวเลข `0.0–1.0` เพื่อจัดเก็บและคำนวณสถิติ พร้อมป้องกันการส่งข้อมูลไปยังวิชาที่ไม่มีอยู่ การส่งซ้ำ และ DB Error
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Student as TU Student (CSTU)
+    participant View as WriteReviewView<br/>(Boundary)
+    participant Ctrl as ReviewController<br/>(Control)
+    participant Session as HttpSession<br/>(Entity)
+    participant Svc as ReviewService<br/>(Control)
+    participant Repo as ReviewRepository<br/>(Entity)
+    participant DB as PostgreSQL Database<br/>(Entity)
+
+    Student->>View: 1. เลือกตัวเลือกประเมินตามหัวข้อ (3 ระดับ / 5 ระดับ / "ไม่แน่ใจ" / เว้นบางหัวข้อ)
+    activate View
+    Student->>View: 2. กดปุ่ม "ส่ง" (Submit)
+
+    View->>View: 3. ล็อกปุ่ม "ส่ง" ทันที (ป้องกัน Double-click / Spam click - TC9)
+    View->>View: 4. ตรวจเบื้องต้นว่ามีหัวข้อประเมินจริงอย่างน้อย 1 หัวข้อ
+
+    alt ไม่มีหัวข้อที่ประเมินจริงเลย (ว่างทั้งหมด หรือเลือก "ไม่แน่ใจ" ทุกหัวข้อ - TC11)
+        View->>View: 5. ปลดล็อกปุ่ม "ส่ง" และแสดงข้อความแจ้งเตือน
+        View-->>Student: 6. แจ้งเตือนให้เลือกประเมินอย่างน้อย 1 หัวข้อ (ไม่ส่งคำขอและไม่นับสถิติ)
+    else มีหัวข้อที่ประเมินจริงอย่างน้อย 1 หัวข้อ
+        View->>Ctrl: 7. POST /api/courses/{id}/reviews { sectionId, reviewText, ratings }
+        activate Ctrl
+
+        Ctrl->>Session: 8. getAttribute("authenticatedUser")
+        activate Session
+        Session-->>Ctrl: 9. return AuthUser (studentId, currentYear) หรือ null
+        deactivate Session
+
+        alt ยังไม่ได้เข้าสู่ระบบ
+            Ctrl-->>View: 10. 401 Unauthorized { error: "กรุณาเข้าสู่ระบบก่อนให้คะแนน" }
+            View->>View: 11. ปลดล็อกปุ่มและแสดงข้อผิดพลาด / นำทางไป Login
+            View-->>Student: 12. แจ้งเตือนให้เข้าสู่ระบบ
+        else เข้าสู่ระบบแล้ว
+            Ctrl->>Svc: 13. validateAndNormalizeRatings(ratings)
+            activate Svc
+            Svc->>Svc: 14. ตรวจสอบและแปลงตัวเลือกเป็นค่า 0.0–1.0 (3 ระดับ: 0.0/0.5/1.0, 5 ระดับ: 0.0–1.0, ไม่แน่ใจ/ไม่เลือก: null)
+            Svc-->>Ctrl: 15. return ValidationResult (valid, normalizedScores)
+            deactivate Svc
+
+            alt ไม่มีหัวข้อประเมินจริงหลัง Validate ฝั่ง Server (TC11)
+                Ctrl-->>View: 16. 400 Bad Request { error: "กรุณาเลือกประเมินอย่างน้อย 1 หัวข้อ" }
+                View->>View: 17. ปลดล็อกปุ่มและแสดง validation error
+                View-->>Student: 18. ปฏิเสธการส่งข้อมูล (ไม่บันทึกและไม่เพิ่มผู้ประเมินในสถิติ)
+            else ข้อมูลคะแนนถูกต้อง (TC1–TC6)
+                Ctrl->>Svc: 19. checkCourseAndEligibility(studentId, courseId)
+                activate Svc
+                Svc->>DB: 20. SELECT course_id, recommended_year FROM courses WHERE course_id = ?
+                activate DB
+                DB-->>Svc: 21. return Course หรือ empty
+                deactivate DB
+
+                alt ไม่พบรายวิชาในระบบ (TC7)
+                    Svc-->>Ctrl: 22. return CourseNotFound
+                    Ctrl-->>View: 23. 404 Not Found { error: "ไม่พบรายวิชาที่ระบุในระบบ" }
+                    View->>View: 24. ปลดล็อกปุ่มและแสดงข้อความไม่พบรายวิชา
+                    View-->>Student: 25. แจ้งเตือนไม่พบรายวิชา (ไม่มีการบันทึกข้อมูลลง DB)
+                else พบรายวิชาในระบบ
+                    Svc->>Repo: 26. existsByCourseIdAndUserId(courseId, userId)
+                    activate Repo
+                    Repo->>DB: 27. SELECT EXISTS(SELECT 1 FROM review WHERE course_id = ? AND user_id = ?)
+                    activate DB
+                    DB-->>Repo: 28. return alreadyReviewed (boolean)
+                    deactivate DB
+                    Repo-->>Svc: 29. return alreadyReviewed
+                    deactivate Repo
+                    Svc-->>Ctrl: 30. return EligibilityStatus(eligible, message)
+
+                    alt เคยประเมินวิชานี้แล้ว หรือ ชั้นปีไม่ผ่านเกณฑ์ (TC8)
+                        Ctrl-->>View: 31. 403 Forbidden { error: "คุณเคยส่งข้อมูลประเมินรายวิชานี้ไปแล้ว" }
+                        View->>View: 32. แสดงข้อความแจ้งเตือนและคงสถานะปิดปุ่มส่ง
+                        View-->>Student: 33. ปฏิเสธการส่งซ้ำ (ไม่สร้างข้อมูลซ้ำและไม่นับสถิติซ้ำซ้อน)
+                    else ผ่านเกณฑ์และยังไม่เคยประเมิน
+                        Ctrl->>Svc: 34. saveReviewWithRatings(courseId, userId, normalizedScores)
+                        activate Svc
+                        Svc->>Repo: 35. save(reviewWithScores)
+                        activate Repo
+                        Repo->>DB: 36. INSERT INTO review (..., teaching_method_score, evaluation_score, teaching_speed_score, assignment_style_score, workload_score)
+                        activate DB
+                        DB-->>Repo: 37. return saved row / UniqueViolation / DatabaseError
+                        deactivate DB
+                        Repo-->>Svc: 38. return saved Review / throw Exception
+                        deactivate Repo
+
+                        alt ส่งคำขอซ้ำพร้อมกันจนชน Unique Constraint (TC9)
+                            Svc-->>Ctrl: 39. throw DataIntegrityViolationException
+                            Ctrl-->>View: 40. 409 Conflict { error: "ข้อมูลถูกส่งไปแล้ว ไม่สามารถบันทึกซ้ำได้" }
+                            View->>View: 41. คงข้อมูลเดิมเพียงชุดเดียว (ไม่นับคะแนนซ้ำ)
+                            View-->>Student: 42. แจ้งเตือนสถานะการบันทึก (ป้องกันการบันทึกซ้ำซ้อน)
+                        else ฐานข้อมูลขัดข้อง / ขาดการเชื่อมต่อ (TC10)
+                            Svc-->>Ctrl: 43. throw DataAccessResourceFailureException
+                            Ctrl-->>View: 44. 503 Service Unavailable { error: "ไม่สามารถบันทึกข้อมูลได้ในขณะนี้" }
+                            View->>View: 45. ปลดล็อกปุ่มและแสดง error (ไม่แสดงว่าสำเร็จ)
+                            View-->>Student: 46. แจ้งเตือนบันทึกไม่สำเร็จ (ไม่อัปเดตสถิติใดๆ)
+                        else บันทึกลงฐานข้อมูลสำเร็จ (TC1–TC6)
+                            Svc->>DB: 47. คำนวณสถิติเฉพาะหัวข้อที่ไม่เป็น null (AVG WHERE score IS NOT NULL)
+                            activate DB
+                            DB-->>Svc: 48. return updated course rating statistics
+                            deactivate DB
+                            Svc-->>Ctrl: 49. return ReviewResponse(reviewId, scores, stats)
+                            Ctrl-->>View: 50. 201 Created { reviewId, scores, message: "บันทึกการให้คะแนนสำเร็จ" }
+                            View->>View: 51. showSuccessModal()
+                            View-->>Student: 52. แจ้งเตือนบันทึกสำเร็จ (หัวข้อ "ไม่แน่ใจ"/ไม่ได้เลือก เก็บเป็น null และไม่รวมในสถิติ)
+                        end
+                        deactivate Svc
+                    end
+                end
+                deactivate Svc
+            end
+        end
+        deactivate Ctrl
+    end
+    deactivate View
+```
+
+#### เกณฑ์การแปลงคะแนนมาตรฐาน (0.0 – 1.0) และเงื่อนไขสำคัญ (TC1–TC11)
+- **หัวข้อแบบ 3 ระดับ** *(แนวทางการสอน, สัดส่วนการวัดผลและตัดเกรด, รูปแบบงาน)*: แปลงเป็น `0.0`, `0.5`, `1.0` ตามลำดับ (TC3, TC5)
+- **หัวข้อแบบ 5 ระดับ** *(ความเร็วในการสอน, ปริมาณงาน)*: แปลงเป็น `0.0`, `0.25`, `0.5`, `0.75`, `1.0` ตามลำดับ (TC4, TC5)
+- **ตัวเลือก `"ไม่แน่ใจ"` หรือหัวข้อที่ไม่ได้เลือก**: จัดเก็บเป็น `null` และไม่นำไปคำนวณค่าเฉลี่ย/สถิติของหัวข้อนั้น (TC1, TC2)
+- **เงื่อนไขป้องกันข้อผิดพลาด (Validation & Reliability)**:
+  - ต้องมีหัวข้อที่ประเมินจริงอย่างน้อย 1 หัวข้อ หากว่างทั้งหมดหรือเป็น `"ไม่แน่ใจ"` ทั้งหมดระบบจะปฏิเสธการส่ง (TC11)
+  - ตรวจสอบรายวิชาในฐานข้อมูลก่อนบันทึก หากไม่มีรายวิชาจะปฏิเสธและแจ้งเตือน (TC7)
+  - ป้องกันการประเมินซ้ำในวิชาเดิม และการกดปุ่มส่งรัวๆ (Double-click / Spam click) ทั้งฝั่ง UI Lock และ Unique Constraint `(course_id, user_id)` (TC8, TC9)
+  - กรณีฐานข้อมูลขัดข้อง ระบบจะคืนข้อผิดพลาดโดยไม่แสดงว่าสำเร็จและไม่อัปเดตสถิติใดๆ (TC10)
+
