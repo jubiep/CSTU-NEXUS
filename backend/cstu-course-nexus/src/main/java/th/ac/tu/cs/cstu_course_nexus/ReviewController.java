@@ -110,7 +110,7 @@ public class ReviewController {
                 || !validScore(review.getTeachingSpeedScore())
                 || !validScore(review.getAssignmentStyleScore())
                 || !validScore(review.getWorkloadScore())) {
-            return ResponseEntity.badRequest().body(Map.of("error", "คะแนนแต่ละหัวข้อต้องอยู่ระหว่าง 0 ถึง 1 หรือเป็น null"));
+            return ResponseEntity.badRequest().body(Map.of("error", "คะแนนแต่ละหัวข้อต้องอยู่ระหว่าง 0 ถึง 100 หรือเป็น null"));
         }
 
         review.setCourseId(courseId);
@@ -138,7 +138,7 @@ public class ReviewController {
     }
 
     private static boolean validScore(Double score) {
-        return score == null || (Double.isFinite(score) && score >= 0.0 && score <= 1.0);
+        return score == null || (Double.isFinite(score) && score >= 0.0 && score <= 100.0);
     }
 
     @ExceptionHandler(DataIntegrityViolationException.class)
