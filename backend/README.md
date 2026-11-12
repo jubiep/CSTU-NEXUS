@@ -399,7 +399,7 @@ APP_CORS_ALLOWED_ORIGINS=http://localhost:5500,http://127.0.0.1:5500,http://loca
 - `GET http://localhost:8080/api/auth/me` คืนข้อมูลบัญชีเมื่อส่ง session cookie ที่ได้จาก login
 - `POST http://localhost:8080/api/auth/logout` ยกเลิก session
 
-Backend อนุญาตเฉพาะ account type `student` และ username ที่เป็นรหัสนักศึกษา 10 หลักตามข้อมูลจาก TU Verify; ไม่บังคับรูปแบบ email เนื่องจากโดเมนอาจแตกต่างตามข้อมูลบัญชีจริง ขณะนี้ยังไม่ได้จำกัดสาขา CSTU เนื่องจากต้องใช้ค่าคณะ/สาขาจริงจาก TU API ชั้นปีคำนวณจากเลขสองหลักแรกของรหัสนักศึกษาเทียบกับปี พ.ศ. ปัจจุบัน เช่น `68` ในปี พ.ศ. 2569 ได้ชั้นปี 2; หากรหัสอ่านไม่ได้หรือเป็นปีในอนาคตจะส่ง `null`
+Backend อนุญาตเฉพาะ account type `student` และ username ที่เป็นรหัสนักศึกษา 10 หลักตามข้อมูลจาก TU Verify; ไม่บังคับรูปแบบ email เนื่องจากโดเมนอาจแตกต่างตามข้อมูลบัญชีจริง จำกัดสิทธิ์ด้วย prefix รหัสนักศึกษา 6809 และปฏิเสธบัญชีที่ไม่ตรงด้วย HTTP 403 ก่อนสร้าง session; prefix นี้กำหนดตายตัวใน TuAuthService และต้องปรับเมื่อรูปแบบรหัสสาขาหรือปีรับเข้าเปลี่ยน ชั้นปีคำนวณจากเลขสองหลักแรกของรหัสนักศึกษาเทียบกับปี พ.ศ. ปัจจุบัน เช่น `68` ในปี พ.ศ. 2569 ได้ชั้นปี 2; หากรหัสอ่านไม่ได้หรือเป็นปีในอนาคตจะส่ง `null`
 
 ค่า session หมดอายุใน 30 นาที Cookie ตั้ง `HttpOnly` และ `SameSite=Lax`; เมื่อนำ frontend/backend ไปอยู่คนละ site ใน production ต้องใช้ HTTPS และตั้ง `SESSION_COOKIE_SECURE=true`, `SESSION_COOKIE_SAME_SITE=none` พร้อมระบุ origin จริงใน `APP_CORS_ALLOWED_ORIGINS` การเก็บ session เริ่มต้นอยู่ในหน่วยความจำของ Spring Boot เหมาะกับการพัฒนา/instance เดียว; ระบบหลาย instance ควรย้าย session store ไป Redis หรือระบบ shared session
 
