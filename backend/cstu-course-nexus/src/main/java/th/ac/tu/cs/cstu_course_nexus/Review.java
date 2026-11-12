@@ -27,6 +27,9 @@ public class Review {
     @Column(name = "review_text", nullable = false, columnDefinition = "TEXT")
     private String reviewText;
 
+    @Column(name = "is_anonymous", nullable = false)
+    private Boolean isAnonymous = false;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
@@ -60,6 +63,11 @@ public class Review {
 
     public String getReviewText() { return reviewText; }
     public void setReviewText(String reviewText) { this.reviewText = reviewText; }
+
+    @com.fasterxml.jackson.annotation.JsonProperty("isAnonymous")
+    public Boolean isAnonymous() { return isAnonymous; }
+    @com.fasterxml.jackson.annotation.JsonProperty("isAnonymous")
+    public void setAnonymous(Boolean anonymous) { isAnonymous = anonymous; }
 
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }

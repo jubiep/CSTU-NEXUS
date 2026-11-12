@@ -50,6 +50,11 @@
         </div>
       </div>
 
+      <label class="anonymous-review-option" for="review-anonymous">
+        <input id="review-anonymous" type="checkbox"/>
+        <span><strong>เผยแพร่แบบไม่ระบุตัวตน</strong><small>ระบบจะแสดงชื่อเป็น Anonymous และไม่เปิดเผยรหัสนักศึกษา</small></span>
+      </label>
+
       <!-- Validation error -->
       <div id="form-error" class="error-msg" style="display:none;margin-bottom:14px;">
         กรุณาเขียนรีวิวก่อนส่ง
@@ -174,7 +179,8 @@
               sectionId: sectionId || null,
               reviewText: text,
               comment: text,
-              text: text
+              text: text,
+              isAnonymous: document.getElementById("review-anonymous").checked
             }),
           });
 

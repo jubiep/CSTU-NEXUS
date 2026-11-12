@@ -43,6 +43,7 @@ CREATE TABLE review (
     reviewer_year INTEGER NOT NULL
         CHECK (reviewer_year BETWEEN 1 AND 4),
     review_text TEXT NOT NULL,
+    is_anonymous BOOLEAN NOT NULL DEFAULT FALSE,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
 
     CONSTRAINT review_section_course_match
@@ -53,3 +54,6 @@ CREATE TABLE review (
     CONSTRAINT review_course_user_unique
         UNIQUE (course_id, user_id)
 );
+
+CREATE INDEX review_course_created_at_idx ON review (course_id, created_at DESC);
+CREATE INDEX review_course_section_created_at_idx ON review (course_id, section_id, created_at DESC);
