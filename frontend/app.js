@@ -3,9 +3,10 @@
    ========================================== */
 
 const isLocalFrontend = ["localhost", "127.0.0.1"].includes(window.location.hostname);
+const isLocalDevServer = isLocalFrontend && ["5500", "5501"].includes(window.location.port);
 const API_BASE_URL = (
   window.CSTU_API_BASE_URL
-  || (isLocalFrontend && window.location.port !== "3000"
+  || (isLocalDevServer
     ? `http://${window.location.hostname}:8080/api`
     : `${window.location.origin}/api`)
 ).replace(/\/+$/, "");
