@@ -40,7 +40,7 @@ public class ReviewController {
             boolean anonymous = Boolean.TRUE.equals(review.isAnonymous());
             item.put("isAnonymous", anonymous);
             if (anonymous) {
-                item.put("author", "Anonymous");
+                item.put("author", maskedStudentIdForYear(review.getReviewerYear()));
             } else {
                 item.put("userId", review.getUserId());
                 item.put("studentId", reviewService.getStudentId(review.getUserId()));
@@ -49,6 +49,16 @@ public class ReviewController {
         }).toList();
 
         return ResponseEntity.ok(response);
+    }
+
+    private String maskedStudentIdForYear(Integer reviewerYear) {
+        return switch (reviewerYear == null ? 0 : reviewerYear) {
+            case 1 -> "69********";
+            case 2 -> "68********";
+            case 3 -> "67********";
+            case 4 -> "66********";
+            default -> "**********";
+        };
     }
 
     @GetMapping("/{id}/reviews/eligibility")

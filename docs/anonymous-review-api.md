@@ -1,4 +1,4 @@
-# Anonymous Review API
+# API รีวิวแบบปกปิดเลขนักศึกษา
 
 Authentication uses the existing session cookie (`JSESSIONID`) established by TU login. Review ownership comes from the authenticated session; client supplied `userId` is ignored.
 
@@ -14,7 +14,7 @@ Request: `{"sectionId":"cs261_100001","reviewText":"Useful feedback","isAnonymou
 
 ## List and privacy
 
-`GET /api/courses/{courseId}/reviews?sectionId={sectionId}` returns `isAnonymous`. Anonymous items contain `author:"Anonymous"` and omit `userId` and `studentId`. Non-anonymous items retain existing identity fields. Owner ID remains stored privately for authorization and duplicate-review enforcement.
+`GET /api/courses/{courseId}/reviews?sectionId={sectionId}` returns `isAnonymous`. รายการที่เปิดโหมดปกปิดจะแสดง `author` ตามชั้นปี (`69********`, `68********`, `67********` หรือ `66********`) และไม่ส่ง `userId` หรือ `studentId` กลับมา ส่วนรายการปกติยังส่งข้อมูลผู้รีวิวตามรูปแบบเดิม โดยเก็บ owner ID ไว้ใช้ตรวจสิทธิ์และป้องกันรีวิวซ้ำ
 
 Apply `backend/database/migrations/003_anonymous_reviews.sql` once to existing PostgreSQL databases. Fresh databases get the column and feed indexes from `backend/database/init.sql`.
 
@@ -27,4 +27,4 @@ Get-Content -Raw backend/database/migrations/003_anonymous_reviews.sql | docker 
 docker compose up -d --build backend frontend
 ```
 
-Check `GET /api/courses/{courseId}/reviews` in the browser Network panel. A newly anonymous review must include `"isAnonymous": true` and `"author": "Anonymous"`, with no `studentId` or `userId`. If the flag is false/missing, the running backend is stale or the review was saved before this feature was active. Existing reviews receive `false` during migration; update their `is_anonymous` value explicitly if they were meant to be anonymous. Do not infer anonymity from the author's identity.
+Check `GET /api/courses/{courseId}/reviews` in the browser Network panel. A newly anonymous review must include `"isAnonymous": true` and the masked `author` for its year, with no `studentId` or `userId`. If the flag is false/missing, the running backend is stale or the review was saved before this feature was active. Existing reviews receive `false` during migration; update their `is_anonymous` value explicitly if they were meant to be anonymous. Do not infer anonymity from the author's identity.

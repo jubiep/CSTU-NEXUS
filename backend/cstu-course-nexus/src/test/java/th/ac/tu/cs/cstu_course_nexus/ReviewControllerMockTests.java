@@ -196,7 +196,7 @@ class ReviewControllerMockTests {
 
         mockMvc.perform(post("/api/courses/CS101/reviews").sessionAttr("authenticatedUser", eligibleUser)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"reviewText\":\"Anonymous review\",\"isAnonymous\":true}"))
+                        .content("{\"reviewText\":\"Private review\",\"isAnonymous\":true}"))
                 .andExpect(status().isCreated());
 
         org.mockito.ArgumentCaptor<Review> captor = org.mockito.ArgumentCaptor.forClass(Review.class);
@@ -217,7 +217,7 @@ class ReviewControllerMockTests {
 
         mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get("/api/courses/CS101/reviews"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].author").value("Anonymous"))
+                .andExpect(jsonPath("$[0].author").value("67********"))
                 .andExpect(jsonPath("$[0].isAnonymous").value(true))
                 .andExpect(jsonPath("$[0].userId").doesNotExist())
                 .andExpect(jsonPath("$[0].studentId").doesNotExist());
@@ -235,6 +235,31 @@ class ReviewControllerMockTests {
                         .content("{\"reviewText\":\"Changed\"}"))
                 .andExpect(status().isNotFound());
         verify(reviewService, never()).saveReview(any(Review.class));
+    }
+
+    @Test
+    void RV16_masksAnonymousAuthorPrefixFromReviewerYear() throws Exception {
+        java.util.List<Review> reviews = new java.util.ArrayList<>();
+        for (int year = 1; year <= 4; year++) {
+            Review review = new Review();
+            review.setId((long) year);
+            review.setCourseId("CS101");
+            review.setUserId(100 + year);
+            review.setReviewerYear(year);
+            review.setReviewText("Review " + year);
+            review.setAnonymous(true);
+            reviews.add(review);
+        }
+        when(reviewService.getReviews("CS101", null)).thenReturn(reviews);
+
+        mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get("/api/courses/CS101/reviews"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].author").value("69********"))
+                .andExpect(jsonPath("$[1].author").value("68********"))
+                .andExpect(jsonPath("$[2].author").value("67********"))
+                .andExpect(jsonPath("$[3].author").value("66********"))
+                .andExpect(jsonPath("$[0].studentId").doesNotExist())
+                .andExpect(jsonPath("$[0].userId").doesNotExist());
     }
 
 }
