@@ -35,7 +35,7 @@ test('แสดงข้อความเมื่อบัญชีถูก�
   });
 
   await page.goto('http://localhost:5500/pages/index.html');
-  await page.locator('#student-id').fill('6809600000');
+  await page.locator('#student-id').fill('6808000000');
   await page.locator('#password').fill('test-password');
   await page.locator('#login-button').click();
 
