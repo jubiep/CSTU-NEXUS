@@ -28,7 +28,7 @@ API ที่ใช้: `GET/PUT /api/users/preferences` ตาม API contract 
 |---|---|---|
 | `.\mvnw.cmd '-Dtest=UserPreferencesControllerTests,UserPreferencesServiceTests,UserPreferencesPersistenceIntegrationTests' test` จาก `backend\cstu-course-nexus` | ผ่าน: 13 tests, 0 failures, 0 errors, 0 skipped | รวม controller 10, service 2 และ PostgreSQL integration 1 |
 | Browser checks ใน Playwright session พร้อม mock `GET/PUT` | ผ่านตาม U7-SYS-01, U7-SYS-02, U7-SYS-03 และ U7-SYS-05 | ตรวจผล UI, request count และ payload; ไม่ได้เชื่อม browser เข้ากับ backend จริง |
-| Standalone runtime validation ตาม `.tsupgrader\runtime-validation\eval-plan.json` | Process exit code 0 | ตัวตรวจไม่สามารถ parse จำนวน tests จาก Maven output (`framework=unknown`); จำนวน 13 tests ยืนยันจาก Maven output โดยตรง |
+| Standalone runtime validation (Maven preference tests) | Process exit code 0 | ตัวตรวจไม่สามารถ parse จำนวน tests จาก Maven output (`framework=unknown`); จำนวน 13 tests ยืนยันจาก Maven output โดยตรง |
 
 ## ข้อจำกัด
 
