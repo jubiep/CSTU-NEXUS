@@ -5,15 +5,23 @@
 ---
 
 ## สารบัญ Use Cases
+
+### Sprint 1
 - [U1: อ่าน Review ของรายวิชาและ Section จากรุ่นพี่](#u1-อ่าน-review-ของรายวิชาและ-section-จากรุ่นพี่)
 - [U2: การยืนยันตัวตนและการจัดการสิทธิ์ก่อนใช้งานระบบ (Authentication & Authorization)](#u2-การยืนยันตัวตนและการจัดการสิทธิ์ก่อนใช้งานระบบ-authentication--authorization)
 - [U3: ตรวจสอบชั้นปีของนักศึกษาก่อนเขียน Review](#u3-ตรวจสอบชั้นปีของนักศึกษาก่อนเขียน-review)
 - [U4: ค้นหารายวิชาที่ต้องการ และ Section](#u4-ค้นหารายวิชาที่ต้องการ-และ-section)
 - [U5: เขียน Review รายวิชาตาม Section](#u5-เขียน-review-รายวิชาตาม-section)
 
+### Sprint 2
+- [U6: ให้คะแนนรายวิชาตามหัวข้อที่กำหนด](#u6-ให้คะแนนรายวิชาตามหัวข้อที่กำหนด)
+- [U7: กำหนด preference ในการเรียนและระดับ Workload](#u7-กำหนด-preference-ในการเรียนและระดับ-workload)
+
 ---
 
-## U1: อ่าน Review ของรายวิชาและ Section จากรุ่นพี่
+## Sprint 1 (U1–U5)
+
+### U1: อ่าน Review ของรายวิชาและ Section จากรุ่นพี่
 
 - **Endpoint:** `GET /api/courses/{id}/reviews?sectionId=...`
 - **คำอธิบาย:** นักศึกษาเปิดหน้ารายละเอียดรายวิชาเพื่ออ่านรีวิวทั้งหมด หรือเลือกกรองเฉพาะ Section ที่ต้องการศึกษา
@@ -60,7 +68,7 @@ sequenceDiagram
 
 ---
 
-## U2: การยืนยันตัวตนและการจัดการสิทธิ์ก่อนใช้งานระบบ (Authentication & Authorization)
+### U2: การยืนยันตัวตนและการจัดการสิทธิ์ก่อนใช้งานระบบ (Authentication & Authorization)
 
 - **Endpoint:** `POST /api/auth/login`
 - **คำอธิบาย:** นักศึกษาเข้าสู่ระบบด้วยเลขทะเบียนนักศึกษาและรหัสผ่าน โดยระบบจะทำการยืนยันตัวตนผ่าน TU AD Verify API คำนวณชั้นปี และสร้าง Session
@@ -110,7 +118,7 @@ sequenceDiagram
 
 ---
 
-## U3: ตรวจสอบชั้นปีของนักศึกษาก่อนเขียน Review
+### U3: ตรวจสอบชั้นปีของนักศึกษาก่อนเขียน Review
 
 - **Endpoint:** `GET /api/courses/{id}/reviews/eligibility`
 - **คำอธิบาย:** ระบบตรวจสอบว่าผู้ใช้ได้เข้าสู่ระบบ มีชั้นปีที่ผ่านเกณฑ์ (`studentYear > recommendedYear`) และยังไม่เคยส่งรีวิวในรายวิชานี้มาก่อน
@@ -169,7 +177,7 @@ sequenceDiagram
 
 ---
 
-## U4: ค้นหารายวิชาที่ต้องการ และ Section
+### U4: ค้นหารายวิชาที่ต้องการ และ Section
 
 - **Endpoint:** `GET /api/courses?keyword=...&year=...` และ `GET /api/courses/{id}`
 - **คำอธิบาย:** ค้นหารายวิชาตามคีย์เวิร์ดหรือชั้นปีที่แนะนำ และกดเข้าไปดูข้อมูลเซกชันและอาจารย์ผู้สอน
@@ -216,7 +224,7 @@ sequenceDiagram
 
 ---
 
-## U5: เขียน Review รายวิชาตาม Section
+### U5: เขียน Review รายวิชาตาม Section
 
 - **Endpoint:** `POST /api/courses/{id}/reviews`
 - **คำอธิบาย:** นักศึกษากรอกเนื้อหารีวิว เลือกเซกชัน และบันทึกข้อมูลลงฐานข้อมูล
@@ -280,3 +288,222 @@ sequenceDiagram
     end
     deactivate View
 ```
+
+---
+
+## Sprint 2 (U6)
+
+### U6: ให้คะแนนรายวิชาตามหัวข้อที่กำหนด
+
+- **Endpoint:** `POST /api/courses/{id}/reviews`
+- **คำอธิบาย:** นักศึกษา CSTU ให้คะแนนประเมินรายวิชาตามหัวข้อมาตรฐานที่กำหนด (ปรับปรุงสเกลเป็น 3 ระดับ 0–100 เท่ากันทุกหัวข้อ: `0.0`, `50.0`, `100.0` หรือเลือก `"ไม่แน่ใจ"` / เว้นว่างเป็น `null`) ระบบแปลงค่าตัวเลือกและบันทึกคะแนนลงฐานข้อมูล พร้อมรองรับการตรวจสอบสิทธิ์ความปลอดภัย ป้องกันการส่งวิชาที่ไม่มีอยู่ การประเมินซ้ำ (409 Conflict) การสแปมปุ่มส่ง และข้อผิดพลาด Database Error
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Student as TU Student (CSTU)
+    participant View as WriteReviewView<br/>(Boundary)
+    participant Ctrl as ReviewController<br/>(Control)
+    participant Session as HttpSession<br/>(Entity)
+    participant Svc as ReviewService<br/>(Control)
+    participant Repo as ReviewRepository<br/>(Entity)
+    participant DB as PostgreSQL Database<br/>(Entity)
+
+    Student->>View: 1. เลือกตัวเลือกประเมิน 5 หัวข้อ (3 ระดับ สเกล 0–100 หรือ "ไม่แน่ใจ") และพิมพ์ข้อความรีวิว
+    activate View
+    Student->>View: 2. กดปุ่ม "ส่ง" (Submit)
+
+    View->>View: 3. ล็อกปุ่ม "ส่ง" (disabled = true, "กำลังส่ง...") ป้องกัน Double-click / Spam click (TC9)
+    View->>View: 4. normalizeRatings(ratings) แปลงตัวเลือกเป็นสเกล 0.0–100.0 (3 ระดับ: 0.0, 50.0, 100.0 / ไม่แน่ใจ: null)
+
+    alt ตรวจสอบฟอร์มเบื้องต้นไม่ผ่าน (เลือกไม่ครบ หรือไม่มีหัวข้อที่ประเมินจริง - TC11)
+        View->>View: 5. ปลดล็อกปุ่ม "ส่ง" และแสดงข้อความแจ้งเตือน form-error
+        View-->>Student: 6. แจ้งเตือนให้เลือกการประเมินให้ครบถ้วน (ไม่ส่งคำขอไปยัง Server)
+    else ฟอร์มผ่านการตรวจสอบ
+        View->>Ctrl: 7. POST /api/courses/{id}/reviews { sectionId, reviewText, ...Scores (0-100 หรือ null) }
+        activate Ctrl
+
+        Ctrl->>Session: 8. getAttribute("authenticatedUser")
+        activate Session
+        Session-->>Ctrl: 9. return AuthUser (studentId, currentYear) หรือ null
+        deactivate Session
+
+        alt ยังไม่ได้เข้าสู่ระบบ (Session ว่าง / null)
+            Ctrl-->>View: 10. 401 Unauthorized { error: "กรุณาเข้าสู่ระบบก่อนเขียนรีวิว" }
+            View->>View: 11. ปลดล็อกปุ่มและแสดงข้อความแจ้งเตือน / นำทางไปหน้า Login
+            View-->>Student: 12. แจ้งเตือนให้เข้าสู่ระบบก่อนดำเนินการ
+        else เข้าสู่ระบบแล้ว
+            alt ข้อความรีวิวว่างเปล่า (text == null || empty)
+                Ctrl-->>View: 13. 400 Bad Request { error: "กรุณากรอกข้อความรีวิวก่อนส่ง" }
+                View->>View: 14. ปลดล็อกปุ่มและแสดง validation error
+                View-->>Student: 15. แจ้งเตือนให้กรอกข้อความรีวิว
+            else ข้อมูลข้อความรีวิวถูกต้อง
+                Ctrl->>Svc: 16. getEligibilityStatus(studentId, courseId)
+                activate Svc
+                Svc->>DB: 17. SELECT recommended_year FROM courses WHERE UPPER(course_id) = ?
+                activate DB
+                DB-->>Svc: 18. return recommendedYear หรือ empty
+                deactivate DB
+
+                alt ไม่พบรายวิชาในระบบ (TC7)
+                    Svc-->>Ctrl: 19. return EligibilityStatus(false, message: "ไม่พบข้อมูลรายวิชาในระบบ")
+                    Ctrl-->>View: 20. 404 Not Found { error: "ไม่พบรายวิชา " + courseId }
+                    View->>View: 21. ปลดล็อกปุ่มและแสดงข้อความไม่พบรายวิชา
+                    View-->>Student: 22. แจ้งเตือนไม่พบรายวิชา (ไม่มีการบันทึกข้อมูลลง DB)
+                else พบรายวิชาในระบบ
+                    Svc->>Repo: 23. existsByCourseIdAndUserId(courseId, userId)
+                    activate Repo
+                    Repo->>DB: 24. SELECT EXISTS(SELECT 1 FROM review WHERE course_id = ? AND user_id = ?)
+                    activate DB
+                    DB-->>Repo: 25. return alreadyReviewed (boolean)
+                    deactivate DB
+                    Repo-->>Svc: 26. return alreadyReviewed
+                    deactivate Repo
+                    Svc-->>Ctrl: 27. return EligibilityStatus(eligible, studentYear, recommendedYear, message)
+
+                    alt เคยประเมินวิชานี้ไปแล้ว (alreadyReviewed = true - TC8)
+                        Ctrl-->>View: 28. 409 Conflict { error: "คุณได้เคยส่งรีวิวรายวิชานี้ไปแล้ว" }
+                        View->>View: 29. ปิดการส่งฟอร์มและแสดงข้อความเตือน
+                        View-->>Student: 30. ปฏิเสธการส่งซ้ำ (ไม่สร้างข้อมูลซ้ำและไม่นับคะแนนซ้ำซ้อน)
+                    else ชั้นปีไม่ผ่านเกณฑ์ (studentYear <= recommendedYear)
+                        Ctrl-->>View: 31. 403 Forbidden { error: "วิชานี้แนะนำสำหรับชั้นปีที่..." }
+                        View->>View: 32. ปิดปุ่มส่งและแสดงข้อความจำกัดสิทธิ์ชั้นปี
+                        View-->>Student: 33. ปฏิเสธสิทธิ์การรีวิว
+                    else มีสิทธิ์รีวิวและยังไม่เคยประเมิน
+                        alt คะแนนไม่อยู่ในช่วง 0–100 หรือไม่ใช่ null (validScore check)
+                            Ctrl-->>View: 34. 400 Bad Request { error: "คะแนนแต่ละหัวข้อต้องอยู่ระหว่าง 0 ถึง 100 หรือเป็น null" }
+                            View->>View: 35. ปลดล็อกปุ่มและแสดง error
+                            View-->>Student: 36. แจ้งเตือนช่วงคะแนนไม่ถูกต้อง
+                        else คะแนนและข้อมูลถูกต้องทั้งหมด (TC1–TC6)
+                            Ctrl->>Svc: 37. saveReview(reviewWithScores)
+                            activate Svc
+                            Svc->>Repo: 38. save(review)
+                            activate Repo
+                            Repo->>DB: 39. INSERT INTO review (course_id, section_id, user_id, reviewer_year, review_text, teaching_method_score, evaluation_score, teaching_speed_score, assignment_style_score, workload_score)
+                            activate DB
+                            DB-->>Repo: 40. return saved review row / DataIntegrityViolation / DB Error
+                            deactivate DB
+                            Repo-->>Svc: 41. return saved Review / throw Exception
+                            deactivate Repo
+
+                            alt ส่งคำขอซ้ำพร้อมกันจนชน Unique Constraint (TC9)
+                                Svc-->>Ctrl: 42. throw DataIntegrityViolationException
+                                Ctrl-->>View: 43. 400 Bad Request { error: "ข้อมูลรายวิชาหรือ Section ไม่ถูกต้อง กรุณาตรวจสอบแล้วลองอีกครั้ง" }
+                                View->>View: 44. คงข้อมูลเดิมเพียงชุดเดียว (ไม่นับคะแนนซ้ำ)
+                                View-->>Student: 45. แจ้งเตือนสถานะการบันทึก (ป้องกันการบันทึกซ้ำซ้อน)
+                            else ฐานข้อมูลขัดข้อง / ตัดการเชื่อมต่อ (TC10)
+                                Svc-->>Ctrl: 46. throw DataAccessResourceFailureException
+                                Ctrl-->>View: 47. 503 Service Unavailable { error: "ระบบฐานข้อมูลไม่พร้อมใช้งาน กรุณาลองใหม่ภายหลัง" }
+                                View->>View: 48. ปลดล็อกปุ่มและแสดงข้อความขัดข้อง (ไม่แสดงว่าสำเร็จ)
+                                View-->>Student: 49. แจ้งเตือนไม่สามารถบันทึกได้ (ไม่อัปเดตสถิติใดๆ)
+                            else บันทึกลงฐานข้อมูลสำเร็จ (TC1–TC6)
+                                Svc-->>Ctrl: 50. return saved Review
+                                Ctrl-->>View: 51. 201 Created { reviewId, message: "รีวิวสำเร็จ" }
+                                View->>View: 52. showSuccessModal() (แสดงป๊อปอัป "รีวิวเสร็จสิ้น")
+                                View-->>Student: 53. แสดงผลบันทึกสำเร็จ (หัวข้อที่เลือก "ไม่แน่ใจ" เก็บเป็น null ใน DB ไม่นำไปคำนวณสถิติ)
+                            end
+                            deactivate Svc
+                        end
+                    end
+                end
+                deactivate Svc
+            end
+        end
+        deactivate Ctrl
+    end
+    deactivate View
+```
+
+#### เกณฑ์การแปลงคะแนนมาตรฐาน (0.0 – 100.0) และเงื่อนไขการทำงานในปัจจุบัน
+- **โครงสร้างหัวข้อการประเมิน 3 ระดับ (สเกล 0–100 เท่ากันทุกหัวข้อ)**:
+  - **แนวทางการสอน (`teaching_method`)**: เน้นทฤษฎี (`0.0`), สมดุล (`50.0`), เน้นปฏิบัติ (`100.0`)
+  - **สัดส่วนการวัดผลและตัดเกรด (`evaluation`)**: เน้นคะแนนสอบ (`0.0`), สมดุล (`50.0`), เน้นโครงงาน (`100.0`)
+  - **ความเร็วในการสอน (`teaching_speed`)**: สอนช้า (`0.0`), ปานกลาง (`50.0`), สอนเร็ว (`100.0`)
+  - **รูปแบบงาน (`assignment_style`)**: เน้นงานเดี่ยว (`0.0`), สมดุล (`50.0`), เน้นงานกลุ่ม (`100.0`)
+  - **ปริมาณงาน (`workload`)**: งานน้อย (`0.0`), ปริมาณงานสมดุล (`50.0`), งานเยอะ (`100.0`)
+- **ตัวเลือก `"ไม่แน่ใจ"` หรือหัวข้อที่ไม่ได้เลือก**: จัดเก็บค่าคะแนนในฐานข้อมูลเป็น `null` และไม่ถูกนำไปคำนวณค่าเฉลี่ยสถิติของหัวข้อนั้น (TC1, TC2)
+- **เงื่อนไขและการตรวจสอบความถูกต้องตามโค้ดจริง (Validation & Error Handling)**:
+  - **Client-side UI Lock**: เมื่อกดปุ่ม "ส่ง" ปุ่มจะถูก disable ทันที ป้องกันการส่งซ้ำซ้อน (Double-click / Spam click) (TC9)
+  - **Course Validation**: ตรวจสอบรหัสรายวิชาในฐานข้อมูล หากไม่มีรายวิชาจะคืนค่า `404 Not Found` (TC7)
+  - **Duplicate Check**: ตรวจสอบการรีวิวซ้ำผ่าน `ReviewService.hasReviewed(...)` หากเคยรีวิวแล้วจะคืนค่า `409 Conflict` (TC8) พร้อม `review_course_user_unique` บน PostgreSQL ป้องกันคำขอคู่ขนาน (TC9)
+  - **Score Range Validation**: ตรวจสอบคะแนนทุกหัวข้อต้องอยู่ระหว่าง `0.0` ถึง `100.0` หรือเป็น `null` หากไม่ถูกต้องจะคืนค่า `400 Bad Request`
+  - **Database Error Handling**: จัดการ `DataAccessResourceFailureException` ด้วยการตอบกลับ `503 Service Unavailable` และไม่แสดงว่าบันทึกสำเร็จ (TC10)
+
+---
+
+### U7: กำหนด preference ในการเรียนและระดับ Workload
+
+- **Endpoint / Storage:** Frontend local save via `localStorage` key `cstu_preferences`; ใช้ในภายหลังเพื่อคำนวณ Match Score กับ Section
+- **คำอธิบาย:** นักศึกษาเปิดหน้ากำหนดความชอบในการเรียน โดยเลือกค่าใน 5 มิติหลัก: แนวทางการสอน, สัดส่วนการวัดผล, ความเร็วในการสอน, รูปแบบงาน, และปริมาณงาน พร้อมตรวจสอบค่าที่เลือกก่อนบันทึกลง storage เพื่อใช้ในระบบแนะนำ Section ต่อไป
+
+sequenceDiagram
+    autonumber
+    actor Student as TU Student
+    participant View as PreferenceView<br/>(Boundary)
+    participant Ctrl as PreferenceController<br/>(Control)
+    participant Store as localStorage / PreferenceRepository<br/>(Entity)
+    participant Match as SectionMatchingService<br/>(Control)
+
+    Student->>View: 1. เปิดหน้า Preferences
+    activate View
+    View->>Ctrl: 2. initializePreferencePage()
+    activate Ctrl
+    Ctrl->>Store: 3. getItem("cstu_preferences")
+    activate Store
+    Store-->>Ctrl: 4. return savedPreferences หรือ null
+    deactivate Store
+    Ctrl-->>View: 5. render existing values & highlight selected hearts
+    deactivate Ctrl
+
+    Student->>View: 6. เลือกความชอบในแต่ละหัวข้อ (5 มิติ)
+    Student->>View: 7. กดปุ่ม "บันทึก"
+    View->>Ctrl: 8. savePreferences(selectedPreferences)
+    activate Ctrl
+
+    Ctrl->>Ctrl: 9. validate range (1..maxRating) และตรวจสอบชนิดข้อมูล
+
+    alt ค่าไม่ถูกต้องหรือข้อมูลเสียหาย
+        Ctrl-->>View: 10. ValidationError
+        View->>View: 11. showPreferenceStatus(error)
+        View-->>Student: 12. แจ้งเตือนให้เลือกค่าใหม่
+    else ค่าถูกต้อง
+        Ctrl->>Store: 13. setItem("cstu_preferences", JSON.stringify(preferences))
+        activate Store
+        Store-->>Ctrl: 14. save success
+        deactivate Store
+        Ctrl-->>View: 15. return success response
+        deactivate Ctrl
+        View->>View: 16. showSuccessModal()
+        View-->>Student: 17. แสดงข้อความ "บันทึกเสร็จสิ้น"
+    end
+    deactivate View
+
+    opt นักศึกษาเปิดใช้งานระบบ Match Score / Recommendation ภายหลัง
+        Student->>View: 18. เปิดหน้าแนะนำ Section หรือดูผล Match Score
+        View->>Ctrl: 19. loadStudentPreferences()
+        activate Ctrl
+        Ctrl->>Store: 20. getItem("cstu_preferences")
+        activate Store
+        Store-->>Ctrl: 21. return preference values
+        deactivate Store
+        Ctrl->>Match: 22. calculateMatchScore(preferences, sectionReviews)
+        activate Match
+        Match-->>Ctrl: 23. return matchPercentage
+        deactivate Match
+        Ctrl-->>View: 24. renderRecommendedSections(matchPercentage)
+        deactivate Ctrl
+        View-->>Student: 25. แสดง Section ที่เหมาะสมตามความชอบและปริมาณงาน
+    end
+
+#### ลักษณะข้อมูลความชอบที่บันทึก
+- **แนวทางการสอน (`teachingApproach`)**: 1-3 (เน้นทฤษฎี → เน้นปฏิบัติ)
+- **สัดส่วนการวัดผลและตัดเกรด (`gradingStyle`)**: 1-3 (เน้นสอบ → เน้นโครงงาน)
+- **ความเร็วในการสอน (`teachingPace`)**: 1-5 (สอนช้ามาก → สอนเร็วมาก)
+- **รูปแบบงาน (`assignmentStyle`)**: 1-3 (งานเดี่ยว → งานกลุ่ม)
+- **ปริมาณงาน (`workload`)**: 1-5 (รับงานได้น้อย → รับงานได้มาก)
+- **การเก็บข้อมูล**: บันทึกลง `localStorage` เป็น JSON object ภายใต้ key `cstu_preferences` และโหลดกลับมาทั้งหมดเมื่อเปิดหน้า Preferences อีกครั้ง
+- **เงื่อนไขการตรวจสอบ**:
+  - ค่าแต่ละด้านต้องเป็นตัวเลขจำนวนเต็มที่อยู่ในช่วง `1..maxRating`
+  - หากไฟล์ localStorage ผิดรูปแบบหรือมีค่าผิด จะแสดงข้อความแจ้งเตือนและไม่บันทึกค่าดังกล่าว
+  - เมื่อมีการเปลี่ยนค่าแต่ละหัวข้อ UI จะอัปเดตสถานะ hearts ให้ตรงกับช่วงที่เลือกทันที
+

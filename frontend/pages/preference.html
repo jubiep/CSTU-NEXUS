@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+  <title>CSTU NEXUS – Preferences</title>
+  <link rel="stylesheet" href="../css/main.css"/>
+  <link rel="stylesheet" href="../css/preference.css"/>
+</head>
+<body>
+  <div class="app-shell">
+    <header id="topbar"></header>
+
+    <main class="page-content preference-page">
+      <div class="preference-heading">
+        <h1>Preferences</h1>
+      </div>
+
+      <form id="preference-form">
+        <div class="preference-list">
+          <fieldset class="preference-card" data-preference="teachingApproach" data-rating="3">
+            <legend>แนวทางการสอน</legend>
+            <div class="preference-hearts" role="radiogroup" aria-label="แนวทางการสอน">
+              <label class="heart-choice"><input type="radio" name="teachingApproach" value="1"/><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78Z"/></svg></label>
+              <label class="heart-choice"><input type="radio" name="teachingApproach" value="2"/><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78Z"/></svg></label>
+              <label class="heart-choice"><input type="radio" name="teachingApproach" value="3"/><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78Z"/></svg></label>
+            </div>
+            <div class="preference-range"><span>เน้นทฤษฎี</span><span>เน้นปฏิบัติ</span></div>
+          </fieldset>
+
+          <fieldset class="preference-card" data-preference="gradingStyle" data-rating="3">
+            <legend>สัดส่วนการวัดผลและตัดเกรด</legend>
+            <div class="preference-hearts" role="radiogroup" aria-label="สัดส่วนการวัดผลและตัดเกรด">
+              <label class="heart-choice"><input type="radio" name="gradingStyle" value="1"/><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78Z"/></svg></label>
+              <label class="heart-choice"><input type="radio" name="gradingStyle" value="2"/><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78Z"/></svg></label>
+              <label class="heart-choice"><input type="radio" name="gradingStyle" value="3"/><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78Z"/></svg></label>
+            </div>
+            <div class="preference-range"><span>เน้นสอบ</span><span>เน้นโครงงาน</span></div>
+          </fieldset>
+
+          <fieldset class="preference-card" data-preference="teachingPace" data-rating="5">
+            <legend>ความเร็วในการสอน</legend>
+            <div class="preference-hearts" role="radiogroup" aria-label="ความเร็วในการสอน">
+              <label class="heart-choice"><input type="radio" name="teachingPace" value="1"/><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78Z"/></svg></label>
+              <label class="heart-choice"><input type="radio" name="teachingPace" value="2"/><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78Z"/></svg></label>
+              <label class="heart-choice"><input type="radio" name="teachingPace" value="3"/><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78Z"/></svg></label>
+              <label class="heart-choice"><input type="radio" name="teachingPace" value="4"/><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78Z"/></svg></label>
+              <label class="heart-choice"><input type="radio" name="teachingPace" value="5"/><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78Z"/></svg></label>
+            </div>
+            <div class="preference-range"><span>สอนช้ามาก</span><span>สอนเร็วมาก</span></div>
+          </fieldset>
+
+          <fieldset class="preference-card" data-preference="assignmentStyle" data-rating="3">
+            <legend>รูปแบบงาน</legend>
+            <div class="preference-hearts" role="radiogroup" aria-label="รูปแบบงาน">
+              <label class="heart-choice"><input type="radio" name="assignmentStyle" value="1"/><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78Z"/></svg></label>
+              <label class="heart-choice"><input type="radio" name="assignmentStyle" value="2"/><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78Z"/></svg></label>
+              <label class="heart-choice"><input type="radio" name="assignmentStyle" value="3"/><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78Z"/></svg></label>
+            </div>
+            <div class="preference-range"><span>งานเดี่ยว</span><span>งานกลุ่ม</span></div>
+          </fieldset>
+
+          <fieldset class="preference-card" data-preference="workload" data-rating="5">
+            <legend>ปริมาณงาน</legend>
+            <div class="preference-hearts" role="radiogroup" aria-label="ปริมาณงาน">
+              <label class="heart-choice"><input type="radio" name="workload" value="1"/><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78Z"/></svg></label>
+              <label class="heart-choice"><input type="radio" name="workload" value="2"/><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78Z"/></svg></label>
+              <label class="heart-choice"><input type="radio" name="workload" value="3"/><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78Z"/></svg></label>
+              <label class="heart-choice"><input type="radio" name="workload" value="4"/><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78Z"/></svg></label>
+              <label class="heart-choice"><input type="radio" name="workload" value="5"/><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78Z"/></svg></label>
+            </div>
+            <div class="preference-range"><span>รับงานได้น้อย</span><span>รับงานได้มาก</span></div>
+          </fieldset>
+        </div>
+
+        <p id="preference-status" class="preference-status" role="status" aria-live="polite" hidden></p>
+        <div class="preference-actions">
+          <a class="btn preference-back" href="profile.html">ย้อนกลับ</a>
+          <button class="btn btn-primary preference-save" type="submit">บันทึก</button>
+        </div>
+      </form>
+    </main>
+  </div>
+
+  <dialog class="save-dialog" id="save-dialog" aria-labelledby="save-dialog-title" aria-describedby="save-dialog-message">
+    <div class="save-dialog-icon" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none">
+        <path d="m6 12.5 4 4L18.5 8" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+    <h2 id="save-dialog-title">บันทึกเสร็จสิ้น</h2>
+    <p id="save-dialog-message">บันทึก Preferences ของคุณเรียบร้อยแล้ว</p>
+    <form method="dialog">
+      <button class="btn btn-primary save-dialog-button" type="submit">ตกลง</button>
+    </form>
+  </dialog>
+
+  <script src="../app.js"></script>
+  <script>
+    const preferenceForm = document.getElementById("preference-form");
+    const preferenceStatus = document.getElementById("preference-status");
+    const saveDialog = document.getElementById("save-dialog");
+    const preferenceSaveButton = preferenceForm.querySelector('button[type="submit"]');
+    const legacyPreferencesStorageKey = "cstu_preferences";
+    const preferenceDimensions = [
+      { uiField: "teachingApproach", apiField: "preferredTeachingMethod", maxRating: 3 },
+      { uiField: "gradingStyle", apiField: "preferredEvaluation", maxRating: 3 },
+      { uiField: "teachingPace", apiField: "preferredTeachingSpeed", maxRating: 5 },
+      { uiField: "assignmentStyle", apiField: "preferredAssignmentStyle", maxRating: 3 },
+      { uiField: "workload", apiField: "preferredWorkload", maxRating: 5 },
+    ];
+
+    document.querySelectorAll(".preference-card").forEach(card => {
+      card.querySelectorAll('input[type="radio"]').forEach((input, index) => {
+        input.setAttribute("aria-label", `${index + 1} จาก ${card.dataset.rating}`);
+      });
+      card.querySelectorAll(".heart-choice").forEach(choice => {
+        const input = choice.querySelector('input[type="radio"]');
+        let selectedOnPointerDown = false;
+
+        choice.addEventListener("pointerdown", () => {
+          selectedOnPointerDown = input.checked;
+        });
+        choice.addEventListener("pointercancel", () => {
+          selectedOnPointerDown = false;
+        });
+        choice.addEventListener("click", event => {
+          const shouldClear = selectedOnPointerDown;
+          selectedOnPointerDown = false;
+          if (!shouldClear) return;
+
+          event.preventDefault();
+          input.checked = false;
+          updatePreferenceHearts(card);
+        });
+      });
+      card.addEventListener("change", () => updatePreferenceHearts(card));
+    });
+
+    function updatePreferenceHearts(card) {
+      const selectedInput = card.querySelector("input:checked");
+      const selectedRating = selectedInput ? Number(selectedInput.value) : 0;
+      card.querySelectorAll(".heart-choice").forEach(choice => {
+        const rating = Number(choice.querySelector("input").value);
+        choice.classList.toggle("is-filled", rating <= selectedRating);
+      });
+    }
+
+    function showPreferenceStatus(message, isError = false) {
+      preferenceStatus.textContent = message;
+      preferenceStatus.classList.toggle("is-error", isError);
+      preferenceStatus.hidden = false;
+      preferenceStatus.setAttribute("role", isError ? "alert" : "status");
+    }
+
+    function ratingToScore(rating, maxRating) {
+      return rating === null ? null : Math.round((rating - 1) * 100 / (maxRating - 1));
+    }
+
+    function scoreToRating(score, maxRating) {
+      if (score === null) return null;
+      if (!Number.isInteger(score) || score < 0 || score > 100) {
+        throw new Error("ข้อมูล Preferences จากระบบไม่ถูกต้อง");
+      }
+      return Math.round(score * (maxRating - 1) / 100) + 1;
+    }
+
+    function validateApiPreferences(preferences) {
+      if (!preferences || typeof preferences !== "object" || Array.isArray(preferences)) {
+        throw new Error("รูปแบบข้อมูล Preferences จากระบบไม่ถูกต้อง");
+      }
+
+      preferenceDimensions.forEach(dimension => {
+        if (!Object.prototype.hasOwnProperty.call(preferences, dimension.apiField)) {
+          throw new Error("ข้อมูล Preferences จากระบบไม่ครบถ้วน");
+        }
+        scoreToRating(preferences[dimension.apiField], dimension.maxRating);
+      });
+    }
+
+    function restorePreferences(preferences) {
+      validateApiPreferences(preferences);
+
+      preferenceDimensions.forEach(dimension => {
+        const rating = scoreToRating(preferences[dimension.apiField], dimension.maxRating);
+        const card = preferenceForm.querySelector(`[data-preference="${dimension.uiField}"]`);
+        card.querySelectorAll('input[type="radio"]').forEach(input => {
+          input.checked = Number(input.value) === rating;
+        });
+        updatePreferenceHearts(card);
+      });
+    }
+
+    function preferencesFromForm() {
+      const preferences = {};
+      preferenceDimensions.forEach(dimension => {
+        const card = preferenceForm.querySelector(`[data-preference="${dimension.uiField}"]`);
+        const selected = card.querySelector("input:checked");
+        const rating = selected ? Number(selected.value) : null;
+        preferences[dimension.apiField] = ratingToScore(rating, dimension.maxRating);
+      });
+      return preferences;
+    }
+
+    function preferencesFromLegacyStorage(legacyPreferences) {
+      if (!legacyPreferences || typeof legacyPreferences !== "object" || Array.isArray(legacyPreferences)) {
+        throw new Error("รูปแบบข้อมูล Preferences ที่บันทึกไว้ในเครื่องไม่ถูกต้อง");
+      }
+
+      const preferences = {};
+      preferenceDimensions.forEach(dimension => {
+        const rating = legacyPreferences[dimension.uiField];
+        if (rating !== undefined && rating !== null
+            && (!Number.isInteger(rating) || rating < 1 || rating > dimension.maxRating)) {
+          throw new Error(`คะแนน Preferences ของ ${dimension.uiField} ไม่ถูกต้อง`);
+        }
+        preferences[dimension.apiField] = ratingToScore(rating === undefined ? null : rating, dimension.maxRating);
+      });
+      return preferences;
+    }
+
+    async function loadPreferences() {
+      let preferences = await apiFetchUserPreferences();
+      validateApiPreferences(preferences);
+
+      const hasServerPreferences = preferenceDimensions.some(
+        dimension => preferences[dimension.apiField] !== null
+      );
+      if (!hasServerPreferences) {
+        const legacyValue = localStorage.getItem(legacyPreferencesStorageKey);
+        if (legacyValue !== null) {
+          const legacyPreferences = preferencesFromLegacyStorage(JSON.parse(legacyValue));
+          const hasLegacyPreferences = Object.values(legacyPreferences).some(value => value !== null);
+          if (hasLegacyPreferences) {
+            try {
+              preferences = await apiSaveUserPreferences(legacyPreferences);
+              validateApiPreferences(preferences);
+              try {
+                localStorage.removeItem(legacyPreferencesStorageKey);
+              } catch (storageError) {
+                console.warn("Unable to remove migrated preferences from local storage:", storageError);
+              }
+            } catch (error) {
+              restorePreferences(legacyPreferences);
+              throw new Error(`ย้าย Preferences เดิมไปยังระบบไม่สำเร็จ: ${error.message}`);
+            }
+          }
+        }
+      }
+
+      restorePreferences(preferences);
+    }
+
+    preferenceForm.addEventListener("submit", async event => {
+      event.preventDefault();
+      const workloadCard = preferenceForm.querySelector('[data-preference="workload"]');
+      if (!workloadCard.querySelector("input:checked")) {
+        showPreferenceStatus("กรุณาเลือกระดับ Workload ที่รับได้ก่อนบันทึก", true);
+        workloadCard.querySelector('input[type="radio"]').focus();
+        return;
+      }
+
+      preferenceSaveButton.disabled = true;
+      try {
+        const savedPreferences = await apiSaveUserPreferences(preferencesFromForm());
+        restorePreferences(savedPreferences);
+        try {
+          localStorage.removeItem(legacyPreferencesStorageKey);
+        } catch (storageError) {
+          console.warn("Unable to remove legacy preferences from local storage:", storageError);
+        }
+        preferenceStatus.hidden = true;
+        saveDialog.showModal();
+      } catch (error) {
+        console.error("Unable to save Preferences:", error);
+        showPreferenceStatus(error.message || "บันทึก Preferences ไม่สำเร็จ กรุณาลองอีกครั้ง", true);
+      } finally {
+        preferenceSaveButton.disabled = false;
+      }
+    });
+
+    async function initializePreferencePage() {
+      const user = await requireAuth();
+      if (!user) return;
+      renderTopbar();
+
+      try {
+        await loadPreferences();
+      } catch (error) {
+        console.error("Unable to load preferences:", error);
+        showPreferenceStatus(error.message || "โหลด Preferences ไม่สำเร็จ", true);
+      }
+    }
+
+    initializePreferencePage();
+  </script>
+</body>
+</html>

@@ -30,6 +30,21 @@ public class Review {
     @Column(name = "is_anonymous", nullable = false)
     private Boolean isAnonymous = false;
 
+    @Column(name = "teaching_method_score")
+    private Double teachingMethodScore;
+
+    @Column(name = "evaluation_score")
+    private Double evaluationScore;
+
+    @Column(name = "teaching_speed_score")
+    private Double teachingSpeedScore;
+
+    @Column(name = "assignment_style_score")
+    private Double assignmentStyleScore;
+
+    @Column(name = "workload_score")
+    private Double workloadScore;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
@@ -68,6 +83,17 @@ public class Review {
     public Boolean isAnonymous() { return isAnonymous; }
     @com.fasterxml.jackson.annotation.JsonProperty("isAnonymous")
     public void setAnonymous(Boolean anonymous) { isAnonymous = anonymous; }
+
+    public Double getTeachingMethodScore() { return teachingMethodScore; }
+    public void setTeachingMethodScore(Double score) { this.teachingMethodScore = score; }
+    public Double getEvaluationScore() { return evaluationScore; }
+    public void setEvaluationScore(Double score) { this.evaluationScore = score; }
+    public Double getTeachingSpeedScore() { return teachingSpeedScore; }
+    public void setTeachingSpeedScore(Double score) { this.teachingSpeedScore = score; }
+    public Double getAssignmentStyleScore() { return assignmentStyleScore; }
+    public void setAssignmentStyleScore(Double score) { this.assignmentStyleScore = score; }
+    public Double getWorkloadScore() { return workloadScore; }
+    public void setWorkloadScore(Double score) { this.workloadScore = score; }
 
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }

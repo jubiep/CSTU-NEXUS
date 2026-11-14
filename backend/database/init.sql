@@ -11,7 +11,23 @@ CREATE TABLE mock_user (
     email VARCHAR(255) NOT NULL UNIQUE
 );
 
--- 2. Courses
+-- 2. User Preferences
+CREATE TABLE user_preferences (
+    user_id INTEGER PRIMARY KEY
+        REFERENCES mock_user(user_id) ON DELETE CASCADE,
+    preferred_teaching_method INTEGER
+        CHECK (preferred_teaching_method BETWEEN 0 AND 100),
+    preferred_evaluation INTEGER
+        CHECK (preferred_evaluation BETWEEN 0 AND 100),
+    preferred_teaching_speed INTEGER
+        CHECK (preferred_teaching_speed BETWEEN 0 AND 100),
+    preferred_assignment_style INTEGER
+        CHECK (preferred_assignment_style BETWEEN 0 AND 100),
+    preferred_workload INTEGER
+        CHECK (preferred_workload BETWEEN 0 AND 100)
+);
+
+-- 3. Courses
 CREATE TABLE courses (
     course_id VARCHAR(20) PRIMARY KEY,
     course_name VARCHAR(200) NOT NULL,
@@ -19,7 +35,7 @@ CREATE TABLE courses (
         CHECK (recommended_year BETWEEN 1 AND 4)
 );
 
--- 3. Sections
+-- 4. Sections
 CREATE TABLE sections (
     course_id VARCHAR(20) NOT NULL
         REFERENCES courses(course_id),
@@ -31,7 +47,7 @@ CREATE TABLE sections (
         UNIQUE (course_id, section_id)
 );
 
--- 4. Reviews
+-- 5. Reviews
 CREATE TABLE review (
     review_id INTEGER GENERATED ALWAYS AS IDENTITY
         PRIMARY KEY,
@@ -44,6 +60,11 @@ CREATE TABLE review (
         CHECK (reviewer_year BETWEEN 1 AND 4),
     review_text TEXT NOT NULL,
     is_anonymous BOOLEAN NOT NULL DEFAULT FALSE,
+    teaching_method_score DOUBLE PRECISION CHECK (teaching_method_score BETWEEN 0 AND 100),
+    evaluation_score DOUBLE PRECISION CHECK (evaluation_score BETWEEN 0 AND 100),
+    teaching_speed_score DOUBLE PRECISION CHECK (teaching_speed_score BETWEEN 0 AND 100),
+    assignment_style_score DOUBLE PRECISION CHECK (assignment_style_score BETWEEN 0 AND 100),
+    workload_score DOUBLE PRECISION CHECK (workload_score BETWEEN 0 AND 100),
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
 
     CONSTRAINT review_section_course_match

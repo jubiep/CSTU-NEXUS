@@ -58,6 +58,34 @@ class TuAuthServiceTests {
     }
 
     @Test
+    void acceptsAllConfiguredCstuStudentIdPrefixes() {
+        for (String studentId : new String[] {
+                "6609000000", "6709000000", "6809000000", "6909000000"
+        }) {
+            RestClient.Builder builder = RestClient.builder();
+            MockRestServiceServer server = MockRestServiceServer.bindTo(builder).build();
+            server.expect(requestTo(VERIFY_URL))
+                    .andRespond(withSuccess("""
+                            {
+                              "status": true,
+                              "type": "student",
+                              "username": "%s",
+                              "displayname_th": "นักศึกษา CSTU ทดสอบ",
+                              "email": "student@tu.ac.th",
+                              "faculty": "คณะทดสอบ",
+                              "department": "วิทยาการคอมพิวเตอร์"
+                            }
+                            """.formatted(studentId), MediaType.APPLICATION_JSON));
+
+            TuAuthService service = new TuAuthService(builder, VERIFY_URL, "test-application-key");
+            AuthUser user = service.verify(studentId, "test-password");
+
+            assertEquals(studentId, user.studentId());
+            server.verify();
+        }
+    }
+
+    @Test
     void rejectsNonStudentAccounts() {
         RestClient.Builder builder = RestClient.builder();
         MockRestServiceServer server = MockRestServiceServer.bindTo(builder).build();
