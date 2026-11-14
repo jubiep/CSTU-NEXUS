@@ -105,9 +105,27 @@ test('คลิกหัวใจที่เลือกอยู่ซ้ำ�
     page.locator('[data-preference="teachingApproach"] .heart-choice.is-filled')
   ).toHaveCount(0);
 
+  await page.locator('label.heart-choice:has(input[name="workload"][value="3"])').click();
   await page.locator('.preference-save').click();
   await expect(page.locator('#save-dialog')).toBeVisible();
   expect(savedPreferences.preferredTeachingMethod).toBeNull();
+});
+
+test('เตือนและไม่บันทึกเมื่อยังไม่ได้เลือกระดับ Workload', async ({ page }) => {
+  let saveRequestCount = 0;
+  await mockPreferencesApi(page, emptyPreferences, () => {
+    saveRequestCount += 1;
+  });
+
+  await page.goto(`${FRONTEND_ORIGIN}/pages/preference.html`);
+  await page.locator('label.heart-choice:has(input[name="teachingApproach"][value="2"])').click();
+  await page.locator('.preference-save').click();
+
+  await expect(page.locator('#preference-status')).toContainText(
+    'กรุณาเลือกระดับ Workload ที่รับได้ก่อนบันทึก'
+  );
+  await expect(page.locator('#save-dialog')).not.toBeVisible();
+  expect(saveRequestCount).toBe(0);
 });
 
 test('บันทึกคะแนนผ่าน PUT ตาม API contract', async ({ page }) => {

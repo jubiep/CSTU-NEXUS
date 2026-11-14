@@ -253,6 +253,13 @@
 
     preferenceForm.addEventListener("submit", async event => {
       event.preventDefault();
+      const workloadCard = preferenceForm.querySelector('[data-preference="workload"]');
+      if (!workloadCard.querySelector("input:checked")) {
+        showPreferenceStatus("กรุณาเลือกระดับ Workload ที่รับได้ก่อนบันทึก", true);
+        workloadCard.querySelector('input[type="radio"]').focus();
+        return;
+      }
+
       preferenceSaveButton.disabled = true;
       try {
         const savedPreferences = await apiSaveUserPreferences(preferencesFromForm());

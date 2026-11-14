@@ -1,0 +1,50 @@
+{
+  "planHash": "799face3c07e4a9efcef16c8357bf0ea4b1aaa8970f22456a5ac43ebfec168b6",
+  "phase": "standalone",
+  "recordedAtUtc": "2026-11-14T09:37:37.6116558Z",
+  "retryCount": 0,
+  "resetBaseline": false,
+  "complete": true,
+  "result": {
+    "setupSucceeded": true,
+    "setupDurationMs": 0,
+    "setupFailureOutput": null,
+    "assertions": [
+      {
+        "name": "tests-pass",
+        "kind": "process",
+        "verificationMethod": "test-results",
+        "passed": true,
+        "timedOut": false,
+        "skipped": false,
+        "skippedReason": null,
+        "exitCode": 0,
+        "outputSample": "[INFO] Scanning for projects...\r\n[INFO] Loaded 24477 auto-discovered prefixes for remote repository central (prefixes-central.txt)\r\n[INFO] \r\n[INFO] -------------------\u003C th.ac.tu.cs:cstu-course-nexus \u003E--------------------\r\n[INFO] Building  0.0.1-SNAPSHOT\r\n[INFO]   from pom.xml\r\n[INFO] --------------------------------[ jar ]---------------------------------\r\n[INFO] \r\n[INFO] --- resources:3.5.0:resources (default-resources) @ cstu-course-nexus ---\r\n[INFO] Copying 1 resource from src\\main\\resources to target\\classes\r\n[INFO] Copying 0 resource from src\\main\\resources to target\\classes\r\n[INFO] \r\n[INFO] --- compiler:3.15.0:compile (default-compile) @ cstu-course-nexus ---\r\n[INFO] Loaded 64 auto-discovered prefixes for remote repository apache.snapshots (prefixes-apache.snapshots.txt)\r\n[INFO] Nothing to compile - all classes are up to date.\r\n[INFO] \r\n[INFO] --- resources:3.5.0:testResources (default-testResources) @ cstu-course-nexus ---\r\n[INFO] skip non existing resourceDirectory D:\\TU\\CSTU-NEXUS\\backend\\cstu-course-nexus\\src\\test\\resources\r\n[INFO] \r\n[INFO] --- compiler:3.15.0:testCompile (default-testCompile) @ cstu-course-nexus ---\r\n[INFO] Nothing to compile - all classes are up to date.\r\n[INFO] \r\n[INFO] --- surefire:3.5.6:test (default-test) @ cstu-course-nexus ---\r\n[INFO] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider\r\n[INFO] \r\n[INFO] -------------------------------------------------------\r\n[INFO]  T E S T S\r\n[INFO] -------------------------------------------------------\r\n[INFO] Running th.ac.tu.cs.cstu_course_nexus.UserPreferencesControllerTests\r\nOpenJDK 64-Bit Server VM warning: Sharing is only supported for boot loader classes because bootstrap classpath has been appended\r\n16:37:29.469 [main] INFO org.springframework.mock.web.MockServletContext -- Initializing Spring TestDispatcherServlet \u0027\u0027\r\n16:37:29.477 [main] INFO org.springframework.test.web.servlet.TestDispatcherServlet -- Initializing Servlet \u0027\u0027\r\n16:37:29.477 [main] INFO org.springframework.test.web.servlet.TestDispatcherServlet -- Completed initialization in 0 ms\r\n16:37:29.620 [main] INFO org.springframework.mock.web.MockServletContext -- Initializing Spring TestDispatcherServlet \u0027\u0027\r\n16:37:29.620 [main] INFO org.springframework.test.web.servlet.TestDispatcherServlet -- Initializing Servlet \u0027\u0027\r\n16:37:29.620 [main] INFO org.springframework.test.web.servlet.TestDispatcherServlet -- Completed initialization in 0 ms\r\n16:37:29.671 [main] INFO org.springframework.mock.web.MockServletContext -- Initializing Spring TestDispatcherServlet \u0027\u0027\r\n16:37:29.671 [main] INFO org.springframework.test.web.servlet.TestDispatcherServlet -- Initializing Servlet \u0027\u0027\r\n16:37:29.671 [main] INFO org.springframework.test.web.servlet.TestDispatcherServlet -- Completed initialization in 0 ms\r\n16:37:29.687 [main] INFO org.springframework.mock.web.MockServletContext -- Initializing Spring TestDispatcherServlet \u0027\u0027\r\n16:37:29.687 [main] INFO org.springframework.test.web.servlet.TestDispatcherServlet -- Initializing Servlet \u0027\u0027\r\n16:37:29.687 [main] INFO org.springframework.test.web.servlet.TestDispatcherServlet -- Completed initialization in 0 ms\r\n16:37:29.702 [main] INFO org.springframework.mock.web.MockServletContext -- Initializing Spring TestDispatcherServlet \u0027\u0027\r\n16:37:29.702 [main] INFO org.springframework.test.web.servlet.TestDispatcherServlet -- Initializing Servlet \u0027\u0027\r\n16:37:29.702 [main] INFO org.springframework.test.web.servlet.TestDispatcherServlet -- Completed initialization in 0 ms\r\n16:37:29.718 [main] INFO org.springframework.mock.web.MockServletContext -- Initializing Spring TestDispatcherServlet \u0027\u0027\r\n16:37:29.718 [main] INFO org.springframework.test.web.servlet.TestDispatcherServlet -- Initializing Servlet \u0027\u0027\r\n16:37:29.718 [main] INFO org.springframework.test.web.servlet.TestDispatcherServlet -- Completed initialization in 0 ms\r\n16:37:29.734 [main] INFO org.springframework.mock.web.MockServletContext -- Initializing Spring TestDispatcherServlet \u0027\u0027\r\n16:37:29.734 [main] INFO org.springframework.test.web.servlet.TestDispatcherServlet -- Initializin\n\u2026[truncated]",
+        "durationMs": 14923,
+        "testResults": {
+          "testFramework": "unknown",
+          "runnerDetectedFrom": "none",
+          "testsTotal": 0,
+          "testsPassed": 0,
+          "testsFailed": 0,
+          "testsSkipped": 0,
+          "parseFailed": true
+        }
+      }
+    ],
+    "executions": [
+      {
+        "source": "tests-pass",
+        "resolvedExecutable": "D:\\TU\\CSTU-NEXUS\\backend\\cstu-course-nexus\\mvnw.cmd",
+        "args": [
+          "-Dtest=UserPreferencesControllerTests,UserPreferencesServiceTests,UserPreferencesPersistenceIntegrationTests",
+          "test"
+        ],
+        "cwd": "D:\\TU\\CSTU-NEXUS\\backend\\cstu-course-nexus",
+        "env": {},
+        "prependPath": [],
+        "platform": "win32"
+      }
+    ]
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "generatedOnPlatform": "win32",
+  "projectType": "other",
+  "setup": [],
+  "assertions": [
+    {
+      "name": "tests-pass",
+      "kind": "process",
+      "command": "D:\\TU\\CSTU-NEXUS\\backend\\cstu-course-nexus\\mvnw.cmd",
+      "args": [
+        "-Dtest=UserPreferencesControllerTests,UserPreferencesServiceTests,UserPreferencesPersistenceIntegrationTests",
+        "test"
+      ],
+      "cwd": "backend\\cstu-course-nexus",
+      "verificationMethod": "test-results",
+      "expected": "0",
+      "timeoutSeconds": 300
+    }
+  ]
+}
