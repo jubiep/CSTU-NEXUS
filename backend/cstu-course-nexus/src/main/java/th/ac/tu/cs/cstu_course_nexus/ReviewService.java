@@ -182,4 +182,8 @@ public class ReviewService {
         }
         return reviewRepository.save(review);
     }
+
+    public java.util.Optional<Review> findOwnedReview(Long reviewId, Integer userId) {
+        return reviewRepository.findByIdAndUserId(reviewId, userId);
+    }
 }

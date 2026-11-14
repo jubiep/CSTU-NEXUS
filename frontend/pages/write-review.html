@@ -185,6 +185,11 @@
         </div>
       </div>
 
+      <label class="anonymous-review-option" for="review-anonymous">
+        <input id="review-anonymous" type="checkbox"/>
+        <span><strong>เผยแพร่แบบไม่ระบุตัวตน</strong><small>ระบบจะแสดงเลข 2 หลักตามชั้นปี และปิดบังเลขที่เหลือ</small></span>
+      </label>
+
       <!-- Validation error -->
       <div id="form-error" class="error-msg" style="display:none;margin-bottom:14px;">
         กรุณาเลือกการประเมินให้ครบทุกหมวดหมู่
@@ -405,13 +410,20 @@
           return;
         }
 
-        // ข้อความรีวิว (text) ไม่จำเป็นต้องเขียน
+        // ต้องมีข้อความรีวิวก่อนส่ง
         const textarea = document.getElementById("review-text");
         const text = textarea ? textarea.value.trim() : "";
+        if (!text) {
+          errEl.textContent = "กรุณากรอกข้อความรีวิวก่อนส่ง";
+          errEl.style.display = "block";
+          if (textarea) textarea.focus();
+          return;
+        }
         errEl.style.display = "none";
 
         // บันทึกรีวิวพร้อมแท็กและคะแนนสเกล 0-1 ไว้ใน localStorage เพื่อแสดงผลทันทีในหน้ารายละเอียดวิชา
         const currentStudentId = (user && user.studentId) || "";
+        const isAnonymous = document.getElementById("review-anonymous").checked;
         const dimensionScores = typeof normalizeRatings === "function" ? normalizeRatings(ratings) : {};
         try {
           const storedKey = `cstu_reviews_${code}`;
@@ -421,7 +433,9 @@
             courseId: code,
             sectionNumber: section || "",
             sectionId: sectionId || null,
-            studentId: currentStudentId,
+            ...(isAnonymous ? {} : { studentId: currentStudentId }),
+            isAnonymous,
+            anonymous: isAnonymous,
             year: (user && user.year) || 2,
             date: new Date().toLocaleDateString("th-TH", { day: "numeric", month: "numeric", year: "numeric" }).replace(/\//g, "-"),
             tags: selectedTags.length > 0 ? selectedTags : ["เน้นทฤษฎี"],
@@ -443,29 +457,32 @@
         submitBtn.textContent = "กำลังส่ง...";
 
         try {
-          // เรียกใช้งานฟังก์ชัน submitReview ใน app.js ที่ส่งค่าทั้ง 5 เกณฑ์ไปยัง Backend
-          if (typeof window.submitReview === "function" && window.submitReview !== submitReviewHandler) {
-            await window.submitReview(code, {
-              sectionId: sectionId || null,
-              reviewText: text || "-",
-              ratings: ratings
-            });
-          } else if (typeof apiSubmitReview === "function") {
+          // ส่งข้อความ สถานะปกปิดตัวตน และคะแนนทั้ง 5 หมวดไปยัง Backend
+          if (typeof apiSubmitReview === "function") {
             await apiSubmitReview(code, {
               sectionId: sectionId || null,
-              reviewText: text || "-",
-              ratings: ratings
+              reviewText: text,
+              comment: text,
+              text,
+              ratings,
+              isAnonymous
             });
           } else {
             await apiRequest(`/courses/${encodeURIComponent(code)}/reviews`, {
               method: "POST",
               body: JSON.stringify({
                 sectionId: sectionId || null,
-                reviewText: text || "-",
-                comment: text || "-",
-                text: text || "-",
+                reviewText: text,
+                comment: text,
+                text,
                 ratings: ratings,
-                scores: dimensionScores
+                scores: dimensionScores,
+                teachingMethodScore: dimensionScores.teaching_method,
+                evaluationScore: dimensionScores.evaluation,
+                teachingSpeedScore: dimensionScores.teaching_speed,
+                assignmentStyleScore: dimensionScores.assignment_style,
+                workloadScore: dimensionScores.workload,
+                isAnonymous
               }),
             });
           }

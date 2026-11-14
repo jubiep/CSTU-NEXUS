@@ -393,8 +393,13 @@
       reviewList.innerHTML = currentSlice.map(r => {
         const yearText = r.year ? `ชั้นปีที่ ${r.year}` : '';
         const dateText = r.date || '9-11-2569';
-        const rawStudentId = r.studentId || r.authorStudentId || "";
-        const studentId = rawStudentId;
+        const isAnonymous = Boolean(r.isAnonymous || r.anonymous);
+        const anonymousYear = Number(r.reviewerYear || r.year);
+        const anonymousPrefixByYear = { 1: "69", 2: "68", 3: "67", 4: "66" };
+        const anonymousStudentId = /^\d{2}\*{8}$/.test(r.author || "")
+          ? r.author
+          : `${anonymousPrefixByYear[anonymousYear] || "**"}********`;
+        const studentId = isAnonymous ? anonymousStudentId : (r.studentId || r.authorStudentId || "ไม่พบรหัสนักศึกษา");
         
         // จัดรูปแบบแท็ก Section
         const rawSection = r.sectionNumber || r.sectionId || '';
@@ -427,7 +432,7 @@
                 <div class="review-verified-shield">
                   <img src="../src/verify-icon.png" alt="verified icon" height="30" width="30"/>
                 </div>
-                <span class="review-student-id">${studentId}</span>
+                <span class="review-student-id"${isAnonymous ? ' aria-label="เลขนักศึกษาที่ปกปิดบางส่วน"' : ''}>${studentId}</span>
                 ${sectionBadgeHtml}
               </div>
               <span class="review-date">${dateText}</span>

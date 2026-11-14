@@ -32,7 +32,6 @@ public class ReviewController {
             item.put("id", review.getId());
             item.put("courseId", review.getCourseId());
             item.put("sectionId", review.getSectionId());
-            item.put("userId", review.getUserId());
             item.put("year", review.getReviewerYear());
             item.put("reviewerYear", review.getReviewerYear());
             item.put("text", review.getReviewText());
@@ -43,11 +42,28 @@ public class ReviewController {
             item.put("assignmentStyleScore", review.getAssignmentStyleScore());
             item.put("workloadScore", review.getWorkloadScore());
             item.put("date", review.getDate());
-            item.put("studentId", reviewService.getStudentId(review.getUserId()));
+            boolean anonymous = Boolean.TRUE.equals(review.isAnonymous());
+            item.put("isAnonymous", anonymous);
+            if (anonymous) {
+                item.put("author", maskedStudentIdForYear(review.getReviewerYear()));
+            } else {
+                item.put("userId", review.getUserId());
+                item.put("studentId", reviewService.getStudentId(review.getUserId()));
+            }
             return item;
         }).toList();
 
         return ResponseEntity.ok(response);
+    }
+
+    private String maskedStudentIdForYear(Integer reviewerYear) {
+        return switch (reviewerYear == null ? 0 : reviewerYear) {
+            case 1 -> "69********";
+            case 2 -> "68********";
+            case 3 -> "67********";
+            case 4 -> "66********";
+            default -> "**********";
+        };
     }
 
     @GetMapping("/{id}/reviews/eligibility")
@@ -135,6 +151,29 @@ public class ReviewController {
             "reviewId", savedReview.getId(),
             "message", "รีวิวสำเร็จ"
         ));
+    }
+
+    @PutMapping("/{courseId}/reviews/{reviewId}")
+    public ResponseEntity<?> editReview(@PathVariable String courseId, @PathVariable Long reviewId,
+            @RequestBody Review update, HttpSession session) {
+        Object sessionUser = session.getAttribute(AUTH_USER_SESSION_KEY);
+        if (!(sessionUser instanceof AuthUser authUser)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "กรุณาเข้าสู่ระบบก่อนแก้ไขรีวิว"));
+        }
+        Integer userId = reviewService.upsertUser(authUser);
+        Review existing = reviewService.findOwnedReview(reviewId, userId).orElse(null);
+        if (existing == null || !existing.getCourseId().equalsIgnoreCase(courseId)) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", "ไม่พบรีวิวที่คุณมีสิทธิ์แก้ไข"));
+        }
+        if (update.getReviewText() == null || update.getReviewText().trim().isEmpty()) {
+            return ResponseEntity.badRequest().body(Map.of("error", "กรุณากรอกข้อความรีวิวก่อนส่ง"));
+        }
+        existing.setReviewText(update.getReviewText().trim());
+        if (update.isAnonymous() != null) {
+            existing.setAnonymous(update.isAnonymous());
+        }
+        reviewService.saveReview(existing);
+        return ResponseEntity.ok(Map.of("reviewId", existing.getId(), "message", "แก้ไขรีวิวสำเร็จ"));
     }
 
     private static boolean validScore(Double score) {

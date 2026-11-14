@@ -59,6 +59,7 @@ CREATE TABLE review (
     reviewer_year INTEGER NOT NULL
         CHECK (reviewer_year BETWEEN 1 AND 4),
     review_text TEXT NOT NULL,
+    is_anonymous BOOLEAN NOT NULL DEFAULT FALSE,
     teaching_method_score DOUBLE PRECISION CHECK (teaching_method_score BETWEEN 0 AND 100),
     evaluation_score DOUBLE PRECISION CHECK (evaluation_score BETWEEN 0 AND 100),
     teaching_speed_score DOUBLE PRECISION CHECK (teaching_speed_score BETWEEN 0 AND 100),
@@ -74,3 +75,6 @@ CREATE TABLE review (
     CONSTRAINT review_course_user_unique
         UNIQUE (course_id, user_id)
 );
+
+CREATE INDEX review_course_created_at_idx ON review (course_id, created_at DESC);
+CREATE INDEX review_course_section_created_at_idx ON review (course_id, section_id, created_at DESC);

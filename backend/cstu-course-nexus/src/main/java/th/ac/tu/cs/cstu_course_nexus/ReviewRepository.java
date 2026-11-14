@@ -17,4 +17,6 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
     Page<Review> findByCourseIdAndSectionIdOrderByCreatedAtDesc(String courseId, String sectionId, Pageable pageable);
 
     boolean existsByCourseIdAndUserId(String courseId, Integer userId);
+
+    java.util.Optional<Review> findByIdAndUserId(Long id, Integer userId);
 }

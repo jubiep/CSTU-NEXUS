@@ -27,6 +27,9 @@ public class Review {
     @Column(name = "review_text", nullable = false, columnDefinition = "TEXT")
     private String reviewText;
 
+    @Column(name = "is_anonymous", nullable = false)
+    private Boolean isAnonymous = false;
+
     @Column(name = "teaching_method_score")
     private Double teachingMethodScore;
 
@@ -75,6 +78,11 @@ public class Review {
 
     public String getReviewText() { return reviewText; }
     public void setReviewText(String reviewText) { this.reviewText = reviewText; }
+
+    @com.fasterxml.jackson.annotation.JsonProperty("isAnonymous")
+    public Boolean isAnonymous() { return isAnonymous; }
+    @com.fasterxml.jackson.annotation.JsonProperty("isAnonymous")
+    public void setAnonymous(Boolean anonymous) { isAnonymous = anonymous; }
 
     public Double getTeachingMethodScore() { return teachingMethodScore; }
     public void setTeachingMethodScore(Double score) { this.teachingMethodScore = score; }

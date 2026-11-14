@@ -3,9 +3,10 @@
    ========================================== */
 
 const isLocalFrontend = ["localhost", "127.0.0.1"].includes(window.location.hostname);
+const isLocalDevServer = isLocalFrontend && ["5500", "5501"].includes(window.location.port);
 const API_BASE_URL = (
   window.CSTU_API_BASE_URL
-  || (isLocalFrontend && window.location.port !== "3000"
+  || (isLocalDevServer
     ? `http://${window.location.hostname}:8080/api`
     : `${window.location.origin}/api`)
 ).replace(/\/+$/, "");
@@ -343,7 +344,7 @@ const mockReviews = {
     { id: 7, sectionNumber: "100001", sectionId: "cs261_100001", studentId: "6609650004", year: 4, date: "14/10/2569", tags: ["เน้นปฏิบัติ"], text: "เป็นวิชาพื้นฐานที่ดีมาก ช่วยต่อยอดวิชาขั้นสูงได้ดี", workload: "ปานกลาง", style: "ปฏิบัติ", detail: "ละเอียด" },
   ],
   "CS262": [
-    { id: 1, studentId: "6800000000", year: 2, date: "10/10/2569", tags: ["เน้นปฏิบัติ"], text: "งาน Lab เยอะ แต่ได้ความรู้จริง", workload: "มาก", style: "ปฏิบัติ", detail: "ละเอียด" },
+    { id: 1, anonymous: true, year: 2, date: "10/10/2569", tags: ["เน้นปฏิบัติ"], text: "งาน Lab เยอะ แต่ได้ความรู้จริง", workload: "มาก", style: "ปฏิบัติ", detail: "ละเอียด" },
   ],
 };
 
@@ -530,7 +531,6 @@ document.addEventListener('DOMContentLoaded', () => {
     updateButtonStates();
   }
 });
-
 /* ==========================================
    Rating & Preference Matching Logic (0.0 - 1.0)
    ========================================== */
@@ -636,6 +636,8 @@ async function submitReview(courseId, reviewData = {}) {
     teachingSpeedScore: scores.teaching_speed ?? null,
     assignmentStyleScore: scores.assignment_style ?? null,
     workloadScore: scores.workload ?? null,
+
+    isAnonymous: Boolean(reviewData.isAnonymous),
 
     ratings: ratings,
     scores: scores

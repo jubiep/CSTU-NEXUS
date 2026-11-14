@@ -186,4 +186,80 @@ class ReviewControllerMockTests {
                 .andExpect(status().isServiceUnavailable())
                 .andExpect(jsonPath("$.error").value("ระบบฐานข้อมูลไม่พร้อมใช้งาน กรุณาลองใหม่ภายหลัง"));
     }
+
+    @Test
+    void RV13_persistsAnonymousChoiceFromRequest() throws Exception {
+        when(reviewService.upsertUser(eligibleUser)).thenReturn(99);
+        when(reviewService.getEligibilityStatus("6700000000", "CS101"))
+                .thenReturn(new ReviewService.EligibilityStatus(true, 3, 1, "eligible"));
+        when(reviewService.saveReview(any(Review.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        mockMvc.perform(post("/api/courses/CS101/reviews").sessionAttr("authenticatedUser", eligibleUser)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"reviewText\":\"Private review\",\"isAnonymous\":true}"))
+                .andExpect(status().isCreated());
+
+        org.mockito.ArgumentCaptor<Review> captor = org.mockito.ArgumentCaptor.forClass(Review.class);
+        verify(reviewService).saveReview(captor.capture());
+        org.junit.jupiter.api.Assertions.assertTrue(captor.getValue().isAnonymous());
+    }
+
+    @Test
+    void RV14_anonymousFeedResponseOmitsUserIdentity() throws Exception {
+        Review anonymous = new Review();
+        anonymous.setId(8L);
+        anonymous.setCourseId("CS101");
+        anonymous.setUserId(99);
+        anonymous.setReviewerYear(3);
+        anonymous.setReviewText("Hidden author");
+        anonymous.setAnonymous(true);
+        when(reviewService.getReviews("CS101", null)).thenReturn(java.util.List.of(anonymous));
+
+        mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get("/api/courses/CS101/reviews"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].author").value("67********"))
+                .andExpect(jsonPath("$[0].isAnonymous").value(true))
+                .andExpect(jsonPath("$[0].userId").doesNotExist())
+                .andExpect(jsonPath("$[0].studentId").doesNotExist());
+    }
+
+    @Test
+    void RV15_cannotEditAnotherUsersReview() throws Exception {
+        when(reviewService.upsertUser(eligibleUser)).thenReturn(99);
+        when(reviewService.findOwnedReview(42L, 99)).thenReturn(java.util.Optional.empty());
+
+        mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders
+                        .put("/api/courses/CS101/reviews/42")
+                        .sessionAttr("authenticatedUser", eligibleUser)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"reviewText\":\"Changed\"}"))
+                .andExpect(status().isNotFound());
+        verify(reviewService, never()).saveReview(any(Review.class));
+    }
+
+    @Test
+    void RV16_masksAnonymousAuthorPrefixFromReviewerYear() throws Exception {
+        java.util.List<Review> reviews = new java.util.ArrayList<>();
+        for (int year = 1; year <= 4; year++) {
+            Review review = new Review();
+            review.setId((long) year);
+            review.setCourseId("CS101");
+            review.setUserId(100 + year);
+            review.setReviewerYear(year);
+            review.setReviewText("Review " + year);
+            review.setAnonymous(true);
+            reviews.add(review);
+        }
+        when(reviewService.getReviews("CS101", null)).thenReturn(reviews);
+
+        mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get("/api/courses/CS101/reviews"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].author").value("69********"))
+                .andExpect(jsonPath("$[1].author").value("68********"))
+                .andExpect(jsonPath("$[2].author").value("67********"))
+                .andExpect(jsonPath("$[3].author").value("66********"))
+                .andExpect(jsonPath("$[0].studentId").doesNotExist())
+                .andExpect(jsonPath("$[0].userId").doesNotExist());
+    }
+
 }
