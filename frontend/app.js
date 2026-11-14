@@ -418,6 +418,17 @@ async function apiRequest(path, options = {}) {
   return payload;
 }
 
+async function apiFetchUserPreferences() {
+  return await apiRequest("/users/preferences");
+}
+
+async function apiSaveUserPreferences(preferences) {
+  return await apiRequest("/users/preferences", {
+    method: "PUT",
+    body: JSON.stringify(preferences),
+  });
+}
+
 // ── Auth ────────────────────────────────────
 async function requireAuth() {
   const protectedContent = document.querySelector(".app-shell");

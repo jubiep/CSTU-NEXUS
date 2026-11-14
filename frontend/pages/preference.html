@@ -100,11 +100,39 @@
     const preferenceForm = document.getElementById("preference-form");
     const preferenceStatus = document.getElementById("preference-status");
     const saveDialog = document.getElementById("save-dialog");
-    const preferencesStorageKey = "cstu_preferences";
+    const preferenceSaveButton = preferenceForm.querySelector('button[type="submit"]');
+    const legacyPreferencesStorageKey = "cstu_preferences";
+    const preferenceDimensions = [
+      { uiField: "teachingApproach", apiField: "preferredTeachingMethod", maxRating: 3 },
+      { uiField: "gradingStyle", apiField: "preferredEvaluation", maxRating: 3 },
+      { uiField: "teachingPace", apiField: "preferredTeachingSpeed", maxRating: 5 },
+      { uiField: "assignmentStyle", apiField: "preferredAssignmentStyle", maxRating: 3 },
+      { uiField: "workload", apiField: "preferredWorkload", maxRating: 5 },
+    ];
 
     document.querySelectorAll(".preference-card").forEach(card => {
       card.querySelectorAll('input[type="radio"]').forEach((input, index) => {
         input.setAttribute("aria-label", `${index + 1} จาก ${card.dataset.rating}`);
+      });
+      card.querySelectorAll(".heart-choice").forEach(choice => {
+        const input = choice.querySelector('input[type="radio"]');
+        let selectedOnPointerDown = false;
+
+        choice.addEventListener("pointerdown", () => {
+          selectedOnPointerDown = input.checked;
+        });
+        choice.addEventListener("pointercancel", () => {
+          selectedOnPointerDown = false;
+        });
+        choice.addEventListener("click", event => {
+          const shouldClear = selectedOnPointerDown;
+          selectedOnPointerDown = false;
+          if (!shouldClear) return;
+
+          event.preventDefault();
+          input.checked = false;
+          updatePreferenceHearts(card);
+        });
       });
       card.addEventListener("change", () => updatePreferenceHearts(card));
     });
@@ -125,43 +153,122 @@
       preferenceStatus.setAttribute("role", isError ? "alert" : "status");
     }
 
-    function restorePreferences() {
-      const saved = localStorage.getItem(preferencesStorageKey);
-      if (saved === null) return;
+    function ratingToScore(rating, maxRating) {
+      return rating === null ? null : Math.round((rating - 1) * 100 / (maxRating - 1));
+    }
 
-      const preferences = JSON.parse(saved);
+    function scoreToRating(score, maxRating) {
+      if (score === null) return null;
+      if (!Number.isInteger(score) || score < 0 || score > 100) {
+        throw new Error("ข้อมูล Preferences จากระบบไม่ถูกต้อง");
+      }
+      return Math.round(score * (maxRating - 1) / 100) + 1;
+    }
+
+    function validateApiPreferences(preferences) {
       if (!preferences || typeof preferences !== "object" || Array.isArray(preferences)) {
-        throw new Error("รูปแบบข้อมูล Preferences ที่บันทึกไว้ไม่ถูกต้อง");
+        throw new Error("รูปแบบข้อมูล Preferences จากระบบไม่ถูกต้อง");
       }
 
-      document.querySelectorAll(".preference-card").forEach(card => {
-        const key = card.dataset.preference;
-        const rating = preferences[key];
-        const maxRating = Number(card.dataset.rating);
-        if (rating === undefined) return;
-        if (!Number.isInteger(rating) || rating < 1 || rating > maxRating) {
-          throw new Error(`คะแนน Preferences ของ ${card.querySelector("legend").textContent} ไม่ถูกต้อง`);
+      preferenceDimensions.forEach(dimension => {
+        if (!Object.prototype.hasOwnProperty.call(preferences, dimension.apiField)) {
+          throw new Error("ข้อมูล Preferences จากระบบไม่ครบถ้วน");
         }
-        const input = card.querySelector(`input[value="${rating}"]`);
-        if (input) input.checked = true;
+        scoreToRating(preferences[dimension.apiField], dimension.maxRating);
+      });
+    }
+
+    function restorePreferences(preferences) {
+      validateApiPreferences(preferences);
+
+      preferenceDimensions.forEach(dimension => {
+        const rating = scoreToRating(preferences[dimension.apiField], dimension.maxRating);
+        const card = preferenceForm.querySelector(`[data-preference="${dimension.uiField}"]`);
+        card.querySelectorAll('input[type="radio"]').forEach(input => {
+          input.checked = Number(input.value) === rating;
+        });
         updatePreferenceHearts(card);
       });
     }
 
-    preferenceForm.addEventListener("submit", event => {
-      event.preventDefault();
+    function preferencesFromForm() {
       const preferences = {};
-      document.querySelectorAll(".preference-card").forEach(card => {
+      preferenceDimensions.forEach(dimension => {
+        const card = preferenceForm.querySelector(`[data-preference="${dimension.uiField}"]`);
         const selected = card.querySelector("input:checked");
-        if (selected) preferences[card.dataset.preference] = Number(selected.value);
+        const rating = selected ? Number(selected.value) : null;
+        preferences[dimension.apiField] = ratingToScore(rating, dimension.maxRating);
       });
+      return preferences;
+    }
 
+    function preferencesFromLegacyStorage(legacyPreferences) {
+      if (!legacyPreferences || typeof legacyPreferences !== "object" || Array.isArray(legacyPreferences)) {
+        throw new Error("รูปแบบข้อมูล Preferences ที่บันทึกไว้ในเครื่องไม่ถูกต้อง");
+      }
+
+      const preferences = {};
+      preferenceDimensions.forEach(dimension => {
+        const rating = legacyPreferences[dimension.uiField];
+        if (rating !== undefined && rating !== null
+            && (!Number.isInteger(rating) || rating < 1 || rating > dimension.maxRating)) {
+          throw new Error(`คะแนน Preferences ของ ${dimension.uiField} ไม่ถูกต้อง`);
+        }
+        preferences[dimension.apiField] = ratingToScore(rating === undefined ? null : rating, dimension.maxRating);
+      });
+      return preferences;
+    }
+
+    async function loadPreferences() {
+      let preferences = await apiFetchUserPreferences();
+      validateApiPreferences(preferences);
+
+      const hasServerPreferences = preferenceDimensions.some(
+        dimension => preferences[dimension.apiField] !== null
+      );
+      if (!hasServerPreferences) {
+        const legacyValue = localStorage.getItem(legacyPreferencesStorageKey);
+        if (legacyValue !== null) {
+          const legacyPreferences = preferencesFromLegacyStorage(JSON.parse(legacyValue));
+          const hasLegacyPreferences = Object.values(legacyPreferences).some(value => value !== null);
+          if (hasLegacyPreferences) {
+            try {
+              preferences = await apiSaveUserPreferences(legacyPreferences);
+              validateApiPreferences(preferences);
+              try {
+                localStorage.removeItem(legacyPreferencesStorageKey);
+              } catch (storageError) {
+                console.warn("Unable to remove migrated preferences from local storage:", storageError);
+              }
+            } catch (error) {
+              restorePreferences(legacyPreferences);
+              throw new Error(`ย้าย Preferences เดิมไปยังระบบไม่สำเร็จ: ${error.message}`);
+            }
+          }
+        }
+      }
+
+      restorePreferences(preferences);
+    }
+
+    preferenceForm.addEventListener("submit", async event => {
+      event.preventDefault();
+      preferenceSaveButton.disabled = true;
       try {
-        localStorage.setItem(preferencesStorageKey, JSON.stringify(preferences));
+        const savedPreferences = await apiSaveUserPreferences(preferencesFromForm());
+        restorePreferences(savedPreferences);
+        try {
+          localStorage.removeItem(legacyPreferencesStorageKey);
+        } catch (storageError) {
+          console.warn("Unable to remove legacy preferences from local storage:", storageError);
+        }
+        preferenceStatus.hidden = true;
         saveDialog.showModal();
       } catch (error) {
-        console.error("Unable to save preferences:", error);
-        showPreferenceStatus("บันทึก Preferences ไม่สำเร็จ กรุณาลองอีกครั้ง", true);
+        console.error("Unable to save Preferences:", error);
+        showPreferenceStatus(error.message || "บันทึก Preferences ไม่สำเร็จ กรุณาลองอีกครั้ง", true);
+      } finally {
+        preferenceSaveButton.disabled = false;
       }
     });
 
@@ -171,7 +278,7 @@
       renderTopbar();
 
       try {
-        restorePreferences();
+        await loadPreferences();
       } catch (error) {
         console.error("Unable to load preferences:", error);
         showPreferenceStatus(error.message || "โหลด Preferences ไม่สำเร็จ", true);
