@@ -44,7 +44,7 @@ backend/
 │
 ├── database/                      # จัดการ PostgreSQL และ Seed Data
 │   ├── compose.yaml               # Docker Compose สำหรับรัน PostgreSQL 17
-│   ├── init.sql                   # Schema โครงสร้างตาราง (mock_user, courses, sections, review)
+│   ├── init.sql                   # Schema โครงสร้างตาราง (mock_user, user_preferences, courses, sections, review)
 │   ├── seed.sql                   # SQL นำเข้าข้อมูลตั้งต้น (38 Courses, 63 Sections)
 │   ├── courses.csv                # ข้อมูลรายวิชาต้นทาง
 │   ├── sections.csv               # ข้อมูล Section ต้นทาง
@@ -248,6 +248,15 @@ docker exec -it cstu-nexus-postgres psql -U cstu_nexus_user -d cstu_nexus_db
 | `courses` | เก็บข้อมูลรายวิชา |
 | `sections` | เก็บข้อมูล Section ของรายวิชา |
 | `review` | เก็บข้อมูลรีวิว |
+| `user_preferences` | เก็บความชอบในการเรียนของผู้ใช้ โดยอ้างอิง `mock_user(user_id)` |
+
+สำหรับ Database ที่มีอยู่แล้ว ให้ apply Migration `database/migrations/005_user_preferences.sql` หนึ่งครั้งจากโฟลเดอร์ `backend/`:
+
+```bash
+docker exec -i cstu-nexus-postgres psql -U cstu_nexus_user -d cstu_nexus_db -v ON_ERROR_STOP=1 < database/migrations/005_user_preferences.sql
+```
+
+การแก้ `init.sql` มีผลเฉพาะตอนสร้าง Database ใหม่ ไม่ได้ apply Migration ให้ Database ที่มีอยู่แล้ว
 
 ### 4.2 นำเข้า Seed Data
 

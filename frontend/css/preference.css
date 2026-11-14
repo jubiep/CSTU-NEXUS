@@ -1,0 +1,252 @@
+body {
+  background: #fff;
+}
+
+.preference-page {
+  padding: 28px 16px 30px;
+  background: #fff;
+}
+
+.preference-heading {
+  display: flex;
+  align-items: center;
+  min-height: 24px;
+  margin-bottom: 18px;
+  padding-left: 8px;
+  border-left: 3px solid #ffd236;
+}
+
+.preference-heading h1 {
+  color: #111;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.preference-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  padding: 0 8px;
+}
+
+.preference-card {
+  min-width: 0;
+  height: 85px;
+  padding: 7px 8px 5px;
+  border: 0;
+  border-radius: 15px;
+  background: #fff;
+  box-shadow: 0 3px 7px rgba(0, 0, 0, .24);
+}
+
+.preference-card legend {
+  width: 100%;
+  height: 22px;
+  padding: 1px 5px;
+  border-radius: 9px;
+  background: linear-gradient(105deg, #ffe58e 0%, #ffd236 100%);
+  color: #111;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 20px;
+  text-align: center;
+}
+
+.preference-hearts {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  height: 29px;
+}
+
+.heart-choice {
+  position: relative;
+  display: inline-flex;
+  width: 21px;
+  height: 24px;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.heart-choice input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  clip-path: inset(50%);
+}
+
+.heart-choice svg {
+  width: 20px;
+  height: 20px;
+  fill: transparent;
+  stroke: #111;
+  stroke-width: 1.8;
+  transition: fill .12s, stroke .12s, transform .12s;
+}
+
+.heart-choice.is-filled svg {
+  fill: #e60023;
+  stroke: #e60023;
+}
+
+.heart-choice input:focus-visible + svg {
+  outline: 2px solid #c3002f;
+  outline-offset: 3px;
+  border-radius: 3px;
+}
+
+.heart-choice:hover svg {
+  transform: scale(1.08);
+}
+
+.preference-range {
+  display: flex;
+  justify-content: space-between;
+  padding: 0 5px;
+  color: #333;
+  font-size: 9px;
+  line-height: 13px;
+}
+
+.preference-status {
+  margin: 12px 8px 0;
+  color: #287a46;
+  font-size: 12px;
+  text-align: center;
+}
+
+.preference-status.is-error {
+  color: #b42318;
+}
+
+.preference-status[hidden] {
+  display: none;
+}
+
+.preference-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 16px 16px 0 8px;
+}
+
+.preference-actions .btn {
+  min-width: 64px;
+  min-height: 28px;
+  padding: 4px 15px;
+  border-radius: 18px;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, .2);
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1.2;
+}
+
+.preference-back {
+  background: #fff;
+  color: #111;
+  text-decoration: none;
+}
+
+.preference-actions .preference-save {
+  min-width: 64px;
+  box-shadow: 0 5px 12px rgba(255, 204, 47, .42);
+}
+
+.save-dialog {
+  position: fixed;
+  inset: 0;
+  width: min(290px, calc(100vw - 40px));
+  margin: auto;
+  padding: 26px 22px 20px;
+  border: 0;
+  border-radius: 22px;
+  background: #fff;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, .2);
+  color: #212121;
+  text-align: center;
+}
+
+.save-dialog::backdrop {
+  background: rgba(26, 20, 20, .45);
+  backdrop-filter: blur(2px);
+}
+
+.save-dialog[open] {
+  animation: save-dialog-enter .2s ease-out;
+}
+
+.save-dialog-icon {
+  display: grid;
+  width: 58px;
+  height: 58px;
+  place-items: center;
+  margin: 0 auto 13px;
+  border-radius: 50%;
+  background: linear-gradient(145deg, #ffe58e, #ffd236);
+  color: #287a46;
+}
+
+.save-dialog-icon svg {
+  width: 31px;
+  height: 31px;
+}
+
+.save-dialog h2 {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.save-dialog p {
+  margin-top: 6px;
+  color: #616161;
+  font-size: 13px;
+}
+
+.save-dialog form {
+  margin-top: 20px;
+}
+
+.save-dialog-button {
+  min-width: 100px;
+  padding: 8px 22px;
+  border-radius: 999px;
+  box-shadow: 0 5px 14px rgba(255, 204, 47, .4);
+}
+
+@keyframes save-dialog-enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (max-width: 320px) {
+  .preference-page {
+    padding-right: 12px;
+    padding-left: 12px;
+  }
+
+  .preference-list {
+    padding-right: 6px;
+    padding-left: 6px;
+  }
+
+  .preference-card {
+    padding-right: 5px;
+    padding-left: 5px;
+  }
+
+  .preference-hearts {
+    gap: 3px;
+  }
+}
