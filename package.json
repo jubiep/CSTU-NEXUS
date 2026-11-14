@@ -1,0 +1,26 @@
+{
+  "name": "cstu-nexus",
+  "version": "1.0.0",
+  "description": "ระบบสนับสนุนการตัดสินใจเลือกเรียนและรีวิวรายวิชาสำหรับนักศึกษาสาขาวิทยาการคอมพิวเตอร์ (CSTU) มหาวิทยาลัยธรรมศาสตร์\r ช่วยให้นักศึกษาค้นหาข้อมูลเชิงลึกของรายวิชา วางแผนการเรียน และรีวิวประสบการณ์เพื่อประกอบการตัดสินใจลงทะเบียนได้อย่างมีประสิทธิภาพ",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jubiep/CSTU-NEXUS.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/jubiep/CSTU-NEXUS/issues"
+  },
+  "homepage": "https://github.com/jubiep/CSTU-NEXUS#readme",
+  "devDependencies": {
+    "@playwright/test": "^1.65.0",
+    "@types/node": "^26.6.6"
+  }
+}

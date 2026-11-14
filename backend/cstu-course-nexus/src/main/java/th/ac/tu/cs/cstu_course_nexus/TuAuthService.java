@@ -1,6 +1,7 @@
 package th.ac.tu.cs.cstu_course_nexus;
 
 import java.util.Map;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
@@ -15,6 +16,10 @@ import org.springframework.web.server.ResponseStatusException;
 @Service
 public class TuAuthService {
 
+    private static final Set<String> CSTU_STUDENT_ID_PREFIXES =
+            Set.of("6609", "6709", "6809", "6909");
+    private static final String CSTU_ONLY_MESSAGE =
+            "ระบบนี้อนุญาตให้ใช้งานเฉพาะนักศึกษาสาขาวิชาวิทยาการคอมพิวเตอร์ เท่านั้น";
     private static final ParameterizedTypeReference<Map<String, Object>> RESPONSE_TYPE =
             new ParameterizedTypeReference<>() { };
 
@@ -105,6 +110,9 @@ public class TuAuthService {
         }
         if (!studentId.matches("\\d{10}")) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "อนุญาตเฉพาะบัญชีนักศึกษา TU");
+        }
+        if (CSTU_STUDENT_ID_PREFIXES.stream().noneMatch(studentId::startsWith)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, CSTU_ONLY_MESSAGE);
         }
         String email = value(response, "email");
         String displayName = value(response, "displayname_th", "displayName", "displayname_en");

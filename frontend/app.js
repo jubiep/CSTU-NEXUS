@@ -334,16 +334,16 @@ function getCourse(code) {
 // ── Mock reviews ────────────────────────────
 const mockReviews = {
   "CS261": [
-    { id: 1, sectionNumber: "100001", sectionId: "cs261_100001", studentId: "6600000000", year: 4, date: "10/10/2569", tags: ["เน้นทฤษฎี"], text: "อาจารย์สอนดีมาก สอนเข้าใจ ไม่เร็วเกินไป", workload: "ปานกลาง", style: "ทฤษฎี", detail: "ละเอียด" },
-    { id: 2, sectionNumber: "100001", sectionId: "cs261_100001", studentId: "6700000000", year: 3, date: "10/10/2569", tags: ["เน้นทฤษฎี"], text: "เนื้อหาแน่น มีแบบฝึกหัดให้ทำตลอด ช่วยให้เข้าใจ concept ได้ดี", workload: "น้อย", style: "ปฏิบัติ", detail: "กลาง" },
-    { id: 3, sectionNumber: "100001", sectionId: "cs261_100001", studentId: "6800000000", year: 2, date: "10/10/2569", tags: ["เน้นทฤษฎี"], text: "วิชานี้ต้องอ่านหนังสือสม่ำเสมอ เตรียมตัวสอบแต่เนิ่นๆ จะทำคะแนนได้ดี", workload: "มาก", style: "ทฤษฎี", detail: "กลาง" },
-    { id: 4, sectionNumber: "100001", sectionId: "cs261_100001", studentId: "6609650001", year: 4, date: "11/10/2569", tags: ["เน้นทฤษฎี"], text: "สไลด์และเอกสารประกอบการสอนครบถ้วนมาก แนะนำให้เข้าเรียนทุกคาบ", workload: "ปานกลาง", style: "ทฤษฎี", detail: "ละเอียด" },
+    { id: 1, sectionNumber: "870001", sectionId: "cs261_870001", studentId: "6600000000", year: 4, date: "9-11-2569", tags: ["เน้นทฤษฎี", "เน้นทฤษฎี"], text: "อาจารย์สอนดีมาก สอนเข้าใจ ไม่เร็วเกินไป", workload: "ปานกลาง", style: "ทฤษฎี", detail: "ละเอียด" },
+    { id: 2, sectionNumber: "870001", sectionId: "cs261_870001", studentId: "6600000000", year: 3, date: "9-11-2569", tags: ["เน้นทฤษฎี", "เน้นทฤษฎี"], text: "อาจารย์สอนดีมาก สอนเข้าใจ ไม่เร็วเกินไป", workload: "น้อย", style: "ปฏิบัติ", detail: "กลาง" },
+    { id: 3, sectionNumber: "870001", sectionId: "cs261_870001", studentId: "6600000000", year: 2, date: "9-11-2569", tags: ["เน้นทฤษฎี", "เน้นทฤษฎี"], text: "อาจารย์สอนดีมาก สอนเข้าใจ ไม่เร็วเกินไป", workload: "มาก", style: "ทฤษฎี", detail: "กลาง" },
+    { id: 4, sectionNumber: "870001", sectionId: "cs261_870001", studentId: "6609650001", year: 4, date: "11-11-2569", tags: ["เน้นทฤษฎี", "สมดุล"], text: "สไลด์และเอกสารประกอบการสอนครบถ้วนมาก แนะนำให้เข้าเรียนทุกคาบ", workload: "ปานกลาง", style: "ทฤษฎี", detail: "ละเอียด" },
     { id: 5, sectionNumber: "100001", sectionId: "cs261_100001", studentId: "6709650002", year: 3, date: "12/10/2569", tags: ["เน้นปฏิบัติ"], text: "มีการบ้านท้ายคาบช่วยทบทวน มีประโยชน์กับการสอบมาก", workload: "ปานกลาง", style: "ปฏิบัติ", detail: "กลาง" },
     { id: 6, sectionNumber: "100001", sectionId: "cs261_100001", studentId: "6809650003", year: 2, date: "13/10/2569", tags: ["เน้นทฤษฎี"], text: "ข้อสอบตรงกับสิ่งที่สอนในห้อง ถ้าตั้งใจเรียนเก็บเกรดสวยแน่นอน", workload: "น้อย", style: "ทฤษฎี", detail: "ละเอียด" },
     { id: 7, sectionNumber: "100001", sectionId: "cs261_100001", studentId: "6609650004", year: 4, date: "14/10/2569", tags: ["เน้นปฏิบัติ"], text: "เป็นวิชาพื้นฐานที่ดีมาก ช่วยต่อยอดวิชาขั้นสูงได้ดี", workload: "ปานกลาง", style: "ปฏิบัติ", detail: "ละเอียด" },
   ],
   "CS262": [
-    { id: 1, anonymous: true, studentId: "6800000000", year: 2, date: "10/10/2569", tags: ["เน้นปฏิบัติ"], text: "งาน Lab เยอะ แต่ได้ความรู้จริง", workload: "มาก", style: "ปฏิบัติ", detail: "ละเอียด" },
+    { id: 1, studentId: "6800000000", year: 2, date: "10/10/2569", tags: ["เน้นปฏิบัติ"], text: "งาน Lab เยอะ แต่ได้ความรู้จริง", workload: "มาก", style: "ปฏิบัติ", detail: "ละเอียด" },
   ],
 };
 
@@ -519,3 +519,121 @@ document.addEventListener('DOMContentLoaded', () => {
     updateButtonStates();
   }
 });
+
+/* ==========================================
+   Rating & Preference Matching Logic (0.0 - 1.0)
+   ========================================== */
+
+const RATING_SCALE_MAP = {
+  teaching_method: {
+    "เน้นทฤษฎี": 0.0,
+    "สมดุล": 50.0,
+    "เน้นปฏิบัติ": 100.0,
+    "ไม่แน่ใจ": null
+  },
+  evaluation: {
+    "เน้นคะแนนสอบ": 0.0,
+    "สมดุล": 50.0,
+    "เน้นโครงงาน": 100.0,
+    "ไม่แน่ใจ": null
+  },
+  teaching_speed: {
+    "สอนช้า": 0.0,
+    "ปานกลาง": 50.0,
+    "สอนเร็ว": 100.0,
+    "ไม่แน่ใจ": null
+  },
+  assignment_style: {
+    "เน้นงานเดี่ยว": 0.0,
+    "สมดุล": 50.0,
+    "เน้นงานกลุ่ม": 100.0,
+    "ไม่แน่ใจ": null
+  },
+  workload: {
+    "งานน้อย": 0.0,
+    "ปริมาณงานสมดุล": 50.0,
+    "งานเยอะ": 100.0,
+    "ไม่แน่ใจ": null
+  }
+};
+
+const DIMENSION_LABELS = {
+  teaching_method: "แนวทางการสอน",
+  evaluation: "สัดส่วนการวัดผล",
+  teaching_speed: "ความเร็วในการสอน",
+  assignment_style: "รูปแบบงาน",
+  workload: "ปริมาณงาน"
+};
+
+/**
+ * แปลงค่าตัวเลือกภาษาไทยเป็นคะแนน 0.0 - 1.0
+ * @param {string} dimension ชื่อหมวดหมู่ (เช่น 'teaching_method')
+ * @param {string} value ตัวเลือกที่เลือก (เช่น 'เน้นปฏิบัติ')
+ * @returns {number|null} คะแนน 0.0 - 1.0 หรือ null ถ้าเป็น 'ไม่แน่ใจ'
+ */
+function convertRatingToScore(dimension, value) {
+  if (!dimension || !value) return null;
+  const dimMap = RATING_SCALE_MAP[dimension];
+  if (!dimMap || !(value in dimMap)) return null;
+  return dimMap[value];
+}
+
+/**
+ * แปลงชุด ratings ที่เลือกจากฟอร์มให้เป็นตัวเลข 0.0 - 1.0
+ * @param {Object} ratingsObj เช่น { teaching_method: 'เน้นทฤษฎี', ... }
+ * @returns {Object} { teaching_method: 0.0, evaluation: 0.5, ... }
+ */
+function normalizeRatings(ratingsObj) {
+  if (!ratingsObj || typeof ratingsObj !== "object") return {};
+  const result = {};
+  for (const [dim, val] of Object.entries(ratingsObj)) {
+    result[dim] = convertRatingToScore(dim, val);
+  }
+  return result;
+}
+
+/**
+ * ส่งรีวิวรายวิชาไปยัง Backend พร้อมส่งค่าทั้ง 5 เกณฑ์การประเมิน
+ * @param {string} courseId รหัสวิชา เช่น 'CS261'
+ * @param {Object} reviewData ข้อมูลรีวิว { sectionId, reviewText, ratings, ... }
+ * @returns {Promise<Object>}
+ */
+async function submitReview(courseId, reviewData = {}) {
+  if (!courseId) throw new Error("ไม่พบรหัสวิชาที่ต้องการรีวิว");
+
+  const ratings = reviewData.ratings || {};
+  const scores = typeof normalizeRatings === "function" ? normalizeRatings(ratings) : {};
+  const text = (reviewData.reviewText || reviewData.text || reviewData.comment || "-").trim();
+
+  // จัดเตรียม Payload ส่งค่าทั้ง 5 เกณฑ์ไปยัง Backend
+  const payload = {
+    sectionId: reviewData.sectionId || null,
+    reviewText: text || "-",
+    comment: text || "-",
+    text: text || "-",
+
+    // 5 เกณฑ์การประเมิน
+    teachingMethod: ratings.teaching_method || null,
+    evaluation: ratings.evaluation || null,
+    teachingSpeed: ratings.teaching_speed || null,
+    assignmentStyle: ratings.assignment_style || null,
+    workload: ratings.workload || null,
+
+    // ค่าสเกล 0.0 - 1.0 ของทั้ง 5 เกณฑ์
+    teachingMethodScore: scores.teaching_method ?? null,
+    evaluationScore: scores.evaluation ?? null,
+    teachingSpeedScore: scores.teaching_speed ?? null,
+    assignmentStyleScore: scores.assignment_style ?? null,
+    workloadScore: scores.workload ?? null,
+
+    ratings: ratings,
+    scores: scores
+  };
+
+  return await apiRequest(`/courses/${encodeURIComponent(courseId)}/reviews`, {
+    method: "POST",
+    body: JSON.stringify(payload)
+  });
+}
+
+const apiSubmitReview = submitReview;
