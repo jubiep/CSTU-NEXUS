@@ -32,15 +32,15 @@ class AuthControllerTests {
     @Test
     void successfulLoginCreatesSessionAndMakesUserAvailableAtMeEndpoint() throws Exception {
         AuthUser user = testUser();
-        when(tuAuthService.verify("6800000000", "correct-password")).thenReturn(user);
+        when(tuAuthService.verify("6809000000", "correct-password")).thenReturn(user);
 
         MvcResult login = mockMvc.perform(post("/api/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
-                                {"username":"6800000000","password":"correct-password"}
+                                {"username":"6809000000","password":"correct-password"}
                                 """))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.user.studentId").value("6800000000"))
+                .andExpect(jsonPath("$.user.studentId").value("6809000000"))
                 .andReturn();
 
         MockHttpSession session = (MockHttpSession) login.getRequest().getSession(false);
@@ -57,11 +57,11 @@ class AuthControllerTests {
 
     @Test
     void logoutInvalidatesSessionAndMeRejectsThatSession() throws Exception {
-        when(tuAuthService.verify("6800000000", "correct-password")).thenReturn(testUser());
+        when(tuAuthService.verify("6809000000", "correct-password")).thenReturn(testUser());
         MvcResult login = mockMvc.perform(post("/api/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
-                                {"username":"6800000000","password":"correct-password"}
+                                {"username":"6809000000","password":"correct-password"}
                                 """))
                 .andExpect(status().isOk())
                 .andReturn();
@@ -92,13 +92,13 @@ class AuthControllerTests {
 
     @Test
     void invalidCredentialsDoNotCreateAnAuthenticatedSession() throws Exception {
-        when(tuAuthService.verify("6800000000", "wrong-password"))
+        when(tuAuthService.verify("6809000000", "wrong-password"))
                 .thenThrow(new ResponseStatusException(HttpStatus.UNAUTHORIZED, "ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง"));
 
         mockMvc.perform(post("/api/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
-                                {"username":"6800000000","password":"wrong-password"}
+                                {"username":"6809000000","password":"wrong-password"}
                                 """))
                 .andExpect(status().isUnauthorized());
         mockMvc.perform(get("/api/auth/me"))
@@ -106,7 +106,7 @@ class AuthControllerTests {
     }
 
     private static AuthUser testUser() {
-        return new AuthUser("นักศึกษา ทดสอบ", "6800000000", 2,
+        return new AuthUser("นักศึกษา ทดสอบ", "6809000000", 2,
                 "คณะวิทยาศาสตร์และเทคโนโลยี", "วิทยาการคอมพิวเตอร์", "student@dome.tu.ac.th");
     }
 }
