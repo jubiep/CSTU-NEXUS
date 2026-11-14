@@ -10,6 +10,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.dao.DataAccessResourceFailureException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -97,6 +99,18 @@ class UserPreferencesControllerTests {
     }
 
     @Test
+    void PUT_requiresAnAuthenticatedSession() throws Exception {
+        mockMvc.perform(put("/api/users/preferences")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{}"))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.error").value("กรุณาเข้าสู่ระบบก่อนจัดการ Preferences"));
+
+        verify(userPreferencesService, never()).saveForUser(
+                org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.any());
+    }
+
+    @Test
     void PUT_rejectsScoresOutsideTheSupportedRange() throws Exception {
         mockMvc.perform(put("/api/users/preferences")
                         .sessionAttr("authenticatedUser", authenticatedUser)
@@ -115,9 +129,57 @@ class UserPreferencesControllerTests {
                         .sessionAttr("authenticatedUser", authenticatedUser)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"preferredTeachingMethod\":50.5}"))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value(
+                        "คะแนน Preferences แต่ละด้านต้องอยู่ระหว่าง 0 ถึง 100 หรือเป็น null"));
 
         verify(userPreferencesService, never()).saveForUser(
                 org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.any());
+    }
+
+    @Test
+    void PUT_returnsAnErrorResponseForMalformedJson() throws Exception {
+        mockMvc.perform(put("/api/users/preferences")
+                        .sessionAttr("authenticatedUser", authenticatedUser)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{not-json"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value(
+                        "รูปแบบ Request ไม่ถูกต้อง กรุณาส่งคะแนนเป็นจำนวนเต็ม 0 ถึง 100 หรือ null"));
+
+        verify(userPreferencesService, never()).saveForUser(
+                org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.any());
+    }
+
+    @Test
+    void PUT_returnsServiceUnavailableWhenTheDatabaseIsUnavailable() throws Exception {
+        when(userPreferencesService.saveForUser(
+                org.mockito.ArgumentMatchers.eq(authenticatedUser),
+                org.mockito.ArgumentMatchers.any()))
+                .thenThrow(new DataAccessResourceFailureException("database unavailable"));
+
+        mockMvc.perform(put("/api/users/preferences")
+                        .sessionAttr("authenticatedUser", authenticatedUser)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"preferredTeachingMethod\":50}"))
+                .andExpect(status().isServiceUnavailable())
+                .andExpect(jsonPath("$.error").value(
+                        "ระบบฐานข้อมูลไม่พร้อมใช้งาน กรุณาลองใหม่ภายหลัง"));
+    }
+
+    @Test
+    void PUT_returnsBadRequestWhenDatabaseConstraintsRejectTheValues() throws Exception {
+        when(userPreferencesService.saveForUser(
+                org.mockito.ArgumentMatchers.eq(authenticatedUser),
+                org.mockito.ArgumentMatchers.any()))
+                .thenThrow(new DataIntegrityViolationException("constraint violation"));
+
+        mockMvc.perform(put("/api/users/preferences")
+                        .sessionAttr("authenticatedUser", authenticatedUser)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"preferredTeachingMethod\":50}"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value(
+                        "บันทึก Preferences ไม่สำเร็จ กรุณาตรวจสอบข้อมูลแล้วลองอีกครั้ง"));
     }
 }

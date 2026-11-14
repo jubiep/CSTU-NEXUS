@@ -8,6 +8,7 @@ import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -56,6 +57,13 @@ public class UserPreferencesController {
             DataIntegrityViolationException exception) {
         return ResponseEntity.badRequest().body(Map.of(
                 "error", "บันทึก Preferences ไม่สำเร็จ กรุณาตรวจสอบข้อมูลแล้วลองอีกครั้ง"));
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<Map<String, String>> handleUnreadableRequestBody(
+            HttpMessageNotReadableException exception) {
+        return ResponseEntity.badRequest().body(Map.of(
+                "error", "รูปแบบ Request ไม่ถูกต้อง กรุณาส่งคะแนนเป็นจำนวนเต็ม 0 ถึง 100 หรือ null"));
     }
 
     @ExceptionHandler(DataAccessResourceFailureException.class)
