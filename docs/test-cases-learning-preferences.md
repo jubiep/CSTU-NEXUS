@@ -15,7 +15,7 @@ API ที่ใช้: `GET/PUT /api/users/preferences` ตาม API contract 
 ## Test Cases
 
 | ID | DoD | ขั้นตอน / ข้อมูลทดสอบ | ผลที่คาดหวัง | ผลจริง / สถานะ |
-|---|---|---|---|---|
+| --- | --- | --- | --- | --- |
 | U7-SYS-01 | โหลด Preference เดิมเป็นค่าเริ่มต้น | Mock `GET` ให้คะแนน `100, 50, 75, null, 25` สำหรับ Teaching, Evaluation, Speed, Assignment และ Workload ตามลำดับ | UI เลือกค่าระดับ `3, 2, 4, ไม่มีค่า, 2` | Browser check ได้ผลตรงกันทุกช่อง และ Assignment ไม่มี radio ที่ถูกเลือก — **ผ่าน** |
 | U7-SYS-02 | เลือก/เปลี่ยน Preference และ Workload | เลือก Teaching ระดับ 2 แล้วคลิกซ้ำเพื่อล้าง; เลือก Workload ระดับ 3 และบันทึก | คลิกซ้ำยกเลิกหัวใจได้; ค่าที่ล้างส่งเป็น `null`; Workload ระดับ 3 จาก 5 ส่งเป็น 50 | หลังคลิกครั้งแรกมี radio ที่เลือก 1 รายการ; หลังคลิกซ้ำเหลือ 0 และไม่มีหัวใจที่เติมสี; payload มี Teaching `null` และ Workload `50` — **ผ่าน** |
 | U7-SYS-03 | Validate เมื่อไม่ระบุ Workload | เลือก Preference อื่นและกดบันทึกโดยไม่เลือก Workload; จากนั้นเลือก Workload ระดับ 3 และบันทึกใหม่ | ครั้งแรกแจ้งเตือนและไม่ส่ง PUT; เมื่อเลือก Workload แล้วบันทึกได้ | แสดงข้อความให้เลือกระดับ Workload, PUT ก่อนเลือกมี 0 ครั้ง; หลังเลือก Workload มี PUT 1 ครั้งและ success dialog ปรากฏ — **ผ่าน** |
@@ -25,7 +25,7 @@ API ที่ใช้: `GET/PUT /api/users/preferences` ตาม API contract 
 ## Execution Log
 
 | ชุดทดสอบ / คำสั่ง | ผล | หมายเหตุ |
-|---|---|---|
+| --- | --- | --- |
 | `.\mvnw.cmd '-Dtest=UserPreferencesControllerTests,UserPreferencesServiceTests,UserPreferencesPersistenceIntegrationTests' test` จาก `backend\cstu-course-nexus` | ผ่าน: 13 tests, 0 failures, 0 errors, 0 skipped | รวม controller 10, service 2 และ PostgreSQL integration 1 |
 | Browser checks ใน Playwright session พร้อม mock `GET/PUT` | ผ่านตาม U7-SYS-01, U7-SYS-02, U7-SYS-03 และ U7-SYS-05 | ตรวจผล UI, request count และ payload; ไม่ได้เชื่อม browser เข้ากับ backend จริง |
 | Standalone runtime validation (Maven preference tests) | Process exit code 0 | ตัวตรวจไม่สามารถ parse จำนวน tests จาก Maven output (`framework=unknown`); จำนวน 13 tests ยืนยันจาก Maven output โดยตรง |

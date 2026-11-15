@@ -506,6 +506,21 @@ Ctrl + C
 | หยุดบริการโดยเก็บข้อมูล | `docker compose -f backend/database/compose.yaml down` |
 
 รัน Test โดยไม่ผ่าน Docker จาก `backend/cstu-course-nexus` ด้วย `.\mvnw.cmd test`
+### เตรียมฐานข้อมูลสำหรับรัน Backend test suite ทั้งชุด
+
+Integration tests ใช้ PostgreSQL แยกบนพอร์ต `55432` เพื่อไม่ปะปนกับฐานข้อมูลพัฒนาที่พอร์ต `5432` รันคำสั่งจาก root ของ repository:
+
+```powershell
+docker compose -f backend/database/test-compose.yaml up -d --wait
+Push-Location backend/cstu-course-nexus
+.\mvnw.cmd test
+$testExitCode = $LASTEXITCODE
+Pop-Location
+docker compose -f backend/database/test-compose.yaml down -v
+exit $testExitCode
+```
+
+ฐานข้อมูลนี้สร้างจาก `backend/database/init.sql` และทิ้งได้หลังทดสอบเสร็จ ห้ามใช้เก็บข้อมูลพัฒนาหรือข้อมูลจริง
 
 ---
 

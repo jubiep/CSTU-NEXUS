@@ -18,7 +18,12 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 
-@SpringBootTest
+@SpringBootTest(properties = {
+        "spring.datasource.url=jdbc:postgresql://localhost:55432/cstu_rv11_test",
+        "spring.datasource.username=postgres",
+        "spring.datasource.password=rv11_test_password",
+        "spring.datasource.driver-class-name=org.postgresql.Driver"
+})
 @Transactional
 class UserPreferencesPersistenceIntegrationTests {
 

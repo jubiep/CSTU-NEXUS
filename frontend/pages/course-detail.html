@@ -41,6 +41,42 @@
         </div>
       </div>
 
+      <!-- Match Score Section -->
+      <div class="section-title-wrap">
+        <div class="section-accent-bar"></div>
+        <h2 class="section-title-text">Match Score</h2>
+      </div>
+      <section class="match-score-section" aria-label="ผล Match Score">
+        <p id="match-score-loading" class="match-score-state" role="status">กำลังวิเคราะห์ความเข้ากันได้...</p>
+        <div id="match-score-error" class="match-score-state is-error" role="alert" hidden></div>
+        <button id="match-score-retry" class="match-score-retry" type="button" hidden>ลองอีกครั้ง</button>
+        <p id="match-score-empty" class="match-score-state" role="status" hidden></p>
+        <div id="match-score-content" hidden>
+          <article class="match-score-summary">
+            <div class="match-score-value-wrap">
+              <span id="match-score-value" class="match-score-value">—</span>
+              <span class="match-score-percent">%</span>
+              <span id="match-score-level" class="match-score-level"></span>
+            </div>
+            <div id="match-score-progress" class="match-score-progress" role="progressbar"
+                 aria-label="Match Score" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+              <span id="match-score-progress-fill"></span>
+            </div>
+            <p id="match-score-coverage" class="match-score-coverage"></p>
+          </article>
+          <article class="match-score-matches">
+            <h3>จุดที่ตรงกับ Preference</h3>
+            <ul id="match-score-matches-list"></ul>
+          </article>
+          <details class="match-score-details">
+            <summary>ดูรายละเอียดปัจจัยที่ใช้คำนวณ</summary>
+            <div id="match-score-details-list" class="match-score-details-list"></div>
+          </details>
+          <p id="match-score-explanation" class="match-score-explanation"></p>
+          <p class="match-score-disclaimer">คะแนนคำนวณจากข้อมูล Preferences และรีวิวของ Section ใช้ประกอบการตัดสินใจได้ แต่ไม่ใช่การรับประกันผลการเรียน</p>
+        </div>
+      </section>
+
       <!-- Write some Review Section -->
       <div class="section-title-wrap">
         <div class="section-accent-bar"></div>
@@ -91,6 +127,11 @@
     const sectionList = document.getElementById("section-list");
     const sectionCountBadge = document.getElementById("section-count-badge");
     const teacherEl = document.getElementById("detail-teacher");
+    const matchScoreLoading = document.getElementById("match-score-loading");
+    const matchScoreError = document.getElementById("match-score-error");
+    const matchScoreRetry = document.getElementById("match-score-retry");
+    const matchScoreEmpty = document.getElementById("match-score-empty");
+    const matchScoreContent = document.getElementById("match-score-content");
 
     let hasReviewedCourse = false;
     let eligibilityData = null;
@@ -257,6 +298,7 @@
           renderSectionButtons(allSections); // อัปเดตสถานะ active
           toggleSection(); // ปิดแผงเมื่อเลือกแล้ว
           loadReviews(); // โหลดรีวิวของ Section ที่เลือก
+          loadMatchScore();
         };
 
         sectionList.appendChild(btn);
@@ -333,6 +375,7 @@
       updateWriteBtn();
       renderSectionButtons(allSections);
       loadReviews();
+      loadMatchScore();
       checkReviewPermission();
     }
 
@@ -366,6 +409,118 @@
         }
       }
     }
+
+    function resetMatchScoreStates() {
+      matchScoreLoading.hidden = true;
+      matchScoreError.hidden = true;
+      matchScoreRetry.hidden = true;
+      matchScoreEmpty.hidden = true;
+      matchScoreContent.hidden = true;
+    }
+
+    async function loadMatchScore() {
+      resetMatchScoreStates();
+      if (!selectedSectionId) {
+        matchScoreEmpty.textContent = allSections.length
+          ? "กรุณาเลือก Section เพื่อดู Match Score"
+          : "วิชานี้ไม่มี Section ให้เปรียบเทียบ Match Score";
+        matchScoreEmpty.hidden = false;
+        return;
+      }
+
+      matchScoreLoading.hidden = false;
+      try {
+        const result = await apiRequest(
+          `/courses/${encodeURIComponent(code)}/sections/${encodeURIComponent(selectedSectionId)}/match-score`
+        );
+        matchScoreLoading.hidden = true;
+
+        if (!result || result.status !== "READY" || !Number.isInteger(result.score)) {
+          matchScoreEmpty.textContent = result?.explanation
+            || "ยังไม่มีข้อมูล Preferences หรือรีวิวของ Section นี้เพียงพอสำหรับคำนวณ Match Score";
+          matchScoreEmpty.hidden = false;
+          return;
+        }
+
+        renderMatchScore(result);
+      } catch (error) {
+        matchScoreLoading.hidden = true;
+        matchScoreError.textContent = error.message || "โหลด Match Score ไม่สำเร็จ กรุณาลองอีกครั้ง";
+        matchScoreError.hidden = false;
+        matchScoreRetry.hidden = false;
+      }
+    }
+
+    function renderMatchScore(result) {
+      const score = Math.max(0, Math.min(100, result.score));
+      const value = document.getElementById("match-score-value");
+      const level = document.getElementById("match-score-level");
+      const progress = document.getElementById("match-score-progress");
+      const progressFill = document.getElementById("match-score-progress-fill");
+      const coverage = document.getElementById("match-score-coverage");
+      const matchesList = document.getElementById("match-score-matches-list");
+      const detailsList = document.getElementById("match-score-details-list");
+
+      value.textContent = String(score);
+      level.textContent = result.level || "";
+      progress.setAttribute("aria-valuenow", String(score));
+      progressFill.style.width = `${score}%`;
+      progressFill.dataset.level = score >= 80 ? "high" : score >= 60 ? "medium" : "low";
+      coverage.textContent = `อ้างอิง ${result.sectionReviewCount} รีวิว · ใช้ข้อมูลได้ ${result.availableFactorCount}/${result.totalFactorCount} ด้าน (${result.coveragePercentage}%)`;
+      document.getElementById("match-score-explanation").textContent = result.explanation || "";
+
+      matchesList.replaceChildren();
+      const strongMatches = (result.details || []).filter(
+        detail => Number.isInteger(detail.similarityScore) && detail.similarityScore >= 80
+      );
+      if (strongMatches.length === 0) {
+        const item = document.createElement("li");
+        item.textContent = "ยังไม่พบด้านที่ตรงกันสูงจากข้อมูลที่มี";
+        matchesList.appendChild(item);
+      } else {
+        strongMatches.forEach(detail => {
+          const item = document.createElement("li");
+          const labels = Array.isArray(detail.sectionProfileLabels) ? detail.sectionProfileLabels.join(" / ") : "";
+          item.textContent = labels ? `${detail.label}: ${labels}` : detail.label;
+          matchesList.appendChild(item);
+        });
+      }
+
+      detailsList.replaceChildren();
+      (result.details || []).forEach(detail => {
+        const row = document.createElement("article");
+        row.className = "match-score-factor";
+        const heading = document.createElement("div");
+        heading.className = "match-score-factor-heading";
+        const title = document.createElement("strong");
+        title.textContent = detail.label;
+        const similarity = document.createElement("span");
+        similarity.className = "match-score-factor-score";
+        similarity.textContent = Number.isInteger(detail.similarityScore)
+          ? `${detail.similarityScore}% เหมือนกัน`
+          : "ยังคำนวณไม่ได้";
+        heading.append(title, similarity);
+
+        const preference = document.createElement("p");
+        preference.textContent = `Preference ของคุณ: ${detail.preferenceLabel || "ยังไม่ได้ระบุ"}`;
+        const profileLabels = Array.isArray(detail.sectionProfileLabels) ? detail.sectionProfileLabels : [];
+        const profileText = profileLabels.length ? profileLabels.join(" / ") : "ยังไม่มีรีวิวในด้านนี้";
+        const section = document.createElement("p");
+        section.textContent = `รูปแบบของ Section: ${profileText}`;
+        const votes = document.createElement("p");
+        votes.className = "match-score-factor-meta";
+        votes.textContent = detail.reviewCount > 0
+          ? `รีวิว ${detail.reviewCount} คน · เสียงส่วนใหญ่ ${detail.consensusPercentage}% · น้ำหนัก ${detail.weightPercentage}%`
+          : "ไม่มีคะแนนรีวิวสำหรับปัจจัยนี้";
+
+        row.append(heading, preference, section, votes);
+        detailsList.appendChild(row);
+      });
+
+      matchScoreContent.hidden = false;
+    }
+
+    matchScoreRetry.addEventListener("click", loadMatchScore);
 
     let allReviews = [];
     let currentPage = 1;
