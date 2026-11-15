@@ -44,6 +44,7 @@
               <label class="heart-choice"><input type="radio" name="teachingPace" value="1"/><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78Z"/></svg></label>
               <label class="heart-choice"><input type="radio" name="teachingPace" value="2"/><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78Z"/></svg></label>
               <label class="heart-choice"><input type="radio" name="teachingPace" value="3"/><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78Z"/></svg></label>
+              </div>
             <div class="preference-range"><span>สอนช้ามาก</span><span>สอนเร็วมาก</span></div>
           </fieldset>
 
@@ -62,9 +63,7 @@
             <div class="preference-hearts" role="radiogroup" aria-label="ปริมาณงาน">
               <label class="heart-choice"><input type="radio" name="workload" value="1"/><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78Z"/></svg></label>
               <label class="heart-choice"><input type="radio" name="workload" value="2"/><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78Z"/></svg></label>
-              <label class="heart-choice"><input type="radio" name="workload" value="3"/><svg viewBox="0
-              <label class="heart-choice"><input type="radio" name="workload" value="4"/><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78Z"/></svg></label>
-              <label class="heart-choice"><input type="radio" name="workload" value="5"/><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78Z"/></svg></label>
+              <label class="heart-choice"><input type="radio" name="workload" value="3"/><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78Z"/></svg></label>
             </div>
             <div class="preference-range"><span>รับงานได้น้อย</span><span>รับงานได้มาก</span></div>
           </fieldset>
@@ -102,9 +101,9 @@
     const preferenceDimensions = [
       { uiField: "teachingApproach", apiField: "preferredTeachingMethod", maxRating: 3 },
       { uiField: "gradingStyle", apiField: "preferredEvaluation", maxRating: 3 },
-      { uiField: "teachingPace", apiField: "preferredTeachingSpeed", maxRating: 5 },
+      { uiField: "teachingPace", apiField: "preferredTeachingSpeed", maxRating: 3 },
       { uiField: "assignmentStyle", apiField: "preferredAssignmentStyle", maxRating: 3 },
-      { uiField: "workload", apiField: "preferredWorkload", maxRating: 5 },
+      { uiField: "workload", apiField: "preferredWorkload", maxRating: 3 },
     ];
 
     document.querySelectorAll(".preference-card").forEach(card => {
