@@ -28,9 +28,9 @@
 |---|---|---|
 | **System Architecture** | [docs/architecture/architecture.md](docs/architecture/architecture.md) | สถาปัตยกรรมระบบ 3-Tier, BCE Pattern, ความปลอดภัย, และ Deployment |
 | **User Stories** | [docs/requirements/user-stories.md](docs/requirements/user-stories.md) | ข้อกำหนดความต้องการแบบ Agile (Persona, Want, Value, Acceptance Criteria) |
-| **Use Case Specifications** | [docs/requirements/use-cases.md](docs/requirements/use-cases.md) | รายละเอียดข้อกำหนด Use Case ทั้งหมด (U1–U7) พร้อม Pre/Post-conditions |
-| **Use Case & Class Diagrams** | [docs/architecture/use-case-and-class-diagrams.md](docs/architecture/use-case-and-class-diagrams.md) | แผนภาพ Use Case Diagram และ Design Class Diagram (BCE) |
-| **Sequence Diagrams** | [docs/architecture/sequence-diagrams.md](docs/architecture/sequence-diagrams.md) | แผนภาพลำดับการทำงาน U1–U7 ทั้งหมด |
+| **Use Case Specifications** | [docs/requirements/use-cases.md](docs/requirements/use-cases.md) | รายละเอียดข้อกำหนด Use Case ทั้งหมด (U1–U9) พร้อม Pre/Post-conditions |
+| **Use Case & Class Diagrams** | [docs/architecture/use-case-and-class-diagrams.md](docs/architecture/use-case-and-class-diagrams.md) | แผนภาพ Use Case Diagram (U1–U9) และ Design Class Diagram (BCE) |
+| **Sequence Diagrams** | [docs/architecture/sequence-diagrams.md](docs/architecture/sequence-diagrams.md) | แผนภาพลำดับการทำงาน U1–U9 ทั้งหมด |
 | **Database & ER Mapping** | [docs/architecture/entity-database-table-mapping.md](docs/architecture/entity-database-table-mapping.md) | แผนผัง ER Diagram, ตารางฐานข้อมูล, API-DAO Mapping, และสิทธิ์ |
 | **API Specifications** | [docs/api/](docs/api/) | ข้อกำหนด API สำหรับการตั้งค่าความชอบ, Match Score และรีวิวแบบปิดบังตัวตน |
 | **Recommended Diagrams** | [docs/architecture/recommended-diagrams.md](docs/architecture/recommended-diagrams.md) | แผนภาพแนะนำเพิ่มเติม (Component, Activity, และ State Machine Diagrams) |

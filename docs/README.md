@@ -10,12 +10,12 @@
 docs/
 ├── requirements/              # ข้อกำหนดความต้องการ (User Stories & Detailed Use Cases)
 │   ├── user-stories.md        # Agile User Stories แยกตาม Persona, Sprint และ Acceptance Criteria
-│   └── use-cases.md           # ข้อกำหนด Use Case U1–U7 ละเอียด (Pre/Post-conditions, Basic/Alt Flows)
+│   └── use-cases.md           # ข้อกำหนด Use Case U1–U9 ละเอียด (Pre/Post-conditions, Basic/Alt Flows)
 │
 ├── architecture/              # สถาปัตยกรรมระบบและแผนภาพ UML เชิงโครงสร้าง
 │   ├── architecture.md        # สถาปัตยกรรมระบบ 3-Tier, BCE Pattern, Security, และ Deployment
 │   ├── use-case-and-class-diagrams.md # แผนภาพ Use Case Diagram และ Design Class Diagram (BCE)
-│   ├── sequence-diagrams.md   # Sequence Diagrams ทุก Use Case (U1–U7)
+│   ├── sequence-diagrams.md   # Sequence Diagrams ทุก Use Case (U1–U9)
 │   ├── entity-database-table-mapping.md # ER Diagram, Database Table Mapping & API-DAO
 │   └── recommended-diagrams.md # แผนภาพแนะนำเพิ่มเติม (Component, Activity, และ State Machine)
 │
@@ -44,12 +44,12 @@ docs/
 
 ### 1. ข้อกำหนดและความต้องการ (Requirements)
 * [User Stories](requirements/user-stories.md) — ข้อกำหนดความต้องการของผู้ใช้งานในรูปแบบ Agile (Persona, Want, Value, Acceptance Criteria) ครอบคลุม Sprint 1 และ Sprint 2
-* [Use Case Specifications](requirements/use-cases.md) — รายละเอียดข้อกำหนดการทำงานของ Use Cases ทั้งหมด (U1–U7) พร้อมตาราง Traceability Matrix เชื่อมโยง User Story ↔ API ↔ UI
+* [Use Case Specifications](requirements/use-cases.md) — รายละเอียดข้อกำหนดการทำงานของ Use Cases ทั้งหมด (U1–U9) พร้อมตาราง Traceability Matrix เชื่อมโยง User Story ↔ API ↔ UI
 
 ### 2. สถาปัตยกรรมและการออกแบบระบบ (Architecture & Design)
 * [System Architecture](architecture/architecture.md) — สถาปัตยกรรมระบบ 3-Tier, BCE Pattern, ระบบรักษาความปลอดภัย, สถาปัตยกรรมฐานข้อมูล และ Docker Multi-container Deployment
-* [Use Case & Class Diagrams](architecture/use-case-and-class-diagrams.md) — แผนภาพ Use Case Diagram (U1–U7) และ Design Class Diagram ตามแพตเทิร์น BCE
-* [Sequence Diagrams](architecture/sequence-diagrams.md) — แผนภาพลำดับการทำงานและ Interaction Flow U1 ถึง U7
+* [Use Case & Class Diagrams](architecture/use-case-and-class-diagrams.md) — แผนภาพ Use Case Diagram (U1–U9) และ Design Class Diagram ตามแพตเทิร์น BCE
+* [Sequence Diagrams](architecture/sequence-diagrams.md) — แผนภาพลำดับการทำงานและ Interaction Flow U1 ถึง U9
 * [Entity & Database Table Mapping](architecture/entity-database-table-mapping.md) — แผนภาพ ER Diagram, โครงสร้างตาราง PostgreSQL, และ Data Access Object (DAO) Mapping
 * [Recommended UML Diagrams](architecture/recommended-diagrams.md) — แผนภาพแนะนำเพิ่มเติมสำหรับส่งอาจารย์ (Component Diagram, Activity Diagrams สำหรับ Match Score และ Eligibility Check, และ State Machine Diagrams)
 
