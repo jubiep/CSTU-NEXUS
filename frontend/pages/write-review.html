@@ -337,7 +337,7 @@
         { name: "workload", label: "ปริมาณงาน" }
       ];
 
-      // Form Validation: ตรวจสอบว่าเลือกครบทั้ง 5 หัวข้อหรือยัง เพื่อเปิด/ปิดปุ่มส่ง
+      // ตรวจความครบถ้วนตอน submit; เปิดปุ่มไว้เพื่อให้ผู้ใช้เห็น form-error
       function validateFormCompletion() {
         const submitBtn = document.querySelector(".btn-submit-review");
         if (!submitBtn) return false;
@@ -351,7 +351,9 @@
           return checked && checked.value;
         });
 
-        submitBtn.disabled = !isComplete;
+        // Keep Submit available so the validation message is shown when a
+        // student tries to submit an incomplete form.
+        submitBtn.disabled = false;
         return isComplete;
       }
 
@@ -401,43 +403,25 @@
           errEl.textContent = "กรุณาเลือกการประเมินให้ครบทุกหมวดหมู่";
           errEl.style.display = "block";
           errEl.scrollIntoView({ behavior: "smooth", block: "center" });
-          if (submitBtn) submitBtn.disabled = true;
           return;
         }
 
-        // ข้อความรีวิว (text) ไม่จำเป็นต้องเขียน
+        const hasActualRating = Object.values(ratings).some(value => value !== "ไม่แน่ใจ");
+        if (!hasActualRating) {
+          errEl.textContent = "กรุณาเลือกการประเมินจริงอย่างน้อย 1 หัวข้อ";
+          errEl.style.display = "block";
+          errEl.scrollIntoView({ behavior: "smooth", block: "center" });
+          return;
+        }
+
+        // ส่งข้อความตามที่กรอก รวมถึงค่าว่าง เพื่อให้ Backend ตอบ validation 400
         const textarea = document.getElementById("review-text");
         const text = textarea ? textarea.value.trim() : "";
         errEl.style.display = "none";
 
-        // บันทึกรีวิวพร้อมแท็กและคะแนนสเกล 0-1 ไว้ใน localStorage เพื่อแสดงผลทันทีในหน้ารายละเอียดวิชา
+        // Prepare the local review now, but persist it only after the API succeeds.
         const currentStudentId = (user && user.studentId) || "";
         const dimensionScores = typeof normalizeRatings === "function" ? normalizeRatings(ratings) : {};
-        try {
-          const storedKey = `cstu_reviews_${code}`;
-          const currentLocal = JSON.parse(localStorage.getItem(storedKey) || "[]");
-          const newReviewItem = {
-            id: Date.now(),
-            courseId: code,
-            sectionNumber: section || "",
-            sectionId: sectionId || null,
-            studentId: currentStudentId,
-            year: (user && user.year) || 2,
-            date: new Date().toLocaleDateString("th-TH", { day: "numeric", month: "numeric", year: "numeric" }).replace(/\//g, "-"),
-            tags: selectedTags.length > 0 ? selectedTags : ["เน้นทฤษฎี"],
-            ratings: ratings,
-            scores: dimensionScores,
-            text: text,
-            comment: text
-          };
-          currentLocal.unshift(newReviewItem);
-          localStorage.setItem(storedKey, JSON.stringify(currentLocal));
-          if (currentStudentId) {
-            localStorage.setItem(`cstu_reviewed_${code}_${currentStudentId}`, "true");
-          }
-        } catch (storageErr) {
-          console.warn("Could not save to localStorage:", storageErr);
-        }
 
         submitBtn.disabled = true;
         submitBtn.textContent = "กำลังส่ง...";
@@ -447,13 +431,13 @@
           if (typeof window.submitReview === "function" && window.submitReview !== submitReviewHandler) {
             await window.submitReview(code, {
               sectionId: sectionId || null,
-              reviewText: text || "-",
+              reviewText: text,
               ratings: ratings
             });
           } else if (typeof apiSubmitReview === "function") {
             await apiSubmitReview(code, {
               sectionId: sectionId || null,
-              reviewText: text || "-",
+              reviewText: text,
               ratings: ratings
             });
           } else {
@@ -461,13 +445,36 @@
               method: "POST",
               body: JSON.stringify({
                 sectionId: sectionId || null,
-                reviewText: text || "-",
-                comment: text || "-",
-                text: text || "-",
+                reviewText: text,
+                comment: text,
+                text: text,
                 ratings: ratings,
                 scores: dimensionScores
               }),
             });
+          }
+
+          try {
+            const storedKey = `cstu_reviews_${code}`;
+            const currentLocal = JSON.parse(localStorage.getItem(storedKey) || "[]");
+            const newReviewItem = {
+              id: Date.now(),
+              courseId: code,
+              sectionNumber: section || "",
+              sectionId: sectionId || null,
+              studentId: currentStudentId,
+              year: (user && user.year) || 2,
+              date: new Date().toLocaleDateString("th-TH", { day: "numeric", month: "numeric", year: "numeric" }).replace(/\//g, "-"),
+              tags: selectedTags,
+              ratings: ratings,
+              scores: dimensionScores,
+              text: text,
+              comment: text
+            };
+            currentLocal.unshift(newReviewItem);
+            localStorage.setItem(storedKey, JSON.stringify(currentLocal));
+          } catch (storageErr) {
+            console.warn("Could not save successful review to localStorage:", storageErr);
           }
 
           if (currentStudentId) {
