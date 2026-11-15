@@ -192,7 +192,11 @@ class ReviewControllerMockTests {
         when(reviewService.upsertUser(eligibleUser)).thenReturn(99);
         when(reviewService.getEligibilityStatus("6700000000", "CS101"))
                 .thenReturn(new ReviewService.EligibilityStatus(true, 3, 1, "eligible"));
-        when(reviewService.saveReview(any(Review.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(reviewService.saveReview(any(Review.class))).thenAnswer(invocation -> {
+            Review review = invocation.getArgument(0);
+            review.setId(8L);
+            return review;
+        });
 
         mockMvc.perform(post("/api/courses/CS101/reviews").sessionAttr("authenticatedUser", eligibleUser)
                         .contentType(MediaType.APPLICATION_JSON)
