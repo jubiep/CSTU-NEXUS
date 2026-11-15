@@ -78,16 +78,11 @@
     </main>
   </div>
 
-  <dialog class="save-dialog" id="save-dialog" aria-labelledby="save-dialog-title" aria-describedby="save-dialog-message">
-    <div class="save-dialog-icon" aria-hidden="true">
-      <svg viewBox="0 0 24 24" fill="none">
-        <path d="m6 12.5 4 4L18.5 8" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
-    </div>
-    <h2 id="save-dialog-title">บันทึกเสร็จสิ้น</h2>
-    <p id="save-dialog-message">บันทึก Preferences ของคุณเรียบร้อยแล้ว</p>
+  <dialog class="save-dialog modal-box" id="save-dialog" aria-labelledby="save-dialog-title">
+    <div class="modal-title" id="save-dialog-title">บันทึกเสร็จสิ้น</div>
+    <img class="success-icon" src="../src/success-icon.png" alt="บันทึกสำเร็จ" height="60" width="60"/>
     <form method="dialog">
-      <button class="btn btn-primary save-dialog-button" type="submit">ตกลง</button>
+      <button class="btn btn-primary btn-full save-dialog-button" type="submit">ตกลง</button>
     </form>
   </dialog>
 

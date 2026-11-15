@@ -183,73 +183,28 @@ body {
 .save-dialog {
   position: fixed;
   inset: 0;
-  width: min(290px, calc(100vw - 40px));
+  width: 90%;
+  max-width: 280px;
   margin: auto;
-  padding: 26px 22px 20px;
+  padding: 36px 32px;
   border: 0;
-  border-radius: 22px;
+  border-radius: var(--radius-lg);
   background: #fff;
-  box-shadow: 0 16px 48px rgba(0, 0, 0, .2);
-  color: #212121;
+  box-shadow: var(--shadow-md);
+  color: var(--gray-800);
   text-align: center;
 }
 
 .save-dialog::backdrop {
-  background: rgba(26, 20, 20, .45);
-  backdrop-filter: blur(2px);
-}
-
-.save-dialog[open] {
-  animation: save-dialog-enter .2s ease-out;
-}
-
-.save-dialog-icon {
-  display: grid;
-  width: 58px;
-  height: 58px;
-  place-items: center;
-  margin: 0 auto 13px;
-  border-radius: 50%;
-  background: linear-gradient(145deg, #ffe58e, #ffd236);
-  color: #287a46;
-}
-
-.save-dialog-icon svg {
-  width: 31px;
-  height: 31px;
-}
-
-.save-dialog h2 {
-  font-size: 18px;
-  font-weight: 700;
-}
-
-.save-dialog p {
-  margin-top: 6px;
-  color: #616161;
-  font-size: 13px;
+  background: rgba(0, 0, 0, .45);
 }
 
 .save-dialog form {
-  margin-top: 20px;
+  margin: 0;
 }
 
 .save-dialog-button {
-  min-width: 100px;
-  padding: 8px 22px;
-  border-radius: 999px;
-  box-shadow: 0 5px 14px rgba(255, 204, 47, .4);
-}
-
-@keyframes save-dialog-enter {
-  from {
-    opacity: 0;
-    transform: translateY(8px) scale(.97);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
+  margin-top: 0;
 }
 
 @media (max-width: 320px) {
