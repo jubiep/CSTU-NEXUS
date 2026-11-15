@@ -1,7 +1,6 @@
 # CSTU NEXUS
 
-ระบบสนับสนุนการตัดสินใจเลือกเรียนและรีวิวรายวิชาสำหรับนักศึกษาสาขาวิทยาการคอมพิวเตอร์ (CSTU) มหาวิทยาลัยธรรมศาสตร์
-ช่วยให้นักศึกษาค้นหาข้อมูลเชิงลึกของรายวิชา วางแผนการเรียน และรีวิวประสบการณ์เพื่อประกอบการตัดสินใจลงทะเบียนได้อย่างมีประสิทธิภาพ
+ระบบสนับสนุนการตัดสินใจเลือกเรียนและรีวิวรายวิชาสำหรับนักศึกษาสาขาวิทยาการคอมพิวเตอร์ (CSTU) มหาวิทยาลัยธรรมศาสตร์ ช่วยให้นักศึกษาค้นหาข้อมูลเชิงลึกของรายวิชา วางแผนการเรียน และอ่าน/เขียนรีวิวประสบการณ์เพื่อประกอบการตัดสินใจลงทะเบียน
 
 > **หมายเหตุ:** โปรเจกต์นี้เป็นส่วนหนึ่งของรายวิชา **CS261 / CS264 Introduction to Software Engineering**  
 > ภาควิชาวิทยาการคอมพิวเตอร์ คณะวิทยาศาสตร์และเทคโนโลยี มหาวิทยาลัยธรรมศาสตร์
@@ -21,283 +20,126 @@
 
 ---
 
-## Tech Stack ปัจจุบัน
+## เอกสารการออกแบบและข้อกำหนดของระบบ (Documentation)
 
-| Layer | Technology | รายละเอียด |
+เอกสารทางเทคนิคและสถาปัตยกรรมทั้งหมดจัดเก็บอยู่ในโฟลเดอร์ [`docs/`](docs/):
+
+| เอกสาร | ลิงก์ | คำอธิบาย |
 |---|---|---|
-| **Frontend** | HTML5, CSS3, Vanilla JavaScript (ES6+) | Mobile-first Responsive Design, TU Red (`#C3002F`) Theme |
-| **Backend** | Java 17, Spring Boot 4.1.x | Spring Web MVC, Spring Data JPA, Spring JDBC (`JdbcTemplate`), Lombok |
-| **Database** | PostgreSQL 17 | รันบน Docker Container (Docker Compose) |
-| **Build & Tooling** | Maven Wrapper (`./mvnw`), Docker Desktop | รองรับการรันโดยไม่ต้องติดตั้ง Maven แยก |
-| **Authentication** | TU Authentication API | ตรวจสอบสถานะนักศึกษาและชั้นปี (1–4) |
-| **Version Control** | Git / GitHub (Monorepo) | จัดการโค้ด Frontend และ Backend ร่วมกันในคลังเดียว |
+| **System Architecture** | [docs/architecture.md](docs/architecture.md) | สถาปัตยกรรมระบบ 3-Tier, BCE Pattern, ความปลอดภัย, และ Deployment |
+| **User Stories** | [docs/user-stories.md](docs/user-stories.md) | ข้อกำหนดความต้องการแบบ Agile (Persona, Want, Value, Acceptance Criteria) |
+| **Use Case Specifications** | [docs/use-cases.md](docs/use-cases.md) | รายละเอียดข้อกำหนด Use Case ทั้งหมด (U1–U7) พร้อม Pre/Post-conditions |
+| **Use Case & Class Diagrams** | [docs/use-case-and-class-diagrams.md](docs/use-case-and-class-diagrams.md) | แผนภาพ Use Case Diagram และ Design Class Diagram (BCE) |
+| **Sequence Diagrams** | [docs/sequence-diagrams.md](docs/sequence-diagrams.md) | แผนภาพลำดับการทำงาน U1–U7 ทั้งหมด |
+| **Database & ER Mapping** | [docs/entity-database-table-mapping.md](docs/entity-database-table-mapping.md) | แผนผัง ER Diagram, ตารางฐานข้อมูล, API-DAO Mapping, และสิทธิ์ |
+| **API Specifications** | [docs/preferences-api.md](docs/preferences-api.md)<br/>[docs/match-score-api.md](docs/match-score-api.md)<br/>[docs/anonymous-review-api.md](docs/anonymous-review-api.md) | ข้อกำหนด API รายละเอียดสำหรับการตั้งค่าความชอบ, Match Score และรีวิวแบบปิดบังตัวตน |
+| **Recommended Diagrams** | [docs/recommended-diagrams.md](docs/recommended-diagrams.md) | แผนภาพแนะนำเพิ่มเติม (Component, Activity, และ State Machine Diagrams) |
 
 ---
 
-## โครงสร้างโปรเจกต์ (Monorepo Structure)
+## ฟีเจอร์หลัก (Key Features)
 
-```text
-CSTU-NEXUS/
-├── docs/                         # เอกสารการออกแบบระบบและ UML Diagrams
-│   ├── use-case-and-class-diagrams.md # Use Case Diagram & Design Class Diagram (BCE)
-│   ├── sequence-diagrams.md      # Sequence Diagrams ทั้ง 5 Use Cases (U1–U5)
-│   └── entity-database-table-mapping.md # ER Diagram, API-DAO Mapping & Permission Flow
-│
-├── frontend/                     # ฝั่งหน้าเว็บผู้ใช้งาน
-│   ├── Dockerfile                # Frontend image (development/production)
-│   ├── nginx.conf.template       # Static hosting และ reverse proxy ไป Backend
-│   ├── pages/                    # ไฟล์หน้าเว็บ HTML แต่ละหน้า
-│   │   ├── index.html            # หน้าเข้าสู่ระบบ (Login)
-│   │   ├── courses.html          # หน้ารายการวิชาทั้งหมด (Course List)
-│   │   ├── course-detail.html    # หน้ารายละเอียดวิชาและรีวิว (Course Detail)
-│   │   ├── write-review.html     # หน้าเขียนรีวิววิชา (Write Review)
-│   │   └── profile.html          # หน้าโปรไฟล์ผู้ใช้และตั้งค่า (Profile / Preferences)
-│   ├── css/                      # สไตล์ชีทแยกตามโมดูลและคอมโพเนนต์
-│   │   ├── main.css              # Global styles, variables, typography, topbar
-│   │   ├── login.css             # สไตล์หน้า Login
-│   │   ├── courses.css           # สไตล์หน้ารายการวิชา
-│   │   ├── course-detail.css     # สไตล์หน้ารายละเอียดและ Section Matching
-│   │   ├── write-review.css      # สไตล์หน้าฟอร์มเขียนรีวิว
-│   │   └── profile.css           # สไตล์หน้าโปรไฟล์ผู้ใช้งาน
-│   ├── src/                      # รูปภาพ โลโก้ และ Asset มีเดีย
-│   ├── app.js                    # ฟังก์ชันหลักฝั่ง Client (API integration, Auth state, Topbar)
-│   └── README.md                 # คู่มือการใช้งาน Frontend
-│
-├── backend/                      # ฝั่งเซิร์ฟเวอร์และฐานข้อมูล
-│   ├── cstu-course-nexus/        # Spring Boot Application
-│   │   ├── src/main/java/        # Java Source Code
-│   │   │   └── th/ac/tu/cs/cstu_course_nexus/
-│   │   │       ├── CstuCourseNexusApplication.java  # Main Application + .env Auto-loader
-│   │   │       ├── HealthController.java            # ตรวจสอบสถานะและเชื่อมต่อ DB
-│   │   │       ├── AuthController.java              # Login, Profile, Logout session
-│   │   │       ├── CourseController.java            # ค้นหารายวิชาและ Section (U4)
-│   │   │       ├── ReviewController.java            # จัดการรีวิวและสิทธิ์ (U1, U3, U5)
-│   │   │       ├── ReviewService.java               # Business Logic การรีวิวและตรวจชั้นปี
-│   │   │       ├── ReviewRepository.java            # Spring Data JPA Repository
-│   │   │       ├── Review.java                      # JPA Entity ตาราง review
-│   │   │       ├── AuthUser.java                    # Model ข้อมูลผู้ใช้ใน session
-│   │   │       ├── StudyYearCalculator.java         # คำนวณชั้นปีจากรหัสนักศึกษา
-│   │   │       ├── TuAuthService.java               # ยืนยันตัวตนกับ TU AD Verify API
-│   │   │       └── WebConfig.java                   # CORS และ Timeout ของ RestClient
-│   │   ├── src/main/resources/
-│   │   │   └── application.properties # การตั้งค่าเชื่อมต่อ Database และ Spring Boot
-│   │   ├── pom.xml               # รายการ Dependencies และการตั้งค่า Maven
-│   │   └── mvnw / mvnw.cmd       # Maven Wrapper
-│   ├── database/                 # การตั้งค่าฐานข้อมูล PostgreSQL และ Seed Data
-│   │   ├── compose.yaml          # Docker Compose สำหรับรัน PostgreSQL 17 และ Backend
-│   │   ├── init.sql              # Schema โครงสร้างตาราง (mock_user, courses, sections, review)
-│   │   ├── seed.sql              # ชุดข้อมูลตั้งต้น (38 รายวิชา, 63 เซกชัน)
-│   │   ├── courses.csv           # ไฟล์ข้อมูลวิชาตั้งต้น
-│   │   ├── sections.csv          # ไฟล์ข้อมูลเซกชันตั้งต้น
-│   │   ├── generate-seed.ps1     # สคริปต์แปลง CSV สู่ seed.sql
-│   │   └── migrations/           # ประวัติการปรับปรุง Database Schema
-│   └── README.md                 # คู่มือการตั้งค่า Backend & Database ฉบับสมบูรณ์
-│
-├── REQUIREMENTS.md               # คู่มือการติดตั้งและตรวจสอบความพร้อมของระบบ
-├── .env.example                  # แม่แบบการตั้งค่า Environment Variables
-├── .gitignore                    # ละเว้นไฟล์ที่ไม่ควรขึ้น Git (.env, target/, build artifacts)
-└── README.md                     # เอกสารแนะนำและคู่มือโปรเจกต์ฉบับหลัก
-```
-
----
-
-## Use Cases, Data Architecture & Permission Design
-
-ระบบออกแบบตามมาตรฐานสถาปัตยกรรมซอฟต์แวร์แบบ **Boundary-Control-Entity (BCE)** และ **Layered Architecture (Controller-Service-DAO-DB)**:
-
-- **Use Cases หลัก (U1–U5):**
-  - **U1:** อ่าน Review ของรายวิชาและ Section จากรุ่นพี่ (`GET /api/courses/{id}/reviews`)
-  - **U2:** การยืนยันตัวตนและการจัดการสิทธิ์ก่อนใช้งานระบบ (`POST /api/auth/login`)
-  - **U3:** ตรวจสอบชั้นปีของนักศึกษาก่อนเขียน Review (`GET /api/auth/me` & Session verification)
-  - **U4:** ค้นหารายวิชาที่ต้องการ และ Section (`GET /api/courses` & `GET /api/courses/{id}`)
-  - **U5:** เขียน Review รายวิชาตาม Section (`POST /api/courses/{id}/reviews`)
-
-📖 **เอกสารการออกแบบฉบับเต็ม:**
-- [Use Case & Design Class Diagrams](docs/use-case-and-class-diagrams.md) — แผนภาพ Use Case Diagram (U1–U5) และ Design Class Diagram (BCE)
-- [Sequence Diagrams (U1–U5)](docs/sequence-diagrams.md) — แผนผังลำดับการทำงานแต่ละ Use Case
-- [Entity, Database Table Mapping & API-DAO Specification](docs/entity-database-table-mapping.md) — แผนภาพ ER Diagram, ตารางจับคู่ API กับ DAO, และ Permission Flow
-
----
-
-## Features หลัก
-
-1. **Structured Course Review** — รีวิววิชาตามหัวข้อเกณฑ์มาตรฐาน (แนวการสอน, สัดส่วนคะแนน, ปริมาณงาน, สื่อการเรียน) และเลือกเปิดเผยหรือปิดบังตัวตนได้
-2. **TU Auth & Year Verification** — ยืนยันสิทธิ์นักศึกษาผ่าน TU Authentication API และคำนวณชั้นปีอัตโนมัติจากรหัสนักศึกษา พร้อมเก็บ Session Cookie แบบ HttpOnly ปลอดภัย
-3. **Section Matching Algorithm** — คำนวณความเข้ากันได้ระหว่างความชอบของนักศึกษา (User Preferences) กับคะแนนรีวิวของแต่ละเซกชัน แสดงเป็น Match Percentage (%)
-4. **Interactive Course Exploration** — ค้นหา คัดกรองตามชั้นปีที่แนะนำ และดูสถิติรีวิวของรายวิชาต่าง ๆ ในหลักสูตร CSTU
+1. **TU Authentication & Year Verification** — ยืนยันตัวตนผ่าน TU AD Verify API ตรวจสอบสิทธิ์เฉพาะนักศึกษา CSTU และคำนวณชั้นปีอัตโนมัติ
+2. **Course & Section Search** — ค้นหารายวิชา กรองตามชั้นปีแนะนำ และดูข้อมูลรายชื่อเซกชันพร้อมอาจารย์ผู้สอน
+3. **Structured Course Review & Privacy** — อ่านรีวิวจากรุ่นพี่ และเขียนรีวิวพร้อมประเมินเกณฑ์มาตรฐาน 5 ด้าน โดยเลือกเปิดเผยหรือปิดบังตัวตน (Anonymous) ได้
+4. **Learning Preferences & Match Scoring** — กำหนดสไตล์การเรียนและ Workload ของตนเอง พร้อมแสดงเปอร์เซ็นต์ความเข้ากันได้ (Match Score %) กับแต่ละเซกชัน
 
 ---
 
 ## ขั้นตอนการติดตั้งและรันระบบ (Quick Start)
 
-### 1. ความต้องการของระบบ (Prerequisites)
+### 1. สิ่งที่ต้องมีในเครื่อง (Prerequisites)
 - [Git](https://git-scm.com/)
-- [Docker Desktop](https://www.docker.com/products/docker-desktop/) (สำหรับรัน PostgreSQL)
-- [Java JDK 17](https://adoptium.net/temurin/releases/?version=17) ขึ้นไป
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/)
+- [Java JDK 17](https://adoptium.net/temurin/releases/?version=17) *(กรณีต้องการรัน Backend แบบ Local)*
 
-> 💡 **สำหรับสมาชิกในทีม:** ดูคู่มือดาวน์โหลด ติดตั้ง และตรวจสอบ Stack แบบละเอียดได้ที่ [REQUIREMENTS.md](REQUIREMENTS.md) (หรือรันสคริปต์ตรวจเช็ค `check-requirements.ps1` / `check-requirements.sh`)
+> 💡 ดูคู่มือเตรียมเครื่องและติดตั้งโปรแกรมแบบละเอียดได้ที่ [REQUIREMENTS.md](REQUIREMENTS.md)
 
 ---
 
-### 2. ตั้งค่าไฟล์สภาพแวดล้อม (`.env`)
+### 2. ตั้งค่า Environment Variables (`.env`)
 
-คัดลอกไฟล์แม่แบบ `.env.example` เป็น `.env` ที่ root ของโปรเจกต์:
+คัดลอกไฟล์ `.env.example` เป็น `.env` ที่ root ของโปรเจกต์:
 
 ```bash
 # บน Windows PowerShell
 copy .env.example .env
 
-# บน Linux / macOS / Git Bash
+# บน macOS / Linux
 cp .env.example .env
 ```
 
-เปิดไฟล์ `.env` แล้วใส่ `TU_API_APPLICATION_KEY` ที่ได้รับจากผู้ดูแลระบบ TU API:
+เปิดไฟล์ `.env` แล้วใส่ `TU_API_APPLICATION_KEY` สำหรับเรียกใช้ TU Authentication API:
 
 ```env
 TU_API_APPLICATION_KEY=your_actual_key_here
-APP_CORS_ALLOWED_ORIGINS=http://localhost:3000,http://localhost:5500,http://127.0.0.1:5500,http://localhost:5501,http://127.0.0.1:5501
-FRONTEND_PORT=3000
-FRONTEND_TARGET=production
 ```
-
-*(ไฟล์ `.env` นี้จะไม่ถูกนำขึ้น Git เนื่องจากมี `.gitignore` ดักไว้แล้ว)*
 
 ---
 
-### 3. เริ่มต้น Database (PostgreSQL 17 บน Docker)
+### 3. รันทั้งระบบด้วย Docker Compose (แนะนำ)
 
-1. เปิด **Docker Desktop**
-2. เปิด Terminal ที่โฟลเดอร์หลักของโปรเจกต์ แล้วสั่งเริ่ม PostgreSQL Container:
+สั่ง build และรันทั้ง Frontend (Nginx), Backend (Spring Boot) และ Database (PostgreSQL 17) ด้วยคำสั่งเดียว:
 
+```bash
+docker compose --env-file .env up --build
+```
+
+- เปิด Browser ไปที่: **`http://localhost:3000`**
+- ตรวจสอบสถานะการทำงาน: `docker compose ps`
+- ดู Log การทำงาน: `docker compose logs -f`
+- หยุดระบบ: `docker compose down`
+
+---
+
+### 4. ทางเลือกรันแบบ Local Development (แยกส่วน)
+
+#### 4.1 เริ่มต้น Database (PostgreSQL 17)
 ```bash
 docker compose -f backend/database/compose.yaml up -d db
 ```
-
-3. ตรวจสอบสถานะ Container:
-```bash
-docker compose -f backend/database/compose.yaml ps
-```
-*(ฐานข้อมูลจะเปิดพอร์ต `5432` สำหรับ Database `cstu_nexus_db`)*
-
-4. (ตัวเลือก) นำเข้า Seed Data ตั้งต้น (หากเพิ่งสร้าง Database ครั้งแรก):
+*(ตัวเลือก) นำเข้า Seed Data ครั้งแรก:*
 ```bash
 docker exec -i cstu-nexus-postgres psql -U cstu_nexus_user -d cstu_nexus_db -v ON_ERROR_STOP=1 < backend/database/seed.sql
 ```
 
----
-
-### 4. รัน Spring Boot Backend
-
-#### ทางเลือกที่ A: รันผ่าน Maven Wrapper โดยตรง (แนะนำสำหรับ Local Dev)
-1. ไปที่โฟลเดอร์ Backend:
+#### 4.2 รัน Spring Boot Backend
 ```bash
 cd backend/cstu-course-nexus
-```
-
-2. รันแอปพลิเคชัน (แอปจะโหลดค่า Key จากไฟล์ `.env` ที่ root อัตโนมัติ):
-```bash
-# บน Windows (PowerShell / Command Prompt)
+# บน Windows
 .\mvnw.cmd spring-boot:run
 
-# บน Linux / macOS / Git Bash
+# บน macOS / Linux
 ./mvnw spring-boot:run
 ```
-Backend จะพร้อมทำงานที่ `http://localhost:8080`
+Backend พร้อมทำงานที่ `http://localhost:8080`
 
-#### ทางเลือกที่ B: รันทั้ง Backend และ Database ผ่าน Docker Compose
+#### 4.3 รัน Frontend
+เปิดไฟล์ `frontend/pages/index.html` ผ่าน **VS Code Live Server** (พอร์ต 5500) หรือรันด้วย Python:
 ```bash
-docker compose --env-file .env -f backend/database/compose.yaml up -d --build
-```
-
----
-
-### 5. รัน Frontend
-
-Frontend ถูกพัฒนาด้วย Vanilla HTML/CSS/JS บริสุทธิ์ สามารถเปิดได้ทันที:
-
-#### วิธีที่ 1: รันทั้งระบบด้วย Docker Compose (แนะนำ)
-
-จาก root ของ repository:
-
-```bash
-docker compose --env-file .env up -d --build
-```
-
-เปิด Browser ที่ `http://localhost:3000` ระบบจะส่งคำขอ `/api` ผ่าน Frontend container ไปยัง Backend container บน Docker network จึงไม่ต้องใช้ hostname `backend` จาก Browser และไม่เกิด CORS ระหว่างหน้าเว็บกับ API
-
-ตรวจสอบสถานะหรือหยุดบริการ:
-
-```bash
-docker compose ps
-docker compose logs -f frontend
-docker compose down
-```
-
-เลือก Docker build target ได้ด้วย `FRONTEND_TARGET=development` หรือ `FRONTEND_TARGET=production` ใน `.env` ส่วน `BACKEND_HOST` และ `BACKEND_PORT` เป็น environment variables ที่ Nginx ใช้ชี้ไปยัง Backend service ภายใน network
-
-#### วิธีที่ 2: ใช้ Live Server (VS Code Extension)
-- คลิกขวาที่ไฟล์ `frontend/pages/index.html` → เลือก **Open with Live Server**
-
-#### วิธีที่ 3: ใช้ Python Simple HTTP Server
-```bash
-cd frontend/
+cd frontend
 python -m http.server 5500
 ```
-เปิดเบราว์เซอร์ไปที่: `http://localhost:5500/pages/index.html` (หรือ `http://127.0.0.1:5500/pages/index.html`)
+เปิด Browser ที่ `http://localhost:5500/pages/index.html`
 
 ---
 
-## API Endpoints (Spring Boot)
-
-| Method | Endpoint | คำอธิบาย | Use Case | สถานะ |
-|---|---|---|:---:|:---:|
-| `GET` | `/health` | ตรวจสอบสถานะการทำงานของ Backend | - | พร้อมใช้งาน |
-| `GET` | `/db-test` | ทดสอบ Query ตาราง courses จาก PostgreSQL | - | พร้อมใช้งาน |
-| `POST` | `/echo` | ทดสอบรับ-ส่ง String Request Body | - | พร้อมใช้งาน |
-| `POST` | `/api/auth/login` | ยืนยันบัญชีนักศึกษา TU และสร้าง HttpOnly Session | U2 | พร้อมใช้งาน |
-| `GET` | `/api/auth/me` | ดึงข้อมูลโปรไฟล์ผู้ใช้ และชั้นปี (Current Year) จาก Session | U2, U3 | พร้อมใช้งาน |
-| `POST` | `/api/auth/logout` | ยกเลิก Session ผู้ใช้ | U2 | พร้อมใช้งาน |
-| `GET` | `/api/courses` | ค้นหารายวิชา (รองรับ `?keyword=&year=`) | U4 | พร้อมใช้งาน |
-| `GET` | `/api/courses/{id}` | ดึงข้อมูลรายวิชาและรายการ Section | U4 | พร้อมใช้งาน |
-| `GET` | `/api/courses/{id}/reviews` | ดึงประวัติรีวิวของรายวิชา (รองรับ `?sectionId=`) | U1 | พร้อมใช้งาน |
-| `GET` | `/api/courses/{id}/reviews/eligibility` | ตรวจสอบสิทธิ์และชั้นปีก่อนส่งรีวิววิชา | U3 | พร้อมใช้งาน |
-| `POST` | `/api/courses/{id}/reviews` | ส่งรีวิวรายวิชาใหม่แยกตาม Section | U5 | พร้อมใช้งาน |
-
----
-
-## Database Schema & Table Mapping
+## โครงสร้างโปรเจกต์โดยสังเขป (Project Structure)
 
 ```text
-+------------------+         +--------------------+         +--------------------+
-|    mock_user     |         |      courses       |         |      sections      |
-+------------------+         +--------------------+         +--------------------+
-| PK user_id       |         | PK course_id       | 1     * | PK section_id      |
-|    student_id    |         |    course_name     |---------| FK course_id       |
-|    display_name  |         |    recommended_year|         |    section_number  |
-|    current_year  |         +--------------------+         |    instructor_name |
-+------------------+                   | 1                  +--------------------+
-         | 1                           |                               | 1
-         |                             |                               |
-         |                             | *                             | *
-         |                    +------------------+                     |
-         +------------------->|      review      |<--------------------+
-                            * +------------------+
-                              | PK review_id     |
-                              | FK course_id     |
-                              | FK section_id    |
-                              | FK user_id       |
-                              |    reviewer_year |
-                              |    review_text   |
-                              |    created_at    |
-                              +------------------+
+CSTU-NEXUS/
+├── docs/                      # เอกสารสถาปัตยกรรม, Use Cases, User Stories และ UML Diagrams
+├── frontend/                  # ฝั่งหน้าเว็บผู้ใช้งาน (HTML5, CSS3, Vanilla JS, Nginx Reverse Proxy)
+│   ├── pages/                 # หน้าเว็บ (index, courses, course-detail, write-review, preference, profile)
+│   ├── css/                   # สไตล์ชีทแยกตามหน้า
+│   └── app.js                 # Logic ส่วนกลางและการเชื่อมต่อ API
+├── backend/                   # ฝั่งเซิร์ฟเวอร์และฐานข้อมูล
+│   ├── cstu-course-nexus/     # Spring Boot Source Code (Java 17, Controllers, Services, Repositories)
+│   └── database/              # Schema (init.sql), Seed Data (seed.sql), และ Migrations
+├── docker-compose.yml         # การติดตั้งระบบรวมทุก Service (Frontend, Backend, Database)
+├── REQUIREMENTS.md            # คู่มือเตรียมเครื่องและติดตั้ง Tech Stack
+└── README.md                  # เอกสารแนะนำและคู่มือการเริ่มต้น
 ```
-
-- `mock_user` : ข้อมูลผู้ใช้งาน, รหัสนักศึกษา, ชื่อ, ชั้นปี, สาขา, อีเมล
-- `courses` : รหัสวิชา (`course_id`), ชื่อวิชา (`course_name`), ชั้นปีที่แนะนำ (`recommended_year`)
-- `sections` : ข้อมูลเซกชัน, อาจารย์ผู้สอน เชื่อมโยงกับ `courses`
-- `review` : รีวิวรายวิชาและเซกชัน พร้อมชั้นปีของผู้เขียน ณ วันที่รีวิว
-
-📖 **ดูเอกสาร Mapping ฉบับเต็ม:** [docs/entity-database-table-mapping.md](docs/entity-database-table-mapping.md)
 
 ---
 

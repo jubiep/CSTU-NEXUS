@@ -1,25 +1,32 @@
 # CSTU-NEXUS — Use Case & Class Diagrams
 
-เอกสารรวบรวม **Use Case Diagram** และ **Design Class Diagram** สำหรับระบบ **CSTU-NEXUS** อ้างอิงตามขอบเขตงาน U1–U5 และสถาปัตยกรรมแบบ **Boundary-Control-Entity (BCE) / Layered Pattern**
+เอกสารรวบรวม **Use Case Diagram** และ **Design Class Diagram** สำหรับระบบ **CSTU-NEXUS** อ้างอิงตามขอบเขตงาน Sprint 1 (U1–U5) และ Sprint 2 (U6–U7) ตามสถาปัตยกรรมแบบ **Boundary-Control-Entity (BCE) / Layered Pattern**
+
+> 📖 **เอกสารที่เกี่ยวข้อง:**
+> - [Detailed Use Case Specifications](use-cases.md) — ข้อกำหนดรายละเอียด Use Cases ทุกข้อ (Preconditions, Flow, Postconditions)
+> - [User Stories](user-stories.md) — ข้อกำหนดความต้องการในรูปแบบ Agile User Stories (Persona, Want, Value, Acceptance Criteria)
+> - [System Architecture](architecture.md) — สถาปัตยกรรมระบบ การแบ่งเลเยอร์ ความปลอดภัย และการติดตั้งระบบ
+> - [Sequence Diagrams](sequence-diagrams.md) — แผนภาพลำดับการทำงาน U1–U7
 
 ---
 
 ## สารบัญ
-1. [Use Case Diagram & Actor Specifications](#1-use-case-diagram--actor-specifications)
+1. [Use Case Diagram & Summary (U1–U7)](#1-use-case-diagram--summary-u1u7)
 2. [Design Class Diagram (BCE Pattern)](#2-design-class-diagram-bce-pattern)
-3. [System Architecture & Deployment Overview](#3-system-architecture--deployment-overview)
+3. [System Architecture Reference](#3-system-architecture-reference)
 
 ---
 
-## 1. Use Case Diagram & Actor Specifications
+## 1. Use Case Diagram & Summary (U1–U7)
 
 ### 1.1 Use Case Diagram (CSTU-NEXUS)
 
 ```mermaid
 flowchart LR
     %% Actors
-    subgraph Actors [Actors]
-        Student["👤 CSTU Student<br/>(นักศึกษา CSTU)"]
+    subgraph Actors ["Actors"]
+        Student["👤 CSTU Student<br/>(นักศึกษาปัจจุบัน)"]
+        Senior["🎓 CSTU Senior<br/>(รุ่นพี่ผู้เคยเรียน)"]
         TuAPI["🏢 TU Authentication System<br/>(TU AD Verify API)"]
     end
 
@@ -30,38 +37,47 @@ flowchart LR
         U1(["U1: อ่าน Review รายวิชา/Section"])
         U3(["U3: ตรวจสอบชั้นปีก่อนเขียน Review"])
         U5(["U5: เขียน Review รายวิชาตาม Section"])
+        U6(["U6: ให้คะแนนเกณฑ์มาตรฐาน & ปกปิดตัวตน"])
+        U7(["U7: กำหนด Preferences & คำนวณ Match Score"])
     end
 
     %% Interactions
     Student --> U2
     Student --> U4
     Student --> U1
-    Student --> U5
+    Student --> U7
+
+    Senior --> U5
+    Senior --> U6
 
     U2 <-->|REST API| TuAPI
 
-    %% Relationships <<include>>
+    %% Relationships <<include>> / <<extend>>
     U4 -.->|"<<include>> (ต้อง Login)"| U2
     U1 -.->|"<<include>> (ต้อง Login)"| U2
+    U7 -.->|"<<include>> (ต้อง Login)"| U2
     U5 -.->|"<<include>> (ต้อง Login)"| U2
     U5 -.->|"<<include>> (ตรวจชั้นปี)"| U3
+    U6 -.->|"<<extend>> (คะแนน/Anonymous)"| U5
 ```
 
-### 1.2 ตารางรายละเอียด Use Cases (U1–U5)
+### 1.2 ตารางสรุป Use Cases (U1–U7)
 
-| Use Case ID | ชื่อ Use Case | Actor หลัก | ความสัมพันธ์ | วัตถุประสงค์โดยสรุป |
-|:---:|---|:---:|:---:|---|
-| **U1** | อ่าน Review รายวิชาและ Section จากรุ่นพี่ | CSTU Student | `<<include>> U2` | เปิดดูประวัติรีวิวและคำแนะนำของแต่ละเซกชันจากรุ่นพี่ในหลักสูตร |
-| **U2** | การยืนยันตัวตนและการจัดการสิทธิ์ | CSTU Student,<br>TU AD Verify API | - | ตรวจสอบรหัสนักศึกษาและรหัสผ่านผ่านระบบของมหาวิทยาลัย และคัดกรองเฉพาะ นศ. CSTU |
-| **U3** | ตรวจสอบชั้นปีก่อนเขียน Review | CSTU Student (System Rule) | `<<included by>> U5` | ตรวจสอบว่าผู้ใช้มีชั้นปี > ชั้นปีที่แนะนำ (`recommended_year`) ของวิชานั้นๆ และยังไม่เคยส่งรีวิวรายวิชานี้ |
-| **U4** | ค้นหารายวิชาที่ต้องการ และ Section | CSTU Student | `<<include>> U2` | ค้นหารายวิชาจากรหัส/ชื่อวิชา คัดกรองตามชั้นปี และดูรายชื่อเซกชันพร้อมผู้สอน |
-| **U5** | เขียน Review รายวิชาตาม Section | CSTU Student | `<<include>> U2, U3` | กรอกข้อความรีวิวประสบการณ์การเรียนและส่งบันทึกแยกตาม Section |
+| Use Case ID | ชื่อ Use Case | Sprint | Actor หลัก | ความสัมพันธ์ | วัตถุประสงค์โดยสรุป |
+|:---:|---|:---:|:---:|:---:|---|
+| **U1** | อ่าน Review รายวิชาและ Section จากรุ่นพี่ | 1 | CSTU Student | `<<include>> U2` | เปิดดูประวัติรีวิวและคำแนะนำของแต่ละเซกชันจากรุ่นพี่ในหลักสูตร |
+| **U2** | การยืนยันตัวตนและการจัดการสิทธิ์ | 1 | CSTU Student,<br>TU AD Verify API | - | ตรวจสอบรหัสนักศึกษาและรหัสผ่านผ่านระบบของมหาวิทยาลัย และคัดกรองเฉพาะ นศ. CSTU |
+| **U3** | ตรวจสอบชั้นปีก่อนเขียน Review | 1 | CSTU Senior | `<<included by>> U5` | ตรวจสอบว่าผู้ใช้มีชั้นปี > ชั้นปีที่แนะนำ (`recommended_year`) และยังไม่เคยส่งรีวิวรายวิชานี้ |
+| **U4** | ค้นหารายวิชาที่ต้องการ และ Section | 1 | CSTU Student | `<<include>> U2` | ค้นหารายวิชาจากรหัส/ชื่อวิชา คัดกรองตามชั้นปี และดูรายชื่อเซกชันพร้อมผู้สอน |
+| **U5** | เขียน Review รายวิชาตาม Section | 1 | CSTU Senior | `<<include>> U2, U3` | กรอกข้อความรีวิวประสบการณ์การเรียนและส่งบันทึกแยกตาม Section |
+| **U6** | ให้คะแนนเกณฑ์มาตรฐาน & รีวิวแบบปกปิดตัวตน | 2 | CSTU Senior | `<<extend>> U5` | ให้คะแนน 5 ด้านมาตรฐาน (0, 50, 100) และเลือกเปิดโหมดปกปิดตัวตน (Anonymous) |
+| **U7** | กำหนด Preferences & คำนวณ Match Score | 2 | CSTU Student | `<<include>> U2` | ตั้งค่าสไตล์การเรียนและ Workload ของตนเอง พร้อมดูความเข้ากันได้ (%) กับแต่ละเซกชัน |
 
 ---
 
 ## 2. Design Class Diagram (BCE Pattern)
 
-แผนภาพแสดงโครงสร้างคลาสเชิงสถิต (Static Structure) แบ่งตามรูปแบบ **Boundary-Control-Entity (BCE)** สอดคล้องกับ Sequence Diagrams และการพัฒนาจริง:
+แผนภาพแสดงโครงสร้างคลาสเชิงสถิต (Static Structure) แบ่งตามรูปแบบ **Boundary-Control-Entity (BCE)** ครอบคลุมคอมโพเนนต์หลักของระบบ:
 
 ```mermaid
 classDiagram
@@ -87,15 +103,24 @@ classDiagram
         +loadCourseDetail(courseId)
         +displaySections(sections)
         +displayReviews(reviews)
+        +loadMatchScore(sectionId)
     }
 
     class WriteReviewView {
         -courseId: String
         -sectionId: String
         -reviewText: String
+        -isAnonymous: Boolean
+        -ratings: RatingScores
         +checkEligibility()
         +submitReview()
         +showDeniedModal()
+    }
+
+    class PreferenceView {
+        -preferences: UserPreferences
+        +loadPreferences()
+        +savePreferences(preferences)
     }
 
     %% =======================
@@ -130,6 +155,7 @@ classDiagram
         +getReviews(courseId, sectionId): ResponseEntity
         +checkReviewEligibility(courseId, session): ResponseEntity
         +submitReview(courseId, review, session): ResponseEntity
+        +updateReview(courseId, reviewId, review, session): ResponseEntity
     }
 
     class ReviewService {
@@ -138,8 +164,23 @@ classDiagram
         +getReviews(courseId, sectionId): List~Review~
         +checkReviewEligibility(studentId, courseId): boolean
         +getEligibilityStatus(studentId, courseId): EligibilityStatus
-        +deriveUserId(studentId): Integer
         +saveReview(review): Review
+    }
+
+    class PreferenceController {
+        -preferenceService: PreferenceService
+        +getPreferences(session): ResponseEntity
+        +savePreferences(request, session): ResponseEntity
+    }
+
+    class MatchScoreController {
+        -matchScoreService: MatchScoreService
+        +getMatchScore(courseId, sectionId, session): ResponseEntity
+    }
+
+    class MatchScoreService {
+        -matchScoreRepository: MatchScoreRepository
+        +calculateScore(studentId, courseId, sectionId): MatchScoreResult
     }
 
     class ReviewRepository {
@@ -181,18 +222,41 @@ classDiagram
         +userId: Integer
         +reviewerYear: Integer
         +reviewText: String
+        +teachingMethodScore: Integer
+        +evaluationScore: Integer
+        +teachingSpeedScore: Integer
+        +assignmentStyleScore: Integer
+        +workloadScore: Integer
+        +isAnonymous: Boolean
         +createdAt: LocalDateTime
-        +onCreate()
+    }
+
+    class UserPreferences {
+        +userId: Integer
+        +preferredTeachingMethod: Integer
+        +preferredEvaluation: Integer
+        +preferredTeachingSpeed: Integer
+        +preferredAssignmentStyle: Integer
+        +preferredWorkload: Integer
+    }
+
+    class MatchScoreResult {
+        +status: String
+        +score: Integer
+        +level: String
+        +explanation: String
     }
 
     %% =======================
     %% RELATIONSHIPS
     %% =======================
-    LoginView ..> AuthController : HTTP Calls
-    CourseSearchView ..> CourseController : HTTP Calls
-    CourseDetailView ..> CourseController : HTTP Calls
-    CourseDetailView ..> ReviewController : HTTP Calls
-    WriteReviewView ..> ReviewController : HTTP Calls
+    LoginView ..> AuthController : HTTP
+    CourseSearchView ..> CourseController : HTTP
+    CourseDetailView ..> CourseController : HTTP
+    CourseDetailView ..> ReviewController : HTTP
+    CourseDetailView ..> MatchScoreController : HTTP
+    WriteReviewView ..> ReviewController : HTTP
+    PreferenceView ..> PreferenceController : HTTP
 
     AuthController --> TuAuthService : uses
     AuthController ..> StudyYearCalculator : calls
@@ -203,36 +267,19 @@ classDiagram
 
     ReviewController --> ReviewService : uses
     ReviewService --> ReviewRepository : uses
-    ReviewService ..> StudyYearCalculator : calls
     ReviewRepository ..> Review : persists
-    ReviewController ..> AuthUser : verifies session
+
+    PreferenceController --> PreferenceService : uses
+    PreferenceService ..> UserPreferences : manages
+
+    MatchScoreController --> MatchScoreService : uses
+    MatchScoreService ..> MatchScoreResult : produces
 ```
 
 ---
 
-## 3. System Architecture & Deployment Overview
+## 3. System Architecture Reference
 
-ภาพรวมการวางระบบ (Deployment / Architecture View):
+สถาปัตยกรรมระบบโดยรวม (System & 3-Tier Layered Architecture, Deployment via Docker Compose, Security, Network และ Reverse Proxy) ได้รับการแยกจัดทำเป็นเอกสารเฉพาะอย่างเป็นทางการ:
 
-```mermaid
-flowchart TD
-    subgraph ClientTier ["🖥️ Client Tier (Frontend)"]
-        Browser["Web Browser (Vanilla HTML5 / CSS3 / ES6 JavaScript)"]
-    end
-
-    subgraph AppTier ["⚙️ Application Tier (Backend)"]
-        SpringBoot["Spring Boot 4.1.x (Java 17)<br/>- Spring Web MVC (REST APIs)<br/>- Spring Data JPA (Review Repository)<br/>- Spring JDBC (JdbcTemplate)<br/>- HttpOnly Session Security"]
-    end
-
-    subgraph DataTier ["🗄️ Data Tier (PostgreSQL)"]
-        Postgres[("PostgreSQL 17 Database<br/>- courses, sections<br/>- mock_user, review")]
-    end
-
-    subgraph ExternalTier ["🌐 External Services"]
-        TuAD["TU Authentication API<br/>(https://restapi.tu.ac.th)"]
-    end
-
-    Browser <-->|"HTTP / JSON (REST APIs)<br/>Port 8080"| SpringBoot
-    SpringBoot <-->|"JDBC (Port 5432)"| Postgres
-    SpringBoot <-->|"HTTPS POST (Application-Key)"| TuAD
-```
+👉 **[ดูเอกสารสถาปัตยกรรมระบบฉบับเต็มได้ที่ docs/architecture.md](architecture.md)**
