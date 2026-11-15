@@ -18,9 +18,9 @@ body {
 
 .preference-heading h1 {
   color: #111;
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 700;
-  line-height: 1.4;
+  line-height: 1.2;
 }
 
 .preference-list {
@@ -112,14 +112,14 @@ body {
   justify-content: space-between;
   padding: 0 5px;
   color: #333;
-  font-size: 13.5px;
+  font-size: 14px;
   line-height: 1.5;
 }
 
 .preference-status {
   margin: 12px 8px 0;
   color: #287a46;
-  font-size: 12px;
+  font-size: 14px;
   text-align: center;
 }
 
