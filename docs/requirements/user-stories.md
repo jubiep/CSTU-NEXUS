@@ -1,13 +1,13 @@
 # CSTU-NEXUS — User Stories
 
-เอกสารรวบรวม **User Stories** ทั้งหมดของระบบ **CSTU-NEXUS** ตามมาตรฐานกระบวนการพัฒนาซอฟต์แวร์แบบ Agile / Scrum สอดคล้องกับขอบเขตงานใน Sprint 1 และ Sprint 2
+เอกสารรวบรวม **User Stories** ทั้งหมดของระบบ **CSTU-NEXUS** ตามมาตรฐานกระบวนการพัฒนาซอฟต์แวร์แบบ Agile / Scrum สอดคล้องกับขอบเขตงานใน Sprint 1 (US-01 — US-05) และ Sprint 2 (US-06 — US-09)
 
 ---
 
 ## สารบัญ
 1. [กลุ่มผู้ใช้งาน (User Personas)](#1-กลุ่มผู้ใช้งาน-user-personas)
 2. [Sprint 1: Core System & Reviewing (US-01 — US-05)](#2-sprint-1-core-system--reviewing-us-01--us-05)
-3. [Sprint 2: Preferences, Scoring & Privacy (US-06 — US-08)](#3-sprint-2-preferences-scoring--privacy-us-06--us-08)
+3. [Sprint 2: Preferences, Scoring & Privacy (US-06 — US-09)](#3-sprint-2-preferences-scoring--privacy-us-06--us-09)
 4. [ตารางสรุปและการจับคู่ (Traceability Matrix: User Stories ↔ Use Cases)](#4-ตารางสรุปและการจับคู่-traceability-matrix-user-stories--use-cases)
 
 ---
@@ -83,7 +83,7 @@
 
 ---
 
-## 3. Sprint 2: Preferences, Scoring & Privacy (US-06 — US-08)
+## 3. Sprint 2: Preferences, Scoring & Privacy (US-06 — US-09)
 
 ### US-06: การให้คะแนนรายวิชาตามหัวข้อเกณฑ์มาตรฐาน (Structured Course Rating)
 - **Role:** As a **CSTU Senior**
@@ -92,31 +92,41 @@
 - **Acceptance Criteria:**
   - **AC 6.1:** Given ผู้ใช้อยู่ในหน้าเขียนรีวิว When เลือกคะแนนเกณฑ์มาตรฐาน 5 ด้าน (0, 50, 100) Then ระบบบันทึกคะแนนแต่ละด้านพร้อมกับข้อความรีวิว
   - **AC 6.2:** Given ผู้ใช้ไม่ได้เลือกเกณฑ์บางหัวข้อ When บันทึก Then ระบบยอมรับค่าว่าง (null) สำหรับหัวข้อที่ไม่ได้ระบุได้ แต่ต้องมีข้อความรีวิว
-- **Priority:** Medium | **Sprint:** 2 | **Use Case ที่เกี่ยวข้อง:** U6
+- **Priority:** High | **Sprint:** 2 | **Use Case ที่เกี่ยวข้อง:** U6
 
 ---
 
-### US-07: การเขียนรีวิวแบบปกปิดตัวตน (Anonymous Review)
+### US-07: การกำหนด Preferences ในการเรียนและระดับ Workload (Learning Preferences)
+- **Role:** As a **CSTU Student**
+- **Action:** I want to **ตั้งค่าความชอบในการเรียน 5 ด้าน และระดับ Workload สูงสุดที่ตนเองยอมรับได้**
+- **Value:** So that **ระบบจดจำสไตล์การเรียนรู้ของฉันไว้ใช้ในการวิเคราะห์ความเข้ากันได้กับเซกชันรายวิชา**
+- **Acceptance Criteria:**
+  - **AC 7.1:** Given ผู้ใช้อยู่ที่หน้า Preferences (`preference.html`) When ปรับระดับความชอบ 5 ด้าน (แนวการสอน, สัดส่วนคะแนน, ความเร็ว, รูปแบบงาน, ระดับ Workload ที่รับได้) และกดบันทึก Then ระบบบันทึกข้อมูลลงฐานข้อมูลผ่าน `PUT /api/users/preferences`
+  - **AC 7.2:** Given ผู้ใช้เปิดหน้า Preferences ครั้งถัดไป When หน้าเว็บโหลด Then ระบบดึงค่าความชอบเดิมที่เคยบันทึกไว้มาแสดงผลอัตโนมัติ
+- **Priority:** High | **Sprint:** 2 | **Use Case ที่เกี่ยวข้อง:** U7
+
+---
+
+### US-08: การดูเปอร์เซ็นต์ความเข้ากันได้รายบุคคล (Match Score Calculation & Exploration)
+- **Role:** As a **CSTU Student**
+- **Action:** I want to **ดูผลคะแนน Match Score (%) และระดับความเข้ากันได้กับแต่ละเซกชัน**
+- **Value:** So that **สามารถเลือกเซกชันที่สอดคล้องกับความชอบและระดับภาระงานที่ตนเองรับไหวได้อย่างเหมาะสมที่สุด**
+- **Acceptance Criteria:**
+  - **AC 8.1:** Given ผู้ใช้บันทึก Preferences แล้ว เมื่อเปิดดูหน้ารายละเอียดรายวิชา Then ระบบแสดงแถบเปอร์เซ็นต์ Match Score (%) และระดับความเข้ากันได้ของแต่ละเซกชัน
+  - **AC 8.2:** Given เซกชันนั้นยังไม่มีข้อมูลรีวิวเพียงพอ หรือผู้ใช้ยังไม่ได้ระบุ Preferences When แสดงผล Then ระบบแสดงสถานะ "ไม่มีข้อมูลเพียงพอ (No Data)" แทนการแสดงคะแนนที่คาดเดาขึ้นมาเอง
+- **Priority:** High | **Sprint:** 2 | **Use Case ที่เกี่ยวข้อง:** U8
+
+---
+
+### US-09: การเขียนรีวิวแบบปกปิดตัวตน (Anonymous Review & Privacy Masking)
 - **Role:** As a **CSTU Senior**
 - **Action:** I want to **เลือกเขียนรีวิวแบบไม่เปิดเผยตัวตน (Anonymous Mode)**
 - **Value:** So that **สามารถแสดงความคิดเห็นและรีวิวประสบการณ์ได้อย่างตรงไปตรงมาโดยไม่ต้องกังวลเรื่องความเป็นส่วนตัว**
 - **Acceptance Criteria:**
-  - **AC 7.1:** Given ผู้ใช้เปิดตัวเลือก "ไม่เปิดเผยตัวตน" ในหน้าเขียนรีวิว When ส่งรีวิว Then ระบบจัดเก็บสถานะ `is_anonymous = true`
-  - **AC 7.2:** Given รีวิวที่มีสถานะเป็น Anonymous When ผู้ใช้อื่นเปิดอ่านรีวิว Then แสดงชื่อผู้เขียนเป็นรหัสรุ่นพรางตัว (เช่น `68********`) และไม่ส่ง `studentId` หรือ `userId` ผ่าน API
-  - **AC 7.3:** Given เจ้าของรีวิวเข้าสู่ระบบ When ดูรีวิวที่ตนเองเคยเขียน Then ยังคงสามารถแก้ไขข้อความรีวิวของตนเองได้
-- **Priority:** Medium | **Sprint:** 2 | **Use Case ที่เกี่ยวข้อง:** U5, U6
-
----
-
-### US-08: การตั้งค่าความชอบในการเรียนและการคำนวณ Match Score (Learning Preferences & Match Score)
-- **Role:** As a **CSTU Student**
-- **Action:** I want to **กำหนดความชอบในการเรียนของตนเอง 5 ด้าน และดูเปอร์เซ็นต์ความเข้ากันได้ (Match Score %) กับแต่ละเซกชัน**
-- **Value:** So that **สามารถเลือกเรียนเซกชันที่สอดคล้องกับสไตล์การเรียนรู้และระดับ Workload ที่ตนเองรับไหวได้อย่างเหมาะสมที่สุด**
-- **Acceptance Criteria:**
-  - **AC 8.1:** Given ผู้ใช้อยู่ที่หน้า Preferences (`preference.html`) When ปรับระดับความชอบ 5 ด้าน (รูปแบบการสอน, สัดส่วนคะแนน, ความเร็ว, รูปแบบงาน, ระดับ Workload ที่รับได้) และกดบันทึก Then ระบบบันทึกลงในฐานข้อมูล และแสดงสถานะบันทึกสำเร็จ
-  - **AC 8.2:** Given ผู้ใช้บันทึก Preferences แล้ว เมื่อเปิดดูหน้ารายละเอียดรายวิชา Then ระบบแสดงแถบ Match Score (%) ของแต่ละเซกชัน คำนวณจากความคล้ายคลึงระหว่าง Preference ของนักศึกษากับสถิติคะแนนรีวิวของเซกชันนั้น
-  - **AC 8.3:** Given เซกชันนั้นยังไม่มีข้อมูลรีวิวเพียงพอ หรือผู้ใช้ยังไม่ได้ระบุ Preferences When แสดงผล Then ระบบแสดงสถานะ "ไม่มีข้อมูลเพียงพอ (No Data)" แทนการสร้างคะแนนจำลองขึ้นมาเอง
-- **Priority:** High | **Sprint:** 2 | **Use Case ที่เกี่ยวข้อง:** U7
+  - **AC 9.1:** Given ผู้ใช้เปิดตัวเลือก "ไม่เปิดเผยตัวตน" ในหน้าเขียนรีวิว When ส่งรีวิว Then ระบบจัดเก็บสถานะ `is_anonymous = true`
+  - **AC 9.2:** Given รีวิวที่มีสถานะเป็น Anonymous When ผู้ใช้อื่นเปิดอ่านรีวิว Then แสดงชื่อผู้เขียนเป็นรหัสรุ่นพรางตัว (เช่น `68********`) และไม่ส่ง `studentId` หรือ `userId` ผ่าน API
+  - **AC 9.3:** Given เจ้าของรีวิวเข้าสู่ระบบ When ดูรีวิวที่ตนเองเคยเขียน Then ยังคงสามารถแก้ไขข้อความรีวิวของตนเองได้
+- **Priority:** High | **Sprint:** 2 | **Use Case ที่เกี่ยวข้อง:** U9
 
 ---
 
@@ -130,5 +140,6 @@
 | **US-04** | อ่านประวัติรีวิวของรายวิชา/เซกชัน | 1 | **U1** | `GET /api/courses/{id}/reviews` | `course-detail.html` |
 | **US-05** | เขียนรีวิวพร้อมตรวจสอบสิทธิ์ชั้นปี | 1 | **U3, U5** | `GET /api/courses/{id}/reviews/eligibility`<br>`POST /api/courses/{id}/reviews` | `write-review.html`<br>`course-detail.html` |
 | **US-06** | ให้คะแนนรายวิชาตามเกณฑ์ 5 ด้าน | 2 | **U6** | `POST /api/courses/{id}/reviews` | `write-review.html` |
-| **US-07** | รีวิวแบบปกปิดตัวตน (Anonymous) | 2 | **U5, U6** | `POST /api/courses/{id}/reviews`<br>`PUT /api/courses/{id}/reviews/{reviewId}` | `write-review.html`<br>`course-detail.html` |
-| **US-08** | ตั้งค่าความชอบและดู Match Score | 2 | **U7** | `GET /api/users/preferences`<br>`PUT /api/users/preferences`<br>`GET /api/courses/{id}/sections/{secId}/match-score` | `preference.html`<br>`course-detail.html` |
+| **US-07** | กำหนด Preferences ในการเรียนและ Workload | 2 | **U7** | `GET /api/users/preferences`<br>`PUT /api/users/preferences` | `preference.html` |
+| **US-08** | คำนวณและแสดงผล Match Score % | 2 | **U8** | `GET /api/courses/{id}/sections/{secId}/match-score` | `course-detail.html` |
+| **US-09** | รีวิวแบบปกปิดตัวตน (Anonymous) | 2 | **U9** | `POST /api/courses/{id}/reviews`<br>`PUT /api/courses/{id}/reviews/{reviewId}` | `write-review.html`<br>`course-detail.html` |

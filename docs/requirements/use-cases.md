@@ -1,6 +1,6 @@
 # CSTU-NEXUS — Detailed Use Case Specifications
 
-เอกสารรวบรวมรายละเอียดข้อกำหนดการใช้งาน (**Use Case Specifications**) ของระบบ **CSTU-NEXUS** ทั้งหมด (U1 ถึง U7) ครอบคลุมทั้ง Sprint 1 และ Sprint 2 ตามมาตรฐาน Software Engineering
+เอกสารรวบรวมรายละเอียดข้อกำหนดการใช้งาน (**Use Case Specifications**) ของระบบ **CSTU-NEXUS** ทั้งหมด (U1 ถึง U9) ครอบคลุมทั้ง Sprint 1 และ Sprint 2 ตามมาตรฐาน Software Engineering
 
 ---
 
@@ -11,8 +11,11 @@
 - [U3: ตรวจสอบชั้นปีของนักศึกษาก่อนเขียน Review (Eligibility Verification)](#u3-ตรวจสอบชั้นปีของนักศึกษาก่อนเขียน-review-eligibility-verification)
 - [U4: ค้นหารายวิชาที่ต้องการ และ Section (Course & Section Search)](#u4-ค้นหารายวิชาที่ต้องการ-และ-section-course--section-search)
 - [U5: เขียน Review รายวิชาตาม Section (Submit Course Review)](#u5-เขียน-review-รายวิชาตาม-section-submit-course-review)
-- [U6: ให้คะแนนรายวิชาตามเกณฑ์มาตรฐานและรีวิวแบบปกปิดตัวตน (Structured Rating & Anonymous Review)](#u6-ให้คะแนนรายวิชาตามเกณฑ์มาตรฐานและรีวิวแบบปกปิดตัวตน-structured-rating--anonymous-review)
-- [U7: กำหนด Preferences ในการเรียนและประมวลผล Match Score (Learning Preferences & Match Score)](#u7-กำหนด-preferences-ในการเรียนและประมวลผล-match-score-learning-preferences--match-score)
+- [U6: ให้คะแนนรายวิชาตามหัวข้อเกณฑ์มาตรฐาน 5 ด้าน (Structured Rating)](#u6-ให้คะแนนรายวิชาตามหัวข้อเกณฑ์มาตรฐาน-5-ด้าน-structured-rating)
+- [U7: กำหนด Preferences ในการเรียนและระดับ Workload (Learning Preferences)](#u7-กำหนด-preferences-ในการเรียนและระดับ-workload-learning-preferences)
+- [U8: คำนวณและแสดงผลความเข้ากันได้รายบุคคล (Match Score Calculation & Exploration)](#u8-คำนวณและแสดงผลความเข้ากันได้รายบุคคล-match-score-calculation--exploration)
+- [U9: เขียนและแสดงผลรีวิวแบบปกปิดตัวตน (Anonymous Review & Privacy Masking)](#u9-เขียนและแสดงผลรีวิวแบบปกปิดตัวตน-anonymous-review--privacy-masking)
+- [Traceability Matrix (Use Case ↔ User Story ↔ API ↔ UI)](#traceability-matrix)
 
 ---
 
@@ -21,7 +24,7 @@
 ```mermaid
 flowchart LR
     subgraph Actors ["Actors"]
-        Student["👤 CSTU Student<br/>(นักศึกษา CSTU)"]
+        Student["👤 CSTU Student<br/>(นักศึกษาปัจจุบัน)"]
         Senior["🎓 CSTU Senior<br/>(รุ่นพี่ผู้เคยเรียน)"]
         TuAPI["🏢 TU Authentication System<br/>(External AD Verify API)"]
     end
@@ -32,26 +35,32 @@ flowchart LR
         U1(["U1: อ่าน Review รายวิชา/Section"])
         U3(["U3: ตรวจสอบชั้นปีก่อนเขียน Review"])
         U5(["U5: เขียน Review รายวิชาตาม Section"])
-        U6(["U6: ให้คะแนนเกณฑ์มาตรฐาน & ปกปิดตัวตน"])
-        U7(["U7: กำหนด Preferences & คำนวณ Match Score"])
+        U6(["U6: ให้คะแนนเกณฑ์มาตรฐาน 5 ด้าน"])
+        U7(["U7: กำหนด Learning Preferences"])
+        U8(["U8: คำนวณและแสดงผล Match Score"])
+        U9(["U9: รีวิวแบบปกปิดตัวตน (Anonymous)"])
     end
 
     Student --> U2
     Student --> U4
     Student --> U1
     Student --> U7
+    Student --> U8
 
     Senior --> U5
     Senior --> U6
+    Senior --> U9
 
     U2 <-->|REST API| TuAPI
 
     U4 -.->|"<<include>>"| U2
     U1 -.->|"<<include>>"| U2
     U7 -.->|"<<include>>"| U2
+    U8 -.->|"<<include>>"| U2
     U5 -.->|"<<include>>"| U2
     U5 -.->|"<<include>>"| U3
     U6 -.->|"<<extend>>"| U5
+    U9 -.->|"<<extend>>"| U5
 ```
 
 ---
@@ -65,7 +74,7 @@ flowchart LR
 | **Primary Actor** | CSTU Student |
 | **Preconditions** | ผู้ใช้เข้าสู่ระบบสำเร็จ (U2) และเปิดอยู่ที่หน้ารายละเอียดรายวิชา (`course-detail.html`) |
 | **Trigger** | ผู้ใช้เปิดหน้ารายละเอียดวิชา หรือเลือกเซกชันที่ต้องการกรองรีวิว |
-| **Main Success Scenario** | 1. ผู้ใช้เลือกดูรีวิวของรายวิชา<br/>2. ระบบส่งคำขอ `GET /api/courses/{id}/reviews`<br/>3. ระบบอ่านข้อมูลรีวิวจากฐานข้อมูล โดยเรียงลำดับจากรีวิวล่าสุดไปเก่าสุด<br/>4. ระบบแสดงรายการรีวิว ประกอบด้วย: ข้อความรีวิว, ชั้นปีของผู้รีวิว ณ วันที่บันทึก, วันที่เขียน, และคะแนนเกณฑ์มาตรฐาน (หากมี)<br/>5. กรณีผู้ใช้เลือกตัวกรองเซกชัน ระบบส่งคำขอพร้อม `?sectionId={sectionId}` และแสดงเฉพาะรีวิวของเซกชันนั้น |
+| **Main Success Scenario** | 1. ผู้ใช้เลือกดูรีวิวของรายวิชา<br/>2. ระบบส่งคำขอ `GET /api/courses/{id}/reviews`<br/>3. ระบบอ่านข้อมูลรีวิวจากฐานข้อมูล โดยเรียงลำดับจากรีวิวล่าสุดไปเก่าสุด<br/>4. ระบบแสดงรายการรีวิว ประกอบด้วย: ข้อความรีวิว, ชั้นปีของผู้รีวิว ณ วันที่บันทึก, วันที่เขียน, และคะแนนเกณฑ์มาตรฐาน (U6)<br/>5. กรณีผู้ใช้เลือกตัวกรองเซกชัน ระบบส่งคำขอพร้อม `?sectionId={sectionId}` และแสดงเฉพาะรีวิวของเซกชันนั้น |
 | **Alternative Flows** | **3a. รายวิชาหรือเซกชันนั้นยังไม่มีรีวิว:**<br/>- ระบบแสดงสถานะ "ยังไม่มีรีวิวสำหรับวิชา/เซกชันนี้" เพื่อแจ้งให้ผู้ใช้ทราบ |
 | **Postconditions** | ผู้ใช้ได้รับข้อมูลรีวิวและประสบการณ์จากรุ่นพี่เพื่อนำไปประกอบการตัดสินใจลงทะเบียน |
 
@@ -82,7 +91,7 @@ flowchart LR
 | **Preconditions** | ผู้ใช้อยู่ที่หน้าเข้าสู่ระบบ (`index.html`) และมีบัญชีนักศึกษามหาวิทยาลัยธรรมศาสตร์ |
 | **Trigger** | ผู้ใช้กรอกเลขทะเบียนนักศึกษาและรหัสผ่าน แล้วกดปุ่ม "เข้าสู่ระบบ" |
 | **Main Success Scenario** | 1. ผู้ใช้กรอกเลขทะเบียนนักศึกษา 10 หลักและรหัสผ่าน<br/>2. Frontend ส่งคำขอ `POST /api/auth/login` ไปยัง Backend<br/>3. Backend ส่งข้อมูลไปยัง TU AD Verify API พร้อม Application Key ผ่าน HTTPS<br/>4. TU AD Verify API ตอบกลับว่ายืนยันตัวตนถูกต้อง พร้อมส่งข้อมูลผู้ใช้กลับมา<br/>5. Backend ตรวจสอบสถานะการเป็นนักศึกษา และรหัสสาขาว่าสังกัด CSTU (ขึ้นต้นด้วย 6609, 6709, 6809, 6909)<br/>6. Backend คำนวณชั้นปีปัจจุบันอัตโนมัติจากรหัสนักศึกษาเทียบกับปีปัจจุบัน<br/>7. Backend สร้าง HttpOnly Session Cookie (`JSESSIONID`) และส่งกลับให้ Browser<br/>8. Frontend นำทางผู้ใช้ไปยังหน้ารายการวิชา (`courses.html`) |
-| **Alternative Flows** | **4a. เลขทะเบียนหรือรหัสผ่านไม่ถูกต้อง:**<br/>- TU API ตอบกลับว่าไม่ผ่าน Backend ส่งรหัส HTTP 401 และ Frontend แสดงข้อความแจ้งเตือน "เลขทะเบียนหรือรหัสผ่านไม่ถูกต้อง"<br/>**5a. ไม่ใช่นักศึกษาสาขาวิทยาการคอมพิวเตอร์ (CSTU):**<br/>- Backend ปฏิเสธการเข้าถึงด้วย HTTP 403 Forbidden และ Frontend แสดงข้อความ "ระบบนี้เปิดให้เฉพาะนักศึกษาสาขาวิทยาการคอมพิวเตอร์เท่านั้น" |
+| **Alternative Flows** | **4a. เลขทะเบียนหรือรหัสผ่านไม่ถูกต้อง:**<br/>- TU API ตอบกลับว่าไม่ผ่าน Backend ส่งรหัส HTTP 401 และ Frontend แสดงข้อความแจ้งเตือน "เลขทะเบียนหรือรหัสผ่านไม่ถูกต้อง"<br/>**5a. ไม่ใช่นักศึกษาสาขาวิทยาการคอมพิวเตอร์ (CSTU):**<br/>- Backend ปฏิเสธการเข้าถึงด้วย HTTP 403 Forbidden และ Frontend แสดงข้อความแจ้งเตือนว่าระบบเปิดให้เฉพาะนักศึกษา CSTU |
 | **Postconditions** | ผู้ใช้มี Session การเข้าสู่ระบบที่ปลอดภัย และสามารถเข้าถึงฟังก์ชันต่างๆ ของระบบได้ |
 
 ---
@@ -111,7 +120,7 @@ flowchart LR
 | **Primary Actor** | CSTU Student |
 | **Preconditions** | ผู้ใช้เข้าสู่ระบบสำเร็จ (U2) และเปิดหน้า `courses.html` |
 | **Trigger** | ผู้ใช้พิมพ์คำค้นหา หรือเลือกตัวกรองชั้นปี หรือคลิกเลือกรายวิชา |
-| **Main Success Scenario** | 1. ผู้ใช้ระบุคำค้นหา (รหัสวิชา เช่น `CS261` หรือชื่อวิชา เช่น `Software Engineering`) และ/หรือเลือกชั้นปี (ปี 1–4)<br/>2. Frontend ส่งคำขอ `GET /api/courses?keyword={keyword}&year={year}`<br/>3. Backend สั่งค้นหาข้อมูลจากตาราง `courses` แบบ Partial Match (ILIKE) และกรองชั้นปี<br/>4. Backend ส่งรายการรายวิชากลับมาในรูปแบบ JSON List<br/>5. Frontend แสดงผลการ์ดรายวิชาทั้งหมดที่ตรงตามเงื่อนไข พร้อมแสดงรหัสวิชา ชื่อวิชา และชั้นปีแนะนำ<br/>6. เมื่อผู้ใช้คลิกเลือกรายวิชา ระบบนำทางไปยัง `course-detail.html?courseId={id}` และดึงข้อมูลเซกชันพร้อมอาจารย์ผู้สอน |
+| **Main Success Scenario** | 1. ผู้ใช้ระบุคำค้นหา (รหัสวิชา เช่น `CS261` หรือชื่อวิชา) และ/หรือเลือกชั้นปี (ปี 1–4)<br/>2. Frontend ส่งคำขอ `GET /api/courses?keyword={keyword}&year={year}`<br/>3. Backend สั่งค้นหาข้อมูลจากตาราง `courses` แบบ Partial Match (ILIKE) และกรองชั้นปี<br/>4. Backend ส่งรายการรายวิชากลับมาในรูปแบบ JSON List<br/>5. Frontend แสดงผลการ์ดรายวิชาทั้งหมดที่ตรงตามเงื่อนไข พร้อมแสดงรหัสวิชา ชื่อวิชา และชั้นปีแนะนำ<br/>6. เมื่อผู้ใช้คลิกเลือกรายวิชา ระบบนำทางไปยัง `course-detail.html?courseId={id}` และดึงข้อมูลเซกชันพร้อมอาจารย์ผู้สอน |
 | **Alternative Flows** | **4a. ไม่พบรายวิชาที่ตรงตามเงื่อนไข:**<br/>- Frontend แสดงภาพหรือข้อความ "ไม่พบรายวิชาที่ตรงกับคำค้นหาของคุณ" และแนะนำให้ลองใช้คำค้นหาอื่น |
 | **Postconditions** | ผู้ใช้พบรายวิชาและข้อมูลเซกชันที่ต้องการศึกษา |
 
@@ -132,30 +141,76 @@ flowchart LR
 
 ---
 
-## U6: ให้คะแนนรายวิชาตามเกณฑ์มาตรฐานและรีวิวแบบปกปิดตัวตน (Structured Rating & Anonymous Review)
+## U6: ให้คะแนนรายวิชาตามหัวข้อเกณฑ์มาตรฐาน 5 ด้าน (Structured Rating)
 
 | ข้อมูลจำเพาะ | รายละเอียด |
 |---|---|
 | **Use Case ID** | **U6** |
-| **ชื่อ Use Case** | ให้คะแนนรายวิชาตามเกณฑ์มาตรฐานและรีวิวแบบปกปิดตัวตน |
+| **ชื่อ Use Case** | ให้คะแนนรายวิชาตามหัวข้อเกณฑ์มาตรฐาน 5 ด้าน |
 | **Primary Actor** | CSTU Senior |
 | **Preconditions** | ผู้ใช้อยู่ในหน้าเขียนรีวิว (`write-review.html`) ของรายวิชาที่ตนมีสิทธิ์ (U3) |
-| **Trigger** | ผู้ใช้เลือกระดับคะแนนเกณฑ์มาตรฐาน 5 ด้าน และ/หรือเลือกเปิดโหมดปกปิดตัวตน |
-| **Main Success Scenario** | 1. ผู้ใช้เลือกประเมินคะแนนเกณฑ์ 5 ด้าน ได้แก่:<br/>   - แนวการสอน (เน้นทฤษฎี 0 / สมดุล 50 / เน้นปฏิบัติ 100)<br/>   - สัดส่วนคะแนน (เน้นสอบ 0 / สมดุล 50 / เน้นโครงงาน 100)<br/>   - ความเร็วการสอน (สอนช้า 0 / ปานกลาง 50 / สอนเร็ว 100)<br/>   - รูปแบบงาน (งานเดี่ยว 0 / สมดุล 50 / งานกลุ่ม 100)<br/>   - ปริมาณงาน / Workload (งานน้อย 0 / ปานกลาง 50 / งานมาก 100)<br/>2. ผู้ใช้เลือกเปิดสวิตช์ "ไม่เปิดเผยตัวตน (Anonymous)" หากต้องการปกป้องข้อมูลส่วนตัว<br/>3. เมื่อกดส่งรีวิว Frontend ส่งคะแนนทั้ง 5 ด้านและค่า `isAnonymous: true/false` ไปกับ Payload<br/>4. Backend บันทึกคะแนนและสถานะ Anonymous ลงในตาราง `review`<br/>5. เมื่อผู้อื่นเปิดอ่านรีวิว ระบบจะพรางรหัสนักศึกษาเหลือเพียงรหัสรุ่น (เช่น `68********`) สำหรับรีวิวที่เป็น Anonymous |
+| **Trigger** | ผู้ใช้เลือกระดับคะแนนเกณฑ์มาตรฐาน 5 ด้านในฟอร์มรีวิว |
+| **Main Success Scenario** | 1. ผู้ใช้เลือกประเมินคะแนนเกณฑ์มาตรฐาน 5 ด้าน ได้แก่:<br/>   - แนวการสอน (เน้นทฤษฎี 0 / สมดุล 50 / เน้นปฏิบัติ 100)<br/>   - สัดส่วนคะแนน (เน้นสอบ 0 / สมดุล 50 / เน้นโครงงาน 100)<br/>   - ความเร็วการสอน (สอนช้า 0 / ปานกลาง 50 / สอนเร็ว 100)<br/>   - รูปแบบงาน (งานเดี่ยว 0 / สมดุล 50 / งานกลุ่ม 100)<br/>   - ปริมาณงาน / Workload (งานน้อย 0 / ปานกลาง 50 / งานมาก 100)<br/>2. เมื่อกดส่งรีวิว Frontend ส่งคะแนนทั้ง 5 ด้านไปพร้อมกับ Payload รีวิว (U5)<br/>3. Backend บันทึกคะแนนลงในตาราง `review` เพื่อใช้เป็นฐานข้อมูลสถิติสำหรับ U8 |
 | **Alternative Flows** | **1a. ผู้ใช้ไม่ประสงค์จะให้คะแนนบางหัวข้อ:**<br/>- ระบบอนุญาตให้ส่งค่า `null` ในหัวข้อที่ไม่ได้เลือก โดยยังคงบันทึกข้อความรีวิวและหัวข้อที่เลือกได้ตามปกติ |
-| **Postconditions** | ระบบมีข้อมูลคะแนนเชิงปริมาณสำหรับนำไปคำนวณ Match Score (U7) และปกป้องความเป็นส่วนตัวของผู้รีวิว |
+| **Postconditions** | ระบบมีข้อมูลคะแนนเชิงปริมาณสำหรับนำไปสร้าง Section Profile และคำนวณ Match Score (U8) |
 
 ---
 
-## U7: กำหนด Preferences ในการเรียนและประมวลผล Match Score (Learning Preferences & Match Score)
+## U7: กำหนด Preferences ในการเรียนและระดับ Workload (Learning Preferences)
 
 | ข้อมูลจำเพาะ | รายละเอียด |
 |---|---|
 | **Use Case ID** | **U7** |
-| **ชื่อ Use Case** | กำหนด Preferences ในการเรียนและประมวลผล Match Score |
+| **ชื่อ Use Case** | กำหนด Preferences ในการเรียนและระดับ Workload |
 | **Primary Actor** | CSTU Student |
 | **Preconditions** | ผู้ใช้เข้าสู่ระบบสำเร็จ (U2) |
-| **Trigger** | ผู้ใช้เข้าหน้า Preferences (`preference.html`) หรือเปิดดูเซกชันในหน้ารายละเอียดรายวิชา |
-| **Main Success Scenario** | **ส่วนที่ 1: กำหนด Preferences ผู้ใช้**<br/>1. ผู้ใช้เปิดหน้า `preference.html` ระบบดึงค่าเดิมผ่าน `GET /api/users/preferences`<br/>2. ผู้ใช้ปรับค่าความชอบในการเรียน 5 ด้าน และระดับ Workload ที่ตนเองรับไหว<br/>3. ผู้ใช้กดบันทึก Frontend ส่งคำขอ `PUT /api/users/preferences`<br/>4. Backend บันทึกข้อมูลลงตาราง `user_preferences` และตอบกลับสถานะสำเร็จ<br/><br/>**ส่วนที่ 2: การประมวลผล Match Score**<br/>5. เมื่อผู้ใช้เปิดดูเซกชันในหน้ารายละเอียดรายวิชา (`course-detail.html`) ระบบส่งคำขอ `GET /api/courses/{id}/sections/{sectionId}/match-score`<br/>6. Backend ดึงค่า Preferences ของผู้ใช้ และสถิติคะแนนรีวิวของเซกชันนั้นมาเปรียบเทียบความเข้ากันได้:<br/>   - 4 ด้านแรก: คำนวณความต่างแบบตรงไปตรงมา `100 - abs(preference - sectionScore)`<br/>   - ด้าน Workload: คิดตามเกณฑ์การยอมรับได้ `100 - max(0, sectionWorkload - workloadTolerance)`<br/>7. Backend ส่งคะแนน Match Percentage (0–100%) พร้อมระดับความเข้ากันได้และรายละเอียดแต่ละด้าน<br/>8. Frontend แสดงแถบ Progress Bar เปอร์เซ็นต์ความเข้ากันได้ของแต่ละเซกชัน |
-| **Alternative Flows** | **6a. ผู้ใช้ยังไม่เคยตั้งค่า Preferences หรือเซกชันนั้นยังไม่มีข้อมูลรีวิวเพียงพอ:**<br/>- Backend ตอบกลับสถานะ `NO_DATA`<br/>- Frontend แสดงข้อความ "ยังไม่มีข้อมูลเพียงพอสำหรับคำนวณ Match Score" เพื่อความถูกต้องทางสถิติ |
-| **Postconditions** | ผู้ใช้ทราบระดับความเข้ากันได้ระหว่างสไตล์การเรียนของตนเองกับแต่ละเซกชันเพื่อช่วยตัดสินใจเลือกเรียน |
+| **Trigger** | ผู้ใช้เปิดหน้า Preferences (`preference.html`) |
+| **Main Success Scenario** | 1. ผู้ใช้เปิดหน้า `preference.html` ระบบดึงค่าเดิมที่เคยบันทึกไว้ผ่าน `GET /api/users/preferences`<br/>2. หน้าเว็บแสดงการเลือกเดิม (ถ้ามี) หรือแสดงสถานะยังไม่ได้เลือก<br/>3. ผู้ใช้ปรับค่าความชอบในการเรียน 5 ด้าน (แนวการสอน, สัดส่วนคะแนน, ความเร็ว, รูปแบบงาน, ระดับ Workload ที่รับได้)<br/>4. ผู้ใช้กดปุ่ม "บันทึก Preferences"<br/>5. Frontend ส่งคำขอ `PUT /api/users/preferences` พร้อม Payload JSON<br/>6. Backend ทำการ Upsert ข้อมูลลงตาราง `user_preferences` ของผู้ใช้นั้น<br/>7. Backend ส่งรหัส HTTP 200 OK พร้อมข้อมูลที่บันทึก<br/>8. Frontend แสดงกล่องข้อความยืนยันการบันทึกสำเร็จ |
+| **Alternative Flows** | **5a. ผู้ใช้ไม่ระบุค่า Workload:**<br/>- Frontend แจ้งเตือนให้เลือกค่า Workload ก่อนบันทึก |
+| **Postconditions** | ข้อมูลความชอบในการเรียนของผู้ใช้ถูกบันทึกเพื่อนำไปใช้คำนวณ Match Score ใน U8 |
+
+---
+
+## U8: คำนวณและแสดงผลความเข้ากันได้รายบุคคล (Match Score Calculation & Exploration)
+
+| ข้อมูลจำเพาะ | รายละเอียด |
+|---|---|
+| **Use Case ID** | **U8** |
+| **ชื่อ Use Case** | คำนวณและแสดงผลความเข้ากันได้รายบุคคล (Match Score Calculation & Exploration) |
+| **Primary Actor** | CSTU Student |
+| **Preconditions** | ผู้ใช้เข้าสู่ระบบสำเร็จ (U2) และเปิดดูหน้ารายละเอียดรายวิชา (`course-detail.html`) |
+| **Trigger** | ผู้ใช้เปิดดูเซกชันของรายวิชา |
+| **Main Success Scenario** | 1. Frontend ส่งคำขอ `GET /api/courses/{id}/sections/{secId}/match-score`<br/>2. Backend ดึงค่า Preferences ของผู้ใช้จาก Session/DB (U7) และดึงสถิติคะแนนรีวิวของเซกชันนั้น (U6)<br/>3. Backend ประมวลผล 2 รอบ:<br/>   - รอบที่ 1 (Section Profile): หาค่าคะแนนที่เป็นฉันทามติ (Consensus) จากคะแนนโหวตส่วนใหญ่ของแต่ละด้าน<br/>   - รอบที่ 2 (Similarity): เปรียบเทียบความเข้ากันได้ระหว่าง Preference กับ Section Profile (4 ด้านแรกใช้ `100 - abs(pref - sec)` ส่วน Workload ใช้ `100 - max(0, sec - tolerance)`)<br/>4. Backend รวมคะแนนเฉลี่ยเป็นเปอร์เซ็นต์ (0–100%) พร้อมจัดระดับ (เช่น "เข้ากันได้ดีมาก", "เข้ากันได้ดี") และส่งคำอธิบายกลับมา<br/>5. Frontend แสดงแถบ Progress Bar เปอร์เซ็นต์ความเข้ากันได้ของแต่ละเซกชันเพื่อช่วยผู้ใช้ตัดสินใจ |
+| **Alternative Flows** | **2a. ผู้ใช้ยังไม่เคยตั้งค่า Preferences หรือเซกชันนั้นยังไม่มีข้อมูลรีวิวเพียงพอ:**<br/>- Backend ตอบกลับสถานะ `NO_DATA`<br/>- Frontend แสดงข้อความ "ยังไม่มีข้อมูลเพียงพอสำหรับคำนวณ Match Score" เพื่อความโปร่งใสทางสถิติ |
+| **Postconditions** | ผู้ใช้ทราบระดับความเข้ากันได้เชิงวิเคราะห์ระหว่างสไตล์การเรียนของตนเองกับแต่ละเซกชัน |
+
+---
+
+## U9: เขียนและแสดงผลรีวิวแบบปกปิดตัวตน (Anonymous Review & Privacy Masking)
+
+| ข้อมูลจำเพาะ | รายละเอียด |
+|---|---|
+| **Use Case ID** | **U9** |
+| **ชื่อ Use Case** | เขียนและแสดงผลรีวิวแบบปกปิดตัวตน (Anonymous Review & Privacy Masking) |
+| **Primary Actor** | CSTU Senior (ผู้เขียนรีวิว), CSTU Student (ผู้อ่านรีวิว) |
+| **Preconditions** | ผู้ใช้อยู่ในหน้าเขียนรีวิว (`write-review.html`) ของรายวิชาที่มีสิทธิ์ (U3) หรือเปิดอ่านรีวิว (U1) |
+| **Trigger** | ผู้ใช้เปิดสวิตช์ "ไม่เปิดเผยตัวตน (Anonymous)" ขณะเขียนรีวิว หรือผู้ใช้เปิดอ่านหน้ารายการรีวิว |
+| **Main Success Scenario** | **ส่วนที่ 1: การเขียนรีวิวแบบปกปิดตัวตน**<br/>1. ผู้ใช้เปิดสวิตช์ Toggle "ไม่เปิดเผยตัวตน"<br/>2. เมื่อกดส่งรีวิว Frontend ส่งค่า `isAnonymous: true` แนบไปกับ Payload ของคำขอ `POST /api/courses/{id}/reviews`<br/>3. Backend บันทึกค่า `is_anonymous = true` ลงตาราง `review` โดยยังคงบันทึก `user_id` จริงไว้ภายในเพื่อตรวจสอบสิทธิ์และการแก้ไข<br/><br/>**ส่วนที่ 2: การอ่านและพรางข้อมูลผู้รีวิว (Masking)**<br/>4. เมื่อนักศึกษาคนอื่นเรียกดูรีวิว (`GET /api/courses/{id}/reviews`)<br/>5. Backend ตรวจสอบหากรีวิวใดมี `is_anonymous = true` ระบบจะทำการ Mask รหัสนักศึกษาเหลือเฉพาะรหัสรุ่น (เช่น `68********`) และไม่ส่ง `userId` หรือ `studentId` จริงออกมาใน Response<br/>6. Frontend แสดงชื่อผู้เขียนเป็นรหัสรุ่นพรางตัว พร้อมป้ายกำกับ "รีวิวนิรนาม" |
+| **Alternative Flows** | **3a. เจ้าของรีวิวต้องการแก้ไขรีวิวของตนเอง:**<br/>- เจ้าของรีวิวยังคงสามารถกดแก้ไขข้อความหรือเปลี่ยนสถานะ Anonymous ผ่าน `PUT /api/courses/{id}/reviews/{reviewId}` ได้ โดยระบบตรวจสอบความเป็นเจ้าของจาก Session |
+| **Postconditions** | รีวิวถูกเผยแพร่โดยปกป้องความเป็นส่วนตัวของผู้เขียน และนักศึกษารุ่นน้องได้ข้อมูลที่เป็นความจริงอย่างตรงไปตรงมา |
+
+---
+
+## Traceability Matrix
+
+| Use Case ID | ชื่อ Use Case | Sprint | User Story ID | API Endpoint ที่เกี่ยวข้อง | หน้าเว็บ UI |
+|:---:|---|:---:|:---:|---|---|
+| **U1** | อ่าน Review รายวิชาและ Section จากรุ่นพี่ | 1 | **US-04** | `GET /api/courses/{id}/reviews` | `course-detail.html` |
+| **U2** | การยืนยันตัวตนและการจัดการสิทธิ์ | 1 | **US-01** | `POST /api/auth/login`<br>`GET /api/auth/me`<br>`POST /api/auth/logout` | `index.html`<br>`profile.html` |
+| **U3** | ตรวจสอบชั้นปีก่อนเขียน Review | 1 | **US-05** | `GET /api/courses/{id}/reviews/eligibility` | `course-detail.html`<br>`write-review.html` |
+| **U4** | ค้นหารายวิชาที่ต้องการ และ Section | 1 | **US-02, US-03** | `GET /api/courses?keyword=&year=`<br>`GET /api/courses/{id}` | `courses.html`<br>`course-detail.html` |
+| **U5** | เขียน Review รายวิชาตาม Section | 1 | **US-05** | `POST /api/courses/{id}/reviews` | `write-review.html` |
+| **U6** | ให้คะแนนรายวิชาตามหัวข้อเกณฑ์ 5 ด้าน | 2 | **US-06** | `POST /api/courses/{id}/reviews` | `write-review.html` |
+| **U7** | กำหนด Preferences ในการเรียนและ Workload | 2 | **US-07** | `GET /api/users/preferences`<br>`PUT /api/users/preferences` | `preference.html` |
+| **U8** | คำนวณและแสดงผล Match Score รายบุคคล | 2 | **US-08** | `GET /api/courses/{id}/sections/{secId}/match-score` | `course-detail.html` |
+| **U9** | รีวิวแบบปกปิดตัวตน (Anonymous) | 2 | **US-09** | `POST /api/courses/{id}/reviews`<br>`PUT /api/courses/{id}/reviews/{id}` | `write-review.html`<br>`course-detail.html` |

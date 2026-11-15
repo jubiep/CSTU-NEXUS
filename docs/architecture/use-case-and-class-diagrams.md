@@ -17,7 +17,7 @@
 
 ---
 
-## 1. Use Case Diagram & Summary (U1–U7)
+## 1. Use Case Diagram & Summary (U1–U9)
 
 ### 1.1 Use Case Diagram (CSTU-NEXUS)
 
@@ -37,8 +37,10 @@ flowchart LR
         U1(["U1: อ่าน Review รายวิชา/Section"])
         U3(["U3: ตรวจสอบชั้นปีก่อนเขียน Review"])
         U5(["U5: เขียน Review รายวิชาตาม Section"])
-        U6(["U6: ให้คะแนนเกณฑ์มาตรฐาน & ปกปิดตัวตน"])
-        U7(["U7: กำหนด Preferences & คำนวณ Match Score"])
+        U6(["U6: ให้คะแนนเกณฑ์มาตรฐาน 5 ด้าน"])
+        U7(["U7: กำหนด Learning Preferences"])
+        U8(["U8: คำนวณและแสดงผล Match Score"])
+        U9(["U9: รีวิวแบบปกปิดตัวตน (Anonymous)"])
     end
 
     %% Interactions
@@ -46,9 +48,11 @@ flowchart LR
     Student --> U4
     Student --> U1
     Student --> U7
+    Student --> U8
 
     Senior --> U5
     Senior --> U6
+    Senior --> U9
 
     U2 <-->|REST API| TuAPI
 
@@ -56,12 +60,14 @@ flowchart LR
     U4 -.->|"<<include>> (ต้อง Login)"| U2
     U1 -.->|"<<include>> (ต้อง Login)"| U2
     U7 -.->|"<<include>> (ต้อง Login)"| U2
+    U8 -.->|"<<include>> (ต้อง Login)"| U2
     U5 -.->|"<<include>> (ต้อง Login)"| U2
     U5 -.->|"<<include>> (ตรวจชั้นปี)"| U3
-    U6 -.->|"<<extend>> (คะแนน/Anonymous)"| U5
+    U6 -.->|"<<extend>>"| U5
+    U9 -.->|"<<extend>>"| U5
 ```
 
-### 1.2 ตารางสรุป Use Cases (U1–U7)
+### 1.2 ตารางสรุป Use Cases (U1–U9)
 
 | Use Case ID | ชื่อ Use Case | Sprint | Actor หลัก | ความสัมพันธ์ | วัตถุประสงค์โดยสรุป |
 |:---:|---|:---:|:---:|:---:|---|
@@ -70,8 +76,10 @@ flowchart LR
 | **U3** | ตรวจสอบชั้นปีก่อนเขียน Review | 1 | CSTU Senior | `<<included by>> U5` | ตรวจสอบว่าผู้ใช้มีชั้นปี > ชั้นปีที่แนะนำ (`recommended_year`) และยังไม่เคยส่งรีวิวรายวิชานี้ |
 | **U4** | ค้นหารายวิชาที่ต้องการ และ Section | 1 | CSTU Student | `<<include>> U2` | ค้นหารายวิชาจากรหัส/ชื่อวิชา คัดกรองตามชั้นปี และดูรายชื่อเซกชันพร้อมผู้สอน |
 | **U5** | เขียน Review รายวิชาตาม Section | 1 | CSTU Senior | `<<include>> U2, U3` | กรอกข้อความรีวิวประสบการณ์การเรียนและส่งบันทึกแยกตาม Section |
-| **U6** | ให้คะแนนเกณฑ์มาตรฐาน & รีวิวแบบปกปิดตัวตน | 2 | CSTU Senior | `<<extend>> U5` | ให้คะแนน 5 ด้านมาตรฐาน (0, 50, 100) และเลือกเปิดโหมดปกปิดตัวตน (Anonymous) |
-| **U7** | กำหนด Preferences & คำนวณ Match Score | 2 | CSTU Student | `<<include>> U2` | ตั้งค่าสไตล์การเรียนและ Workload ของตนเอง พร้อมดูความเข้ากันได้ (%) กับแต่ละเซกชัน |
+| **U6** | ให้คะแนนรายวิชาตามหัวข้อเกณฑ์มาตรฐาน 5 ด้าน | 2 | CSTU Senior | `<<extend>> U5` | ให้คะแนน 5 ด้านมาตรฐาน (0, 50, 100) ได้แก่ แนวการสอน, สัดส่วนคะแนน, ความเร็ว, รูปแบบงาน, Workload |
+| **U7** | กำหนด Preferences ในการเรียนและ Workload | 2 | CSTU Student | `<<include>> U2` | ตั้งค่าสไตล์การเรียนและระดับ Workload ที่ตนเองรับไหว บันทึกลงฐานข้อมูล |
+| **U8** | คำนวณและแสดงผล Match Score รายบุคคล | 2 | CSTU Student | `<<include>> U2` | คำนวณความเข้ากันได้ (%) ระหว่าง Preferences ของผู้ใช้กับสถิติคะแนนเซกชัน |
+| **U9** | รีวิวแบบปกปิดตัวตน (Anonymous Review) | 2 | CSTU Senior,<br>CSTU Student | `<<extend>> U5` | เขียนรีวิวโดยพรางตัวตน และแสดงผลโดย Mask รหัสนักศึกษาตามรุ่น (เช่น `68********`) เพื่อปกป้องความเป็นส่วนตัว |
 
 ---
 
