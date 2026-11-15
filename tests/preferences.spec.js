@@ -81,7 +81,7 @@ test('โหลดค่าความชอบจาก API แล้วแส
 
   await expect(page.locator('input[name="teachingApproach"][value="3"]')).toBeChecked();
   await expect(page.locator('input[name="gradingStyle"][value="2"]')).toBeChecked();
-  await expect(page.locator('input[name="teachingPace"][value="4"]')).toBeChecked();
+  await expect(page.locator('input[name="teachingPace"][value="3"]')).toBeChecked();
   await expect(page.locator('input[name="assignmentStyle"]:checked')).toHaveCount(0);
   await expect(page.locator('input[name="workload"][value="2"]')).toBeChecked();
 });
@@ -138,16 +138,16 @@ test('บันทึกคะแนนผ่าน PUT ตาม API contract',
   await page.goto(`${FRONTEND_ORIGIN}/pages/preference.html`);
   await page.locator('label.heart-choice:has(input[name="teachingApproach"][value="2"])').click();
   await page.locator('label.heart-choice:has(input[name="gradingStyle"][value="3"])').click();
-  await page.locator('label.heart-choice:has(input[name="teachingPace"][value="4"])').click();
+  await page.locator('label.heart-choice:has(input[name="teachingPace"][value="3"])').click();
   await page.locator('label.heart-choice:has(input[name="assignmentStyle"][value="1"])').click();
-  await page.locator('label.heart-choice:has(input[name="workload"][value="5"])').click();
+  await page.locator('label.heart-choice:has(input[name="workload"][value="3"])').click();
   await page.locator('.preference-save').click();
 
   await expect(page.locator('#save-dialog')).toBeVisible();
   expect(savedPreferences).toEqual({
     preferredTeachingMethod: 50,
     preferredEvaluation: 100,
-    preferredTeachingSpeed: 75,
+    preferredTeachingSpeed: 100,
     preferredAssignmentStyle: 0,
     preferredWorkload: 100,
   });
