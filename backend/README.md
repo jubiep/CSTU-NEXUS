@@ -2,7 +2,7 @@
 
 ส่วนประมวลผลเซิร์ฟเวอร์ (REST API) และฐานข้อมูลสำหรับระบบ CSTU NEXUS
 
-> 📖 **ภาพรวมระบบและสถาปัตยกรรม:** ดูได้ที่ [docs/architecture.md](../docs/architecture.md) และ [Root README.md](../README.md)
+> 📖 **ภาพรวมระบบและสถาปัตยกรรม:** ดูได้ที่ [docs/architecture/architecture.md](../docs/architecture/architecture.md) และ [Root README.md](../README.md)
 
 ---
 
@@ -120,5 +120,5 @@ docker compose -f backend/database/test-compose.yaml down -v
 | `GET` | `/api/courses/{id}/sections/{secId}/match-score` | U7 | คำนวณความเข้ากันได้ (%) ระหว่าง Preference กับคะแนนเซกชัน |
 
 > 📖 **ดูรายละเอียดการทำงานและ Data Flow:**  
-> - [Sequence Diagrams (U1–U7)](../docs/sequence-diagrams.md)  
-> - [Entity & Database Table Mapping](../docs/entity-database-table-mapping.md)
+> - [Sequence Diagrams (U1–U7)](../docs/architecture/sequence-diagrams.md)  
+> - [Entity & Database Table Mapping](../docs/architecture/entity-database-table-mapping.md)

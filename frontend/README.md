@@ -2,7 +2,7 @@
 
 ส่วนติดต่อผู้ใช้งาน (Client-side Web Application) สำหรับระบบสนับสนุนการตัดสินใจเลือกเรียนและรีวิวรายวิชา CSTU NEXUS
 
-> 📖 **ภาพรวมระบบและสถาปัตยกรรม:** ดูได้ที่ [docs/architecture.md](../docs/architecture.md) และ [Root README.md](../README.md)
+> 📖 **ภาพรวมระบบและสถาปัตยกรรม:** ดูได้ที่ [docs/architecture/architecture.md](../docs/architecture/architecture.md) และ [Root README.md](../README.md)
 
 ---
 

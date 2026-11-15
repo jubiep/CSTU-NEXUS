@@ -26,14 +26,15 @@
 
 | เอกสาร | ลิงก์ | คำอธิบาย |
 |---|---|---|
-| **System Architecture** | [docs/architecture.md](docs/architecture.md) | สถาปัตยกรรมระบบ 3-Tier, BCE Pattern, ความปลอดภัย, และ Deployment |
-| **User Stories** | [docs/user-stories.md](docs/user-stories.md) | ข้อกำหนดความต้องการแบบ Agile (Persona, Want, Value, Acceptance Criteria) |
-| **Use Case Specifications** | [docs/use-cases.md](docs/use-cases.md) | รายละเอียดข้อกำหนด Use Case ทั้งหมด (U1–U7) พร้อม Pre/Post-conditions |
-| **Use Case & Class Diagrams** | [docs/use-case-and-class-diagrams.md](docs/use-case-and-class-diagrams.md) | แผนภาพ Use Case Diagram และ Design Class Diagram (BCE) |
-| **Sequence Diagrams** | [docs/sequence-diagrams.md](docs/sequence-diagrams.md) | แผนภาพลำดับการทำงาน U1–U7 ทั้งหมด |
-| **Database & ER Mapping** | [docs/entity-database-table-mapping.md](docs/entity-database-table-mapping.md) | แผนผัง ER Diagram, ตารางฐานข้อมูล, API-DAO Mapping, และสิทธิ์ |
-| **API Specifications** | [docs/preferences-api.md](docs/preferences-api.md)<br/>[docs/match-score-api.md](docs/match-score-api.md)<br/>[docs/anonymous-review-api.md](docs/anonymous-review-api.md) | ข้อกำหนด API รายละเอียดสำหรับการตั้งค่าความชอบ, Match Score และรีวิวแบบปิดบังตัวตน |
-| **Recommended Diagrams** | [docs/recommended-diagrams.md](docs/recommended-diagrams.md) | แผนภาพแนะนำเพิ่มเติม (Component, Activity, และ State Machine Diagrams) |
+| **System Architecture** | [docs/architecture/architecture.md](docs/architecture/architecture.md) | สถาปัตยกรรมระบบ 3-Tier, BCE Pattern, ความปลอดภัย, และ Deployment |
+| **User Stories** | [docs/requirements/user-stories.md](docs/requirements/user-stories.md) | ข้อกำหนดความต้องการแบบ Agile (Persona, Want, Value, Acceptance Criteria) |
+| **Use Case Specifications** | [docs/requirements/use-cases.md](docs/requirements/use-cases.md) | รายละเอียดข้อกำหนด Use Case ทั้งหมด (U1–U7) พร้อม Pre/Post-conditions |
+| **Use Case & Class Diagrams** | [docs/architecture/use-case-and-class-diagrams.md](docs/architecture/use-case-and-class-diagrams.md) | แผนภาพ Use Case Diagram และ Design Class Diagram (BCE) |
+| **Sequence Diagrams** | [docs/architecture/sequence-diagrams.md](docs/architecture/sequence-diagrams.md) | แผนภาพลำดับการทำงาน U1–U7 ทั้งหมด |
+| **Database & ER Mapping** | [docs/architecture/entity-database-table-mapping.md](docs/architecture/entity-database-table-mapping.md) | แผนผัง ER Diagram, ตารางฐานข้อมูล, API-DAO Mapping, และสิทธิ์ |
+| **API Specifications** | [docs/api/](docs/api/) | ข้อกำหนด API สำหรับการตั้งค่าความชอบ, Match Score และรีวิวแบบปิดบังตัวตน |
+| **Recommended Diagrams** | [docs/architecture/recommended-diagrams.md](docs/architecture/recommended-diagrams.md) | แผนภาพแนะนำเพิ่มเติม (Component, Activity, และ State Machine Diagrams) |
+| **Documentation Index** | [docs/README.md](docs/README.md) | สารบัญรวมเอกสารทั้งหมดจัดหมวดหมู่อย่างเป็นระเบียบ |
 
 ---
 

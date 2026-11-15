@@ -3,8 +3,8 @@
 เอกสารรวบรวม **Use Case Diagram** และ **Design Class Diagram** สำหรับระบบ **CSTU-NEXUS** อ้างอิงตามขอบเขตงาน Sprint 1 (U1–U5) และ Sprint 2 (U6–U7) ตามสถาปัตยกรรมแบบ **Boundary-Control-Entity (BCE) / Layered Pattern**
 
 > 📖 **เอกสารที่เกี่ยวข้อง:**
-> - [Detailed Use Case Specifications](use-cases.md) — ข้อกำหนดรายละเอียด Use Cases ทุกข้อ (Preconditions, Flow, Postconditions)
-> - [User Stories](user-stories.md) — ข้อกำหนดความต้องการในรูปแบบ Agile User Stories (Persona, Want, Value, Acceptance Criteria)
+> - [Detailed Use Case Specifications](../requirements/use-cases.md) — ข้อกำหนดรายละเอียด Use Cases ทุกข้อ (Preconditions, Flow, Postconditions)
+> - [User Stories](../requirements/user-stories.md) — ข้อกำหนดความต้องการในรูปแบบ Agile User Stories (Persona, Want, Value, Acceptance Criteria)
 > - [System Architecture](architecture.md) — สถาปัตยกรรมระบบ การแบ่งเลเยอร์ ความปลอดภัย และการติดตั้งระบบ
 > - [Sequence Diagrams](sequence-diagrams.md) — แผนภาพลำดับการทำงาน U1–U7
 
