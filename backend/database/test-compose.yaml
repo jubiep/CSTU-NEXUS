@@ -1,0 +1,18 @@
+name: cstu-nexus-test
+services:
+  test-db:
+    image: postgres:17
+    container_name: cstu-nexus-test-postgres
+    environment:
+      POSTGRES_DB: cstu_rv11_test
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: rv11_test_password
+    ports:
+      - "55432:5432"
+    volumes:
+      - ./init.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d cstu_rv11_test"]
+      interval: 2s
+      timeout: 3s
+      retries: 20

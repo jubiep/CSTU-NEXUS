@@ -101,7 +101,7 @@ Frontend container ใช้ Nginx เสิร์ฟไฟล์ static แล�
 
 หน้าเว็บเรียก Backend จริงผ่าน Session Cookie แบบ HttpOnly (ปลอดภัย ไม่มีเก็บ token ลง local storage):
 
-- เมื่อเปิด Frontend ผ่าน Docker ที่ `http://localhost:3000` ค่า API เริ่มต้นคือ same-origin `/api` ซึ่ง Nginx จะ proxy ไปยัง Backend; เมื่อใช้ local server ที่พอร์ตอื่น ค่าเริ่มต้นจะใช้ `http://<frontend-host>:8080/api` และ override ได้ด้วย `window.CSTU_API_BASE_URL` **ก่อน** โหลด `app.js`
+- เมื่อเปิด Frontend ผ่าน Docker ค่า API เริ่มต้นคือ same-origin `/api` ซึ่ง Nginx จะ proxy ไปยัง Backend ไม่ว่าตั้ง host port เป็น `3000`, `3001` หรือพอร์ตอื่น ส่วน VS Code Live Server ที่พอร์ต `5500`/`5501` จะใช้ `http://<frontend-host>:8080/api`; override ได้ด้วย `window.CSTU_API_BASE_URL` **ก่อน** โหลด `app.js`
 - `POST /api/auth/login` (U2): รับ `{ "username": "6800000000", "password": "..." }` ยืนยันผ่าน TU AD Verify และสร้าง HttpOnly Session
 - `GET /api/auth/me` (U2, U3): คืนข้อมูลผู้ใช้และชั้นปีปัจจุบัน (`currentYear`) เพื่อตรวจสิทธิ์ก่อนเปิดฟอร์มรีวิว
 - `POST /api/auth/logout` (U2): ยกเลิก Session ฝั่ง Backend

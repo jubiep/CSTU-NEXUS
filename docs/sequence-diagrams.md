@@ -15,6 +15,7 @@
 
 ### Sprint 2
 - [U6: ให้คะแนนรายวิชาตามหัวข้อที่กำหนด](#u6-ให้คะแนนรายวิชาตามหัวข้อที่กำหนด)
+- [U7: กำหนด preference ในการเรียนและระดับ Workload](#u7-กำหนด-preference-ในการเรียนและระดับ-workload)
 
 ---
 
@@ -427,4 +428,82 @@ sequenceDiagram
   - **Duplicate Check**: ตรวจสอบการรีวิวซ้ำผ่าน `ReviewService.hasReviewed(...)` หากเคยรีวิวแล้วจะคืนค่า `409 Conflict` (TC8) พร้อม `review_course_user_unique` บน PostgreSQL ป้องกันคำขอคู่ขนาน (TC9)
   - **Score Range Validation**: ตรวจสอบคะแนนทุกหัวข้อต้องอยู่ระหว่าง `0.0` ถึง `100.0` หรือเป็น `null` หากไม่ถูกต้องจะคืนค่า `400 Bad Request`
   - **Database Error Handling**: จัดการ `DataAccessResourceFailureException` ด้วยการตอบกลับ `503 Service Unavailable` และไม่แสดงว่าบันทึกสำเร็จ (TC10)
+
+---
+
+### U7: กำหนด preference ในการเรียนและระดับ Workload
+
+- **Endpoint / Storage:** Frontend local save via `localStorage` key `cstu_preferences`; ใช้ในภายหลังเพื่อคำนวณ Match Score กับ Section
+- **คำอธิบาย:** นักศึกษาเปิดหน้ากำหนดความชอบในการเรียน โดยเลือกค่าใน 5 มิติหลัก: แนวทางการสอน, สัดส่วนการวัดผล, ความเร็วในการสอน, รูปแบบงาน, และปริมาณงาน พร้อมตรวจสอบค่าที่เลือกก่อนบันทึกลง storage เพื่อใช้ในระบบแนะนำ Section ต่อไป
+
+sequenceDiagram
+    autonumber
+    actor Student as TU Student
+    participant View as PreferenceView<br/>(Boundary)
+    participant Ctrl as PreferenceController<br/>(Control)
+    participant Store as localStorage / PreferenceRepository<br/>(Entity)
+    participant Match as SectionMatchingService<br/>(Control)
+
+    Student->>View: 1. เปิดหน้า Preferences
+    activate View
+    View->>Ctrl: 2. initializePreferencePage()
+    activate Ctrl
+    Ctrl->>Store: 3. getItem("cstu_preferences")
+    activate Store
+    Store-->>Ctrl: 4. return savedPreferences หรือ null
+    deactivate Store
+    Ctrl-->>View: 5. render existing values & highlight selected hearts
+    deactivate Ctrl
+
+    Student->>View: 6. เลือกความชอบในแต่ละหัวข้อ (5 มิติ)
+    Student->>View: 7. กดปุ่ม "บันทึก"
+    View->>Ctrl: 8. savePreferences(selectedPreferences)
+    activate Ctrl
+
+    Ctrl->>Ctrl: 9. validate range (1..maxRating) และตรวจสอบชนิดข้อมูล
+
+    alt ค่าไม่ถูกต้องหรือข้อมูลเสียหาย
+        Ctrl-->>View: 10. ValidationError
+        View->>View: 11. showPreferenceStatus(error)
+        View-->>Student: 12. แจ้งเตือนให้เลือกค่าใหม่
+    else ค่าถูกต้อง
+        Ctrl->>Store: 13. setItem("cstu_preferences", JSON.stringify(preferences))
+        activate Store
+        Store-->>Ctrl: 14. save success
+        deactivate Store
+        Ctrl-->>View: 15. return success response
+        deactivate Ctrl
+        View->>View: 16. showSuccessModal()
+        View-->>Student: 17. แสดงข้อความ "บันทึกเสร็จสิ้น"
+    end
+    deactivate View
+
+    opt นักศึกษาเปิดใช้งานระบบ Match Score / Recommendation ภายหลัง
+        Student->>View: 18. เปิดหน้าแนะนำ Section หรือดูผล Match Score
+        View->>Ctrl: 19. loadStudentPreferences()
+        activate Ctrl
+        Ctrl->>Store: 20. getItem("cstu_preferences")
+        activate Store
+        Store-->>Ctrl: 21. return preference values
+        deactivate Store
+        Ctrl->>Match: 22. calculateMatchScore(preferences, sectionReviews)
+        activate Match
+        Match-->>Ctrl: 23. return matchPercentage
+        deactivate Match
+        Ctrl-->>View: 24. renderRecommendedSections(matchPercentage)
+        deactivate Ctrl
+        View-->>Student: 25. แสดง Section ที่เหมาะสมตามความชอบและปริมาณงาน
+    end
+
+#### ลักษณะข้อมูลความชอบที่บันทึก
+- **แนวทางการสอน (`teachingApproach`)**: 1-3 (เน้นทฤษฎี → เน้นปฏิบัติ)
+- **สัดส่วนการวัดผลและตัดเกรด (`gradingStyle`)**: 1-3 (เน้นสอบ → เน้นโครงงาน)
+- **ความเร็วในการสอน (`teachingPace`)**: 1-5 (สอนช้ามาก → สอนเร็วมาก)
+- **รูปแบบงาน (`assignmentStyle`)**: 1-3 (งานเดี่ยว → งานกลุ่ม)
+- **ปริมาณงาน (`workload`)**: 1-5 (รับงานได้น้อย → รับงานได้มาก)
+- **การเก็บข้อมูล**: บันทึกลง `localStorage` เป็น JSON object ภายใต้ key `cstu_preferences` และโหลดกลับมาทั้งหมดเมื่อเปิดหน้า Preferences อีกครั้ง
+- **เงื่อนไขการตรวจสอบ**:
+  - ค่าแต่ละด้านต้องเป็นตัวเลขจำนวนเต็มที่อยู่ในช่วง `1..maxRating`
+  - หากไฟล์ localStorage ผิดรูปแบบหรือมีค่าผิด จะแสดงข้อความแจ้งเตือนและไม่บันทึกค่าดังกล่าว
+  - เมื่อมีการเปลี่ยนค่าแต่ละหัวข้อ UI จะอัปเดตสถานะ hearts ให้ตรงกับช่วงที่เลือกทันที
 

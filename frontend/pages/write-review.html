@@ -185,6 +185,11 @@
         </div>
       </div>
 
+      <label class="anonymous-review-option" for="review-anonymous">
+        <input id="review-anonymous" type="checkbox"/>
+        <span><strong>เผยแพร่แบบไม่ระบุตัวตน</strong><small>ระบบจะแสดงเลข 2 หลักตามชั้นปี และปิดบังเลขที่เหลือ</small></span>
+      </label>
+
       <!-- Validation error -->
       <div id="form-error" class="error-msg" style="display:none;margin-bottom:14px;">
         กรุณาเลือกการประเมินให้ครบทุกหมวดหมู่
@@ -351,8 +356,6 @@
           return checked && checked.value;
         });
 
-        // Keep Submit available so the validation message is shown when a
-        // student tries to submit an incomplete form.
         submitBtn.disabled = false;
         return isComplete;
       }
@@ -419,26 +422,23 @@
         const text = textarea ? textarea.value.trim() : "";
         errEl.style.display = "none";
 
-        // Prepare the local review now, but persist it only after the API succeeds.
+        // Prepare local review data; persist it only after the API succeeds.
         const currentStudentId = (user && user.studentId) || "";
+        const isAnonymous = document.getElementById("review-anonymous").checked;
         const dimensionScores = typeof normalizeRatings === "function" ? normalizeRatings(ratings) : {};
-
         submitBtn.disabled = true;
         submitBtn.textContent = "กำลังส่ง...";
 
         try {
-          // เรียกใช้งานฟังก์ชัน submitReview ใน app.js ที่ส่งค่าทั้ง 5 เกณฑ์ไปยัง Backend
-          if (typeof window.submitReview === "function" && window.submitReview !== submitReviewHandler) {
-            await window.submitReview(code, {
-              sectionId: sectionId || null,
-              reviewText: text,
-              ratings: ratings
-            });
-          } else if (typeof apiSubmitReview === "function") {
+          // ส่งข้อความ สถานะปกปิดตัวตน และคะแนนทั้ง 5 หมวดไปยัง Backend
+          if (typeof apiSubmitReview === "function") {
             await apiSubmitReview(code, {
               sectionId: sectionId || null,
               reviewText: text,
-              ratings: ratings
+              comment: text,
+              text,
+              ratings,
+              isAnonymous
             });
           } else {
             await apiRequest(`/courses/${encodeURIComponent(code)}/reviews`, {
@@ -447,9 +447,15 @@
                 sectionId: sectionId || null,
                 reviewText: text,
                 comment: text,
-                text: text,
+                text,
                 ratings: ratings,
-                scores: dimensionScores
+                scores: dimensionScores,
+                teachingMethodScore: dimensionScores.teaching_method,
+                evaluationScore: dimensionScores.evaluation,
+                teachingSpeedScore: dimensionScores.teaching_speed,
+                assignmentStyleScore: dimensionScores.assignment_style,
+                workloadScore: dimensionScores.workload,
+                isAnonymous
               }),
             });
           }
@@ -457,28 +463,28 @@
           try {
             const storedKey = `cstu_reviews_${code}`;
             const currentLocal = JSON.parse(localStorage.getItem(storedKey) || "[]");
-            const newReviewItem = {
+            currentLocal.unshift({
               id: Date.now(),
               courseId: code,
               sectionNumber: section || "",
               sectionId: sectionId || null,
-              studentId: currentStudentId,
+              ...(isAnonymous ? {} : { studentId: currentStudentId }),
+              isAnonymous,
+              anonymous: isAnonymous,
               year: (user && user.year) || 2,
               date: new Date().toLocaleDateString("th-TH", { day: "numeric", month: "numeric", year: "numeric" }).replace(/\//g, "-"),
               tags: selectedTags,
-              ratings: ratings,
+              ratings,
               scores: dimensionScores,
-              text: text,
+              text,
               comment: text
-            };
-            currentLocal.unshift(newReviewItem);
+            });
             localStorage.setItem(storedKey, JSON.stringify(currentLocal));
+            if (currentStudentId) {
+              localStorage.setItem(`cstu_reviewed_${code}_${currentStudentId}`, "true");
+            }
           } catch (storageErr) {
             console.warn("Could not save successful review to localStorage:", storageErr);
-          }
-
-          if (currentStudentId) {
-            localStorage.setItem(`cstu_reviewed_${code}_${currentStudentId}`, "true");
           }
           alreadyReviewed = true;
           document.getElementById("success-modal").classList.add("show");

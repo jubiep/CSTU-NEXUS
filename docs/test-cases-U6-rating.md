@@ -46,12 +46,12 @@
 
 | วันที่ | ชุดทดสอบ/คำสั่ง | ผล | หลักฐาน |
 |---|---|---|---|
-| 15 พ.ย. 2569 | Maven full suite (`mvn -o test`) | **ผ่าน: 39 tests, 0 failures, 0 errors, 0 skipped** | Surefire reports ใน `backend/cstu-course-nexus/target/surefire-reports/`; controller 16, service 6, integration 3, application context 2, study-year 7, auth 5 |
-| 15 พ.ย. 2569 | `ReviewControllerMockTests` | **ผ่าน: 16 tests** | ครอบคลุม U6-01, U6-02, U6-04–U6-08 และ U6-12–U6-15; ตรวจ HTTP status, mapping และ validation รวมข้อความ null/ว่าง/ช่องว่าง |
-| 15 พ.ย. 2569 | `ReviewConcurrentSubmissionIntegrationTests` | **ผ่าน: 3 tests** | PostgreSQL 17 disposable ที่ `localhost:55432`; ตรวจบันทึกห้าคะแนน, ค่า `null` ของหัวข้อไม่แน่ใจ และคำขอซ้ำคู่ขนาน; query หลังทดสอบพบ `RV11_TEST:1`; container ถูกหยุดหลังเก็บหลักฐาน |
+| 16 พ.ย. 2569 | Maven full suite (`mvn test`) หลังรวม `main` | **ผ่าน: 88 tests, 0 failures, 0 errors, 0 skipped** | Surefire reports ใน `backend/cstu-course-nexus/target/surefire-reports/`; รวม test ของ authentication, course, match score, preferences, reviews และ study year |
+| 16 พ.ย. 2569 | `ReviewControllerMockTests` | **ผ่าน: 20 tests** | ครอบคลุม validation/mapping U6 และ anonymous review (RV13–RV16); ตรวจ HTTP status, คะแนน และการปกปิดตัวตน |
+| 16 พ.ย. 2569 | `ReviewConcurrentSubmissionIntegrationTests` | **ผ่าน: 3 tests** | PostgreSQL 17 disposable ที่ `localhost:55432`; ตรวจบันทึกห้าคะแนน, ค่า `null` ของหัวข้อไม่แน่ใจ และคำขอซ้ำคู่ขนาน; query หลังทดสอบพบ `RV11_TEST:1`; container ถูกหยุดหลังเก็บหลักฐาน |
 | 15 พ.ย. 2569 | Node VM harness กับ `app.js` และ submit handler จาก `write-review.html` | **ผ่าน** | ตรวจทุกตัวเลือก 0/50/100/`null`, submit partial/unsure, blank payload, กรณี invalid ไม่ยิง API, DB error ไม่เขียน localStorage, และ localStorage เขียนหลัง API สำเร็จ |
 | 15 พ.ย. 2569 | `git diff --check` | **ผ่าน** | ไม่พบ whitespace errors |
-| 16 พ.ย. 2569 | Maven focused suite (`-Dtest=ReviewControllerMockTests,ReviewServiceMockTests`) | **ผ่าน: 22 tests, 0 failures, 0 errors, 0 skipped** | รันซ้ำหลังการกู้ไฟล์; ครอบคลุม Controller 16 tests และ Service 6 tests โดยไม่ต้องใช้ PostgreSQL จริง |
+| 16 พ.ย. 2569 | Maven focused suite (`-Dtest=ReviewControllerMockTests,ReviewServiceMockTests`) | **ผ่าน: 26 tests, 0 failures, 0 errors, 0 skipped** | รันหลังรวม anonymous review; ครอบคลุม Controller 20 tests และ Service 6 tests |
 | 16 พ.ย. 2569 | Node VM smoke check ของ `frontend/app.js` | **ผ่าน** | ตรวจ mapping 0/50/100/`null` และตรวจว่า reviewText ว่างถูกส่งเป็นค่าว่าง ไม่แทนด้วย `-` |
 
 หมายเหตุ: Frontend ถูกทดสอบด้วย Node VM และ mocked DOM/API ไม่ใช่ browser E2E; browser ที่เชื่อมกับ `127.0.0.1:5500` อยู่ในหน้า session หมดอายุ จึงไม่ได้ใช้บัญชีจริงหรือส่งรีวิวไปฐานข้อมูลของแอป ชุด `CstuCourseNexusApplicationTests` ใช้การตั้งค่า default และเชื่อมต่อ `localhost:5432/cstu_nexus_db` เพื่อเริ่ม Spring context; การทดสอบ integration ที่เขียนข้อมูลใช้ฐานข้อมูลแยก `localhost:55432/cstu_rv11_test` เท่านั้น
