@@ -44,7 +44,7 @@ backend/
 │
 ├── database/                      # จัดการ PostgreSQL และ Seed Data
 │   ├── compose.yaml               # Docker Compose สำหรับรัน PostgreSQL 17
-│   ├── init.sql                   # Schema โครงสร้างตาราง (mock_user, courses, sections, review)
+│   ├── init.sql                   # Schema โครงสร้างตาราง (mock_user, user_preferences, courses, sections, review)
 │   ├── seed.sql                   # SQL นำเข้าข้อมูลตั้งต้น (38 Courses, 63 Sections)
 │   ├── courses.csv                # ข้อมูลรายวิชาต้นทาง
 │   ├── sections.csv               # ข้อมูล Section ต้นทาง
@@ -248,6 +248,15 @@ docker exec -it cstu-nexus-postgres psql -U cstu_nexus_user -d cstu_nexus_db
 | `courses` | เก็บข้อมูลรายวิชา |
 | `sections` | เก็บข้อมูล Section ของรายวิชา |
 | `review` | เก็บข้อมูลรีวิว |
+| `user_preferences` | เก็บความชอบในการเรียนของผู้ใช้ โดยอ้างอิง `mock_user(user_id)` |
+
+สำหรับ Database ที่มีอยู่แล้ว ให้ apply Migration `database/migrations/005_user_preferences.sql` หนึ่งครั้งจากโฟลเดอร์ `backend/`:
+
+```bash
+docker exec -i cstu-nexus-postgres psql -U cstu_nexus_user -d cstu_nexus_db -v ON_ERROR_STOP=1 < database/migrations/005_user_preferences.sql
+```
+
+การแก้ `init.sql` มีผลเฉพาะตอนสร้าง Database ใหม่ ไม่ได้ apply Migration ให้ Database ที่มีอยู่แล้ว
 
 ### 4.2 นำเข้า Seed Data
 
@@ -399,7 +408,7 @@ APP_CORS_ALLOWED_ORIGINS=http://localhost:5500,http://127.0.0.1:5500,http://loca
 - `GET http://localhost:8080/api/auth/me` คืนข้อมูลบัญชีเมื่อส่ง session cookie ที่ได้จาก login
 - `POST http://localhost:8080/api/auth/logout` ยกเลิก session
 
-Backend อนุญาตเฉพาะ account type `student` และ username ที่เป็นรหัสนักศึกษา 10 หลักตามข้อมูลจาก TU Verify; ไม่บังคับรูปแบบ email เนื่องจากโดเมนอาจแตกต่างตามข้อมูลบัญชีจริง จำกัดสิทธิ์ด้วย prefix รหัสนักศึกษา 6809 และปฏิเสธบัญชีที่ไม่ตรงด้วย HTTP 403 ก่อนสร้าง session; prefix นี้กำหนดตายตัวใน TuAuthService และต้องปรับเมื่อรูปแบบรหัสสาขาหรือปีรับเข้าเปลี่ยน ชั้นปีคำนวณจากเลขสองหลักแรกของรหัสนักศึกษาเทียบกับปี พ.ศ. ปัจจุบัน เช่น `68` ในปี พ.ศ. 2569 ได้ชั้นปี 2; หากรหัสอ่านไม่ได้หรือเป็นปีในอนาคตจะส่ง `null`
+Backend อนุญาตเฉพาะ account type `student` และ username ที่เป็นรหัสนักศึกษา 10 หลักตามข้อมูลจาก TU Verify; ไม่บังคับรูปแบบ email เนื่องจากโดเมนอาจแตกต่างตามข้อมูลบัญชีจริง จำกัดสิทธิ์ด้วย prefix รหัสนักศึกษา 6609, 6709, 6809 หรือ 6909 และปฏิเสธบัญชีที่ไม่ตรงด้วย HTTP 403 ก่อนสร้าง session; prefix นี้กำหนดตายตัวใน TuAuthService และต้องปรับเมื่อรูปแบบรหัสสาขาหรือปีรับเข้าเปลี่ยน ชั้นปีคำนวณจากเลขสองหลักแรกของรหัสนักศึกษาเทียบกับปี พ.ศ. ปัจจุบัน เช่น `68` ในปี พ.ศ. 2569 ได้ชั้นปี 2; หากรหัสอ่านไม่ได้หรือเป็นปีในอนาคตจะส่ง `null`
 
 ค่า session หมดอายุใน 30 นาที Cookie ตั้ง `HttpOnly` และ `SameSite=Lax`; เมื่อนำ frontend/backend ไปอยู่คนละ site ใน production ต้องใช้ HTTPS และตั้ง `SESSION_COOKIE_SECURE=true`, `SESSION_COOKIE_SAME_SITE=none` พร้อมระบุ origin จริงใน `APP_CORS_ALLOWED_ORIGINS` การเก็บ session เริ่มต้นอยู่ในหน่วยความจำของ Spring Boot เหมาะกับการพัฒนา/instance เดียว; ระบบหลาย instance ควรย้าย session store ไป Redis หรือระบบ shared session
 

@@ -97,6 +97,7 @@ class ReviewServiceMockTests {
         assertEquals("cs101", courseLookupParameter.get());
     }
 
+    @SuppressWarnings("unchecked")
     private void stubQueries(List<Integer> userIds, List<Integer> recommendedYears) {
         when(jdbcTemplate.query(anyString(), any(RowMapper.class), any(Object[].class)))
                 .thenAnswer(invocation -> {
