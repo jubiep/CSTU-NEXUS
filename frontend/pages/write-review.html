@@ -425,8 +425,9 @@
         const currentStudentId = (user && user.studentId) || "";
         const isAnonymous = document.getElementById("review-anonymous").checked;
         const dimensionScores = typeof normalizeRatings === "function" ? normalizeRatings(ratings) : {};
+        const storedKey = `cstu_reviews_${code}`;
+        let localReviewId = null;
         try {
-          const storedKey = `cstu_reviews_${code}`;
           const currentLocal = JSON.parse(localStorage.getItem(storedKey) || "[]");
           const newReviewItem = {
             id: Date.now(),
@@ -444,6 +445,7 @@
             text: text,
             comment: text
           };
+          localReviewId = newReviewItem.id;
           currentLocal.unshift(newReviewItem);
           localStorage.setItem(storedKey, JSON.stringify(currentLocal));
           if (currentStudentId) {
@@ -485,6 +487,15 @@
                 isAnonymous
               }),
             });
+          }
+
+          // Backend บันทึกแล้ว: ลบสำเนาชั่วคราวใน localStorage เพื่อไม่ให้รีวิวขึ้นซ้ำ 2 อัน
+          try {
+            const remaining = JSON.parse(localStorage.getItem(storedKey) || "[]")
+              .filter(item => item.id !== localReviewId);
+            localStorage.setItem(storedKey, JSON.stringify(remaining));
+          } catch (storageErr) {
+            console.warn("Could not clean up temporary review:", storageErr);
           }
 
           if (currentStudentId) {
