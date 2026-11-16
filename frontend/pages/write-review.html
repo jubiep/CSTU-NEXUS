@@ -286,7 +286,7 @@
         try {
           const storedKey = `cstu_reviews_${code}`;
           const localList = JSON.parse(localStorage.getItem(storedKey) || "[]");
-          if (localList.some(r => r.studentId === studentId)) {
+          if (localList.some(r => r.studentId === studentId || r.reviewerStudentId === studentId)) {
             return true;
           }
         } catch (e) {}
@@ -426,16 +426,17 @@
         const currentStudentId = (user && user.studentId) || "";
         const isAnonymous = document.getElementById("review-anonymous").checked;
         const dimensionScores = typeof normalizeRatings === "function" ? normalizeRatings(ratings) : {};
-        const storedKey = `cstu_reviews_${code}`;
-        let localReviewId = null;
+        // ประกาศนอก try เพื่อให้ใช้ลบสำเนาใน localStorage หลังส่งขึ้น Backend สำเร็จได้
+        const localReviewId = Date.now();
         try {
           const currentLocal = JSON.parse(localStorage.getItem(storedKey) || "[]");
           const newReviewItem = {
-            id: Date.now(),
+            id: localReviewId,
             courseId: code,
             sectionNumber: section || "",
             sectionId: sectionId || null,
             ...(isAnonymous ? {} : { studentId: currentStudentId }),
+            reviewerStudentId: currentStudentId,
             isAnonymous,
             anonymous: isAnonymous,
             year: (user && user.year) || 2,
@@ -501,6 +502,18 @@
 
           if (currentStudentId) {
             localStorage.setItem(`cstu_reviewed_${code}_${currentStudentId}`, "true");
+          }
+          // รีวิวถูกบันทึกใน Backend แล้ว ลบสำเนาชั่วคราวออกเพื่อไม่ให้แสดงซ้ำในหน้ารายละเอียดวิชา
+          try {
+            const storedKey = `cstu_reviews_${code}`;
+            const remaining = JSON.parse(localStorage.getItem(storedKey) || "[]").filter(r => r.id !== localReviewId);
+            if (remaining.length > 0) {
+              localStorage.setItem(storedKey, JSON.stringify(remaining));
+            } else {
+              localStorage.removeItem(storedKey);
+            }
+          } catch (storageErr) {
+            console.warn("Could not clean up localStorage:", storageErr);
           }
           alreadyReviewed = true;
           document.getElementById("success-modal").classList.add("show");
