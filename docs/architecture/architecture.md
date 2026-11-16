@@ -82,7 +82,7 @@ flowchart TD
 | BCE Role | คอมโพเนนต์ในระบบ | รายละเอียดหน้าที่ |
 |---|---|---|
 | **Boundary** | `index.html`, `courses.html`, `course-detail.html`, `write-review.html`, `preference.html`, `profile.html`, `app.js` | ส่วนประสานงานระหว่างผู้ใช้กับระบบ รับอินพุต แสดงผล และแปลง Event ของผู้ใช้เป็นการเรียก API |
-| **Control** | `AuthController`, `CourseController`, `ReviewController`, `PreferenceController`, `MatchScoreController`<br/>`TuAuthService`, `ReviewService`, `PreferenceService`, `MatchScoreService`, `StudyYearCalculator` | คลาสผู้ควบคุม ทำหน้าที่ประสานงานระหว่าง Boundary และ Entity ควบคุม Workflow, Business Rules และการคำนวณ |
+| **Control** | `AuthController`, `CourseController`, `ReviewController`, `UserPreferencesController`, `MatchScoreController`<br/>`TuAuthService`, `ReviewService`, `UserPreferencesService`, `MatchScoreService`, `StudyYearCalculator` | คลาสผู้ควบคุม ทำหน้าที่ประสานงานระหว่าง Boundary และ Entity ควบคุม Workflow, Business Rules และการคำนวณ |
 | **Entity** | `AuthUser`, `CourseDetail`, `Section`, `Review`, `UserPreferences`, `MatchScoreResult` | ตัวแทนของข้อมูลเชิงธุรกิจ (Business Data) ที่คงอยู่ (Persisted) ในระบบหรือ Session |
 
 ---

@@ -175,8 +175,8 @@ classDiagram
         +saveReview(review): Review
     }
 
-    class PreferenceController {
-        -preferenceService: PreferenceService
+    class UserPreferencesController {
+        -userPreferencesService: UserPreferencesService
         +getPreferences(session): ResponseEntity
         +savePreferences(request, session): ResponseEntity
     }
@@ -264,7 +264,7 @@ classDiagram
     CourseDetailView ..> ReviewController : HTTP
     CourseDetailView ..> MatchScoreController : HTTP
     WriteReviewView ..> ReviewController : HTTP
-    PreferenceView ..> PreferenceController : HTTP
+    PreferenceView ..> UserPreferencesController : HTTP
 
     AuthController --> TuAuthService : uses
     AuthController ..> StudyYearCalculator : calls
@@ -277,8 +277,8 @@ classDiagram
     ReviewService --> ReviewRepository : uses
     ReviewRepository ..> Review : persists
 
-    PreferenceController --> PreferenceService : uses
-    PreferenceService ..> UserPreferences : manages
+    UserPreferencesController --> UserPreferencesService : uses
+    UserPreferencesService ..> UserPreferences : manages
 
     MatchScoreController --> MatchScoreService : uses
     MatchScoreService ..> MatchScoreResult : produces
