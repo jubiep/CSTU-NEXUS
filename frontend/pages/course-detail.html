@@ -147,7 +147,7 @@
       try {
         const storedKey = `cstu_reviews_${code}`;
         const localList = JSON.parse(localStorage.getItem(storedKey) || "[]");
-        if (localList.some(r => r.studentId === studentId)) {
+        if (localList.some(r => r.studentId === studentId || r.reviewerStudentId === studentId)) {
           return true;
         }
       } catch (e) {}
@@ -544,10 +544,43 @@
       const startIndex = (currentPage - 1) * REVIEWS_PER_PAGE;
       const currentSlice = allReviews.slice(startIndex, startIndex + REVIEWS_PER_PAGE);
 
+      // แปลงวันที่จาก Backend (yyyy-mm-dd หรือ ISO) ให้เป็นรูปแบบ วัน-เดือน-ปี พ.ศ.
+      function formatReviewDate(dateStr) {
+        if (!dateStr) return '9-11-2569';
+        if (/^\d{1,2}-\d{1,2}-\d{4}$/.test(dateStr)) return dateStr;
+        const d = new Date(dateStr);
+        if (!isNaN(d.getTime())) {
+          return `${d.getDate()}-${d.getMonth() + 1}-${d.getFullYear() + 543}`;
+        }
+        return dateStr;
+      }
+
+      // ใช้แท็กที่บันทึกไว้ ถ้าไม่มีให้สร้างจากคะแนน 5 หมวด (0 / 50 / 100) ที่ Backend ส่งมา
+      function getReviewTags(r) {
+        if (Array.isArray(r.tags) && r.tags.length > 0) {
+          return r.tags;
+        }
+        const tags = [];
+        const dimMaps = [
+          { score: r.teachingMethodScore, map: { 0: "เน้นทฤษฎี", 50: "สมดุล", 100: "เน้นปฏิบัติ" } },
+          { score: r.evaluationScore, map: { 0: "เน้นคะแนนสอบ", 50: "สมดุล", 100: "เน้นโครงงาน" } },
+          { score: r.teachingSpeedScore, map: { 0: "สอนช้า", 50: "ปานกลาง", 100: "สอนเร็ว" } },
+          { score: r.assignmentStyleScore, map: { 0: "เน้นงานเดี่ยว", 50: "สมดุล", 100: "เน้นงานกลุ่ม" } },
+          { score: r.workloadScore, map: { 0: "งานน้อย", 50: "ปริมาณงานสมดุล", 100: "งานเยอะ" } }
+        ];
+        dimMaps.forEach(d => {
+          if (d.score !== undefined && d.score !== null) {
+            const rounded = Math.round(Number(d.score));
+            if (d.map[rounded]) tags.push(d.map[rounded]);
+          }
+        });
+        return tags.length > 0 ? tags : ["เน้นทฤษฎี", "สมดุล"];
+      }
+
       // Render รายการรีวิวแนวตั้ง (Vertical list) สูงสุด 5 รายการต่อหน้า
       reviewList.innerHTML = currentSlice.map(r => {
         const yearText = r.year ? `ชั้นปีที่ ${r.year}` : '';
-        const dateText = r.date || '9-11-2569';
+        const dateText = formatReviewDate(r.date);
         const isAnonymous = Boolean(r.isAnonymous || r.anonymous);
         const anonymousYear = Number(r.reviewerYear || r.year);
         const anonymousPrefixByYear = { 1: "69", 2: "68", 3: "67", 4: "66" };
@@ -564,9 +597,7 @@
           : `<span class="review-section-badge general">ทั่วไป</span>`;
 
         // จัดรูปแบบแท็กการประเมิน (Tags)
-        const tagsList = Array.isArray(r.tags) && r.tags.length > 0
-          ? r.tags
-          : ["เน้นทฤษฎี", "สมดุล"];
+        const tagsList = getReviewTags(r);
         const tagsHtml = `
           <div class="review-tags-wrap">
             ${tagsList.map(t => `<span class="review-tag-badge">${t}</span>`).join('')}
@@ -662,16 +693,82 @@
       const reviewList = document.getElementById("review-list");
       const paginationEl = document.getElementById("pagination");
 
+      // sectionId จาก Backend มีรูปแบบ "tu109_540001" ส่วน localStorage เก็บ "540001"
+      const getCleanSection = rawSec => {
+        if (!rawSec) return "";
+        const str = String(rawSec).trim();
+        return str.includes('_') ? str.split('_').pop() : str;
+      };
+
+      // รีวิวที่ไม่ระบุตัวตนจาก Backend ไม่มี studentId จึงต้องเทียบด้วย section + ข้อความแทน
+      const getReviewKey = review => {
+        if (!review) return null;
+        const studentId = String(review.studentId || review.authorStudentId || review.reviewerStudentId || "").trim();
+        if (studentId) return `student_${studentId}`;
+        const sec = getCleanSection(review.sectionNumber || review.sectionId);
+        const comment = String(review.text || review.comment || "").trim();
+        return (comment || sec) ? `anon_${sec}_${comment}` : null;
+      };
+
       const mergeReviewsWithoutDuplicates = (preferred, fallback) => {
-        const merged = [];
-        const seenStudents = new Set();
-        [...preferred, ...fallback].forEach(review => {
-          const studentId = String(review.studentId || review.authorStudentId || "").trim();
-          if (studentId && seenStudents.has(studentId)) return;
-          if (studentId) seenStudents.add(studentId);
+        const merged = [...preferred];
+        const preferredKeys = new Set(preferred.map(getReviewKey).filter(Boolean));
+        fallback.forEach(review => {
+          const key = getReviewKey(review);
+          if (key && preferredKeys.has(key)) return;
           merged.push(review);
         });
         return merged;
+      };
+
+      // รีวิวใน localStorage ตัวนี้ถูกบันทึกลง Backend แล้วหรือยัง
+      const isSyncedWithBackend = (localRev, backendList) => {
+        const localText = String(localRev.text || localRev.comment || "").trim();
+        const localSec = getCleanSection(localRev.sectionNumber || localRev.sectionId);
+        const localSid = String(localRev.studentId || localRev.reviewerStudentId || "").trim();
+
+        return backendList.some(backendRev => {
+          const bSid = String(backendRev.studentId || backendRev.authorStudentId || "").trim();
+          if (localSid && bSid && localSid === bSid) return true;
+
+          const bText = String(backendRev.text || backendRev.comment || "").trim();
+          const bSec = getCleanSection(backendRev.sectionNumber || backendRev.sectionId);
+          return Boolean(localText && bText && localText === bText && (!localSec || !bSec || localSec === bSec));
+        });
+      };
+
+      // รวมรีวิวที่ผู้ใช้เพิ่งเขียนและบันทึกไว้ใน localStorage (โครงสร้างข้อมูลส่วน frontend)
+      // ถ้า backendLoaded = true จะลบรายการที่ซิงก์ขึ้น Backend แล้วออกจาก localStorage เพื่อไม่ให้แสดงซ้ำ
+      const mergeLocalReviews = (reviews, backendLoaded) => {
+        try {
+          const storedKey = `cstu_reviews_${code}`;
+          let localList = JSON.parse(localStorage.getItem(storedKey) || "[]");
+          if (localList.length === 0) return reviews;
+
+          if (backendLoaded) {
+            const unSyncedList = localList.filter(l => !isSyncedWithBackend(l, reviews));
+            if (unSyncedList.length !== localList.length) {
+              localList = unSyncedList;
+              if (localList.length > 0) {
+                localStorage.setItem(storedKey, JSON.stringify(localList));
+              } else {
+                localStorage.removeItem(storedKey);
+              }
+            }
+          }
+
+          if (selectedSection) {
+            localList = localList.filter(r => {
+              const s = getCleanSection(r.sectionNumber || r.sectionId);
+              return !s || s === String(selectedSection).trim();
+            });
+          }
+
+          return localList.length > 0 ? mergeReviewsWithoutDuplicates(localList, reviews) : reviews;
+        } catch (storageErr) {
+          console.warn("Could not load reviews from localStorage:", storageErr);
+          return reviews;
+        }
       };
 
       reviewList.innerHTML = `<p style="text-align:center;color:var(--gray-400);padding:32px 0;font-size:14px;">กำลังโหลดรีวิว...</p>`;
@@ -687,44 +784,19 @@
         allReviews = Array.isArray(res) ? res : (res && res.reviews ? res.reviews : []);
 
         // หาก Backend ส่งค่าว่างกลับมา (ยังไม่มีข้อมูลใน DB) ให้ fallback ไปดึงจาก mockReviews
-        if (allReviews.length === 0 && typeof getReviews === "function") {
+        const backendHasReviews = allReviews.length > 0;
+        if (!backendHasReviews && typeof getReviews === "function") {
           allReviews = getReviews(code, selectedSection) || [];
         }
 
-        // รวมรีวิวที่ผู้ใช้เพิ่งเขียนและบันทึกไว้ใน localStorage (โครงสร้างข้อมูลส่วน frontend)
-        try {
-          const storedKey = `cstu_reviews_${code}`;
-          let localList = JSON.parse(localStorage.getItem(storedKey) || "[]");
-          if (selectedSection) {
-            localList = localList.filter(r => !r.sectionNumber || String(r.sectionNumber).trim() === String(selectedSection).trim());
-          }
-          if (localList.length > 0) {
-            allReviews = mergeReviewsWithoutDuplicates(localList, allReviews);
-          }
-        } catch (storageErr) {
-          console.warn("Could not load reviews from localStorage:", storageErr);
-        }
+        allReviews = mergeLocalReviews(allReviews, backendHasReviews);
       } catch (err) {
         console.warn("Failed to load reviews from API, using fallback if available:", err);
         if (typeof getReviews === "function") {
           allReviews = getReviews(code, selectedSection) || [];
         }
 
-        // รวมรีวิวที่ผู้ใช้เพิ่งเขียนและบันทึกไว้ใน localStorage (โครงสร้างข้อมูลส่วน frontend)
-        try {
-          const storedKey = `cstu_reviews_${code}`;
-          let localList = JSON.parse(localStorage.getItem(storedKey) || "[]");
-          if (selectedSection) {
-            localList = localList.filter(r => !r.sectionNumber || String(r.sectionNumber).trim() === String(selectedSection).trim());
-          }
-          if (localList.length > 0) {
-            allReviews = mergeReviewsWithoutDuplicates(localList, allReviews);
-          }
-        } catch (storageErr) {
-          console.warn("Could not load reviews from localStorage:", storageErr);
-
-
-        }
+        allReviews = mergeLocalReviews(allReviews, false);
       }
 
       currentPage = 1;
