@@ -199,10 +199,6 @@ body {
   background: rgba(0, 0, 0, .45);
 }
 
-.save-dialog form {
-  margin: 0;
-}
-
 .save-dialog-button {
   margin-top: 0;
 }
