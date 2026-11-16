@@ -532,7 +532,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 /* ==========================================
-   Rating & Preference Matching Logic (0.0 - 1.0)
+   Rating & Preference Matching Logic (0 - 100)
    ========================================== */
 
 const RATING_SCALE_MAP = {
@@ -577,10 +577,10 @@ const DIMENSION_LABELS = {
 };
 
 /**
- * แปลงค่าตัวเลือกภาษาไทยเป็นคะแนน 0.0 - 1.0
+ * แปลงค่าตัวเลือกภาษาไทยเป็นคะแนน 0 - 100
  * @param {string} dimension ชื่อหมวดหมู่ (เช่น 'teaching_method')
  * @param {string} value ตัวเลือกที่เลือก (เช่น 'เน้นปฏิบัติ')
- * @returns {number|null} คะแนน 0.0 - 1.0 หรือ null ถ้าเป็น 'ไม่แน่ใจ'
+ * @returns {number|null} คะแนน 0, 50, 100 หรือ null ถ้าเป็น 'ไม่แน่ใจ'
  */
 function convertRatingToScore(dimension, value) {
   if (!dimension || !value) return null;
@@ -590,9 +590,9 @@ function convertRatingToScore(dimension, value) {
 }
 
 /**
- * แปลงชุด ratings ที่เลือกจากฟอร์มให้เป็นตัวเลข 0.0 - 1.0
+ * แปลงชุด ratings ที่เลือกจากฟอร์มให้เป็นตัวเลข 0 - 100
  * @param {Object} ratingsObj เช่น { teaching_method: 'เน้นทฤษฎี', ... }
- * @returns {Object} { teaching_method: 0.0, evaluation: 0.5, ... }
+ * @returns {Object} { teaching_method: 0, evaluation: 50, ... }
  */
 function normalizeRatings(ratingsObj) {
   if (!ratingsObj || typeof ratingsObj !== "object") return {};
@@ -614,14 +614,14 @@ async function submitReview(courseId, reviewData = {}) {
 
   const ratings = reviewData.ratings || {};
   const scores = typeof normalizeRatings === "function" ? normalizeRatings(ratings) : {};
-  const text = (reviewData.reviewText || reviewData.text || reviewData.comment || "-").trim();
+  const text = String(reviewData.reviewText ?? reviewData.text ?? reviewData.comment ?? "").trim();
 
   // จัดเตรียม Payload ส่งค่าทั้ง 5 เกณฑ์ไปยัง Backend
   const payload = {
     sectionId: reviewData.sectionId || null,
-    reviewText: text || "-",
-    comment: text || "-",
-    text: text || "-",
+    reviewText: text,
+    comment: text,
+    text: text,
 
     // 5 เกณฑ์การประเมิน
     teachingMethod: ratings.teaching_method || null,
@@ -630,7 +630,7 @@ async function submitReview(courseId, reviewData = {}) {
     assignmentStyle: ratings.assignment_style || null,
     workload: ratings.workload || null,
 
-    // ค่าสเกล 0.0 - 1.0 ของทั้ง 5 เกณฑ์
+    // ค่าสเกล 0 - 100 ของทั้ง 5 เกณฑ์
     teachingMethodScore: scores.teaching_method ?? null,
     evaluationScore: scores.evaluation ?? null,
     teachingSpeedScore: scores.teaching_speed ?? null,
