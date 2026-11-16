@@ -21,23 +21,23 @@
 
 ```mermaid
 flowchart TD
-    subgraph Client ["Client Tier (Browser)"]
+    subgraph Client["Client Tier (Browser)"]
         UI["Web Browser<br/>(HTML5 / CSS3 / Vanilla ES6+ JS)"]
     end
 
-    subgraph Proxy ["Proxy & Web Server"]
+    subgraph Proxy["Proxy & Web Server"]
         Nginx["Nginx Reverse Proxy (Port 3000)<br/>- Static File Serving<br/>- API Gateway Routing (/api/*)"]
     end
 
-    subgraph Application ["Application Tier (Backend)"]
+    subgraph Application["Application Tier (Backend)"]
         SpringBoot["Spring Boot Application (Port 8080)<br/>- Spring Web MVC (Controllers)<br/>- Business Logic (Services)<br/>- Spring Data JPA / Spring JDBC<br/>- Session Management (HttpOnly Cookie)"]
     end
 
-    subgraph Data ["Data Tier"]
+    subgraph Data["Data Tier"]
         Postgres[("PostgreSQL 17 Database (Port 5432)<br/>- courses & sections<br/>- mock_user & user_preferences<br/>- review")]
     end
 
-    subgraph External ["External Services"]
+    subgraph External["External Services"]
         TuAPI["TU Authentication API<br/>(https://restapi.tu.ac.th)"]
     end
 
@@ -195,22 +195,22 @@ erDiagram
 
 ```mermaid
 flowchart LR
-    subgraph Host ["Host Machine"]
+    subgraph Host["Host Machine"]
         Port3000["Port 3000"]
         Port8080["Port 8080 (Dev)"]
         Port5432["Port 5432 (Dev)"]
     end
 
-    subgraph DockerNetwork ["Docker Bridge Network (cstu-nexus-net)"]
-        subgraph FrontContainer ["Container: frontend"]
+    subgraph DockerNetwork["Docker Bridge Network (cstu-nexus-net)"]
+        subgraph FrontContainer["Container: frontend"]
             NginxServ["Nginx Alpine"]
         end
 
-        subgraph BackContainer ["Container: backend"]
+        subgraph BackContainer["Container: backend"]
             SpringApp["Spring Boot (Java 17)"]
         end
 
-        subgraph DBContainer ["Container: db"]
+        subgraph DBContainer["Container: db"]
             PostgresDB["PostgreSQL 17"]
             Volume[("Persistent Volume<br/>postgres_data")]
         end

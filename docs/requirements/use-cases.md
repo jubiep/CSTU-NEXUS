@@ -23,13 +23,13 @@
 
 ```mermaid
 flowchart LR
-    subgraph Actors ["Actors"]
+    subgraph Actors["Actors"]
         Student["👤 CSTU Student<br/>(นักศึกษาปัจจุบัน)"]
         Senior["🎓 CSTU Senior<br/>(รุ่นพี่ผู้เคยเรียน)"]
         TuAPI["🏢 TU Authentication System<br/>(External AD Verify API)"]
     end
 
-    subgraph System ["🖥️ CSTU-NEXUS System"]
+    subgraph System["🖥️ CSTU-NEXUS System"]
         U2(["U2: การยืนยันตัวตนและจัดการสิทธิ์"])
         U4(["U4: ค้นหารายวิชาและ Section"])
         U1(["U1: อ่าน Review รายวิชา/Section"])
