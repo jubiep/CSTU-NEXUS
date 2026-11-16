@@ -16,6 +16,8 @@
 ### Sprint 2
 - [U6: ให้คะแนนรายวิชาตามหัวข้อที่กำหนด](#u6-ให้คะแนนรายวิชาตามหัวข้อที่กำหนด)
 - [U7: กำหนด preference ในการเรียนและระดับ Workload](#u7-กำหนด-preference-ในการเรียนและระดับ-workload)
+- [U8: คำนวณและแสดงผลความเข้ากันได้รายบุคคล (Match Score)](#u8-คำนวณและแสดงผลความเข้ากันได้รายบุคคล-match-score)
+- [U9: เขียนและแสดงผลรีวิวแบบปกปิดตัวตน (Anonymous Review)](#u9-เขียนและแสดงผลรีวิวแบบปกปิดตัวตน-anonymous-review)
 
 ---
 
@@ -436,6 +438,7 @@ sequenceDiagram
 - **Endpoint / Storage:** Frontend local save via `localStorage` key `cstu_preferences`; ใช้ในภายหลังเพื่อคำนวณ Match Score กับ Section
 - **คำอธิบาย:** นักศึกษาเปิดหน้ากำหนดความชอบในการเรียน โดยเลือกค่าใน 5 มิติหลัก: แนวทางการสอน, สัดส่วนการวัดผล, ความเร็วในการสอน, รูปแบบงาน, และปริมาณงาน พร้อมตรวจสอบค่าที่เลือกก่อนบันทึกลง storage เพื่อใช้ในระบบแนะนำ Section ต่อไป
 
+```mermaid
 sequenceDiagram
     autonumber
     actor Student as TU Student
@@ -477,23 +480,7 @@ sequenceDiagram
         View-->>Student: 17. แสดงข้อความ "บันทึกเสร็จสิ้น"
     end
     deactivate View
-
-    opt นักศึกษาเปิดใช้งานระบบ Match Score / Recommendation ภายหลัง
-        Student->>View: 18. เปิดหน้าแนะนำ Section หรือดูผล Match Score
-        View->>Ctrl: 19. loadStudentPreferences()
-        activate Ctrl
-        Ctrl->>Store: 20. getItem("cstu_preferences")
-        activate Store
-        Store-->>Ctrl: 21. return preference values
-        deactivate Store
-        Ctrl->>Match: 22. calculateMatchScore(preferences, sectionReviews)
-        activate Match
-        Match-->>Ctrl: 23. return matchPercentage
-        deactivate Match
-        Ctrl-->>View: 24. renderRecommendedSections(matchPercentage)
-        deactivate Ctrl
-        View-->>Student: 25. แสดง Section ที่เหมาะสมตามความชอบและปริมาณงาน
-    end
+```
 
 #### ลักษณะข้อมูลความชอบที่บันทึก
 - **แนวทางการสอน (`teachingApproach`)**: 1-3 (เน้นทฤษฎี → เน้นปฏิบัติ)
@@ -502,8 +489,132 @@ sequenceDiagram
 - **รูปแบบงาน (`assignmentStyle`)**: 1-3 (งานเดี่ยว → งานกลุ่ม)
 - **ปริมาณงาน (`workload`)**: 1-5 (รับงานได้น้อย → รับงานได้มาก)
 - **การเก็บข้อมูล**: บันทึกลง `localStorage` เป็น JSON object ภายใต้ key `cstu_preferences` และโหลดกลับมาทั้งหมดเมื่อเปิดหน้า Preferences อีกครั้ง
-- **เงื่อนไขการตรวจสอบ**:
-  - ค่าแต่ละด้านต้องเป็นตัวเลขจำนวนเต็มที่อยู่ในช่วง `1..maxRating`
-  - หากไฟล์ localStorage ผิดรูปแบบหรือมีค่าผิด จะแสดงข้อความแจ้งเตือนและไม่บันทึกค่าดังกล่าว
-  - เมื่อมีการเปลี่ยนค่าแต่ละหัวข้อ UI จะอัปเดตสถานะ hearts ให้ตรงกับช่วงที่เลือกทันที
+---
+
+### U8: คำนวณและแสดงผลความเข้ากันได้รายบุคคล (Match Score)
+
+- **Endpoint:** `GET /api/courses/{courseId}/sections/{sectionId}/match-score`
+- **คำอธิบาย:** คำนวณคะแนน Match Score เปรียบเทียบความชอบของผู้เรียน (U7) กับประวัติคะแนนรีวิวของเซกชัน (U6)
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Student as TU Student
+    participant View as CourseDetailView<br/>(Boundary)
+    participant Ctrl as MatchScoreController<br/>(Control)
+    participant Svc as MatchScoreService<br/>(Control)
+    participant PrefRepo as UserPreferencesRepository<br/>(Entity)
+    participant ScoreRepo as MatchScoreRepository<br/>(Entity)
+    participant DB as PostgreSQL Database<br/>(Entity)
+
+    Student->>View: 1. เลือกดูรายละเอียด Section
+    activate View
+    View->>Ctrl: 2. GET /api/courses/{courseId}/sections/{sectionId}/match-score
+    activate Ctrl
+
+    Ctrl->>Svc: 3. calculateScore(studentId, courseId, sectionId)
+    activate Svc
+
+    Svc->>PrefRepo: 4. findByUserId(userId)
+    activate PrefRepo
+    PrefRepo->>DB: 5. SELECT FROM user_preferences WHERE user_id = ?
+    activate DB
+    DB-->>PrefRepo: 6. return UserPreferences
+    deactivate DB
+    PrefRepo-->>Svc: 7. return preferences
+    deactivate PrefRepo
+
+    Svc->>ScoreRepo: 8. getSectionRatings(courseId, sectionId)
+    activate ScoreRepo
+    ScoreRepo->>DB: 9. SELECT scores FROM review WHERE course_id = ? AND section_id = ?
+    activate DB
+    DB-->>ScoreRepo: 10. return ratings rows
+    deactivate DB
+    ScoreRepo-->>Svc: 11. return sectionRatings
+    deactivate ScoreRepo
+
+    alt ไม่มี Preferences หรือไม่มีรีวิวใน Section
+        Svc-->>Ctrl: 12. return MatchScoreResult(status: NO_DATA)
+        Ctrl-->>View: 13. 200 OK { status: "NO_DATA", score: null }
+        View-->>Student: 14. แสดงข้อความ "ยังไม่มีข้อมูลเพียงพอสำหรับคำนวณ"
+    else มีข้อมูลครบถ้วน
+        Svc->>Svc: 15. คำนวณ Round 1: สร้าง Section Profile จากเสียงส่วนใหญ่
+        Svc->>Svc: 16. คำนวณ Round 2: เปรียบเทียบ Similarity แต่ละด้าน
+        Svc-->>Ctrl: 17. return MatchScoreResult(status: READY, score, level, explanation)
+        Ctrl-->>View: 18. 200 OK { status: "READY", score: 86, level: "เข้ากันได้ดีมาก", ... }
+        View->>View: 19. renderMatchProgressBar(score)
+        View-->>Student: 20. แสดงแถบเปอร์เซ็นต์ Match Score บนหน้าจอ
+    end
+    deactivate Svc
+    deactivate Ctrl
+    deactivate View
+```
+
+---
+
+### U9: เขียนและแสดงผลรีวิวแบบปกปิดตัวตน (Anonymous Review)
+
+- **Endpoints:** `POST /api/courses/{id}/reviews` (พร้อม `isAnonymous: true`) และ `GET /api/courses/{id}/reviews`
+- **คำอธิบาย:** รุ่นพี่เลือกเขียนรีวิวแบบนิรนาม และระบบพรางรหัสนักศึกษาตามรุ่นเมื่อผู้อื่นเปิดอ่าน
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Senior as CSTU Senior (ผู้รีวิว)
+    actor Student as CSTU Student (ผู้อ่าน)
+    participant WriteView as WriteReviewView<br/>(Boundary)
+    participant DetailView as CourseDetailView<br/>(Boundary)
+    participant Ctrl as ReviewController<br/>(Control)
+    participant Svc as ReviewService<br/>(Control)
+    participant Repo as ReviewRepository<br/>(Entity)
+    participant DB as PostgreSQL Database<br/>(Entity)
+
+    Senior->>WriteView: 1. เปิดสวิตช์ "ไม่เปิดเผยตัวตน" (isAnonymous = true)
+    activate WriteView
+    Senior->>WriteView: 2. กดส่งรีวิว
+    WriteView->>Ctrl: 3. POST /api/courses/{id}/reviews { reviewText, isAnonymous: true, ... }
+    activate Ctrl
+
+    Ctrl->>Svc: 4. saveReview(review)
+    activate Svc
+    Svc->>Repo: 5. save(reviewEntity)
+    activate Repo
+    Repo->>DB: 6. INSERT INTO review (..., is_anonymous) VALUES (..., true)
+    activate DB
+    DB-->>Repo: 7. saved row
+    deactivate DB
+    Repo-->>Svc: 8. return saved Review
+    deactivate Repo
+    Svc-->>Ctrl: 9. 201 Created
+    deactivate Svc
+    Ctrl-->>WriteView: 10. 201 Created { message: "รีวิวสำเร็จ" }
+    deactivate Ctrl
+    WriteView-->>Senior: 11. แสดงหน้าต่างยืนยันบันทึกสำเร็จ
+    deactivate WriteView
+
+    Note over Student,DetailView: เมื่อนักศึกษาคนอื่นเข้ามาอ่านรีวิว
+    Student->>DetailView: 12. เปิดหน้ารายการรีวิว
+    activate DetailView
+    DetailView->>Ctrl: 13. GET /api/courses/{id}/reviews
+    activate Ctrl
+    Ctrl->>Svc: 14. getReviews(courseId)
+    activate Svc
+    Svc->>Repo: 15. findByCourseId(courseId)
+    activate Repo
+    Repo->>DB: 16. SELECT * FROM review WHERE course_id = ?
+    activate DB
+    DB-->>Repo: 17. return rows (มี flag is_anonymous)
+    deactivate DB
+    Repo-->>Svc: 18. return list
+    deactivate Repo
+
+    Svc->>Svc: 19. พรางตัวตน: สำหรับ is_anonymous = true ให้ Mask author เป็น 68******** และลบ studentId/userId ออก
+    Svc-->>Ctrl: 20. return masked review list
+    deactivate Svc
+    Ctrl-->>DetailView: 21. 200 OK [ { author: "68********", isAnonymous: true, reviewText: ... } ]
+    deactivate Ctrl
+    DetailView->>DetailView: 22. renderAnonymousBadge()
+    DetailView-->>Student: 23. แสดงรีวิวพร้อมป้าย "รีวิวนิรนาม" โดยไม่เปิดเผยชื่อจริง
+    deactivate DetailView
+```
 

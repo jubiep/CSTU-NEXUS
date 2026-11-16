@@ -2,16 +2,15 @@
 
 ส่วนติดต่อผู้ใช้งาน (Client-side Web Application) สำหรับระบบสนับสนุนการตัดสินใจเลือกเรียนและรีวิวรายวิชา CSTU NEXUS
 
-> 📖 สำหรับข้อมูลภาพรวมโปรเจกต์ และการรันฐานข้อมูล สามารถดูได้ที่ [Root README.md](../README.md)
+> 📖 **ภาพรวมระบบและสถาปัตยกรรม:** ดูได้ที่ [docs/architecture/architecture.md](../docs/architecture/architecture.md) และ [Root README.md](../README.md)
 
 ---
 
-## เทคโนโลยีที่ใช้ (Frontend Tech Stack)
-
-- **HTML5:** Semantic Elements รองรับโครงสร้างหน้าเว็บที่เข้าถึงง่าย
-- **CSS3:** Flexbox, CSS Grid, CSS Variables (`--tu-primary: #C3002F`, `--bg-color: #F8F9FA` ฯลฯ) และ Mobile-first Media Queries
-- **JavaScript (Vanilla ES6+):** ควบคุม Dynamic DOM, การเรียก REST API, Modal Dialogs และ Navigation State
-- **Icons & Assets:** Vector SVGs และ Image Assets จากดีไซน์ Figma
+## Tech Stack
+- **HTML5:** Semantic Elements สำหรับโครงสร้างเว็บ
+- **CSS3:** Flexbox, CSS Grid, CSS Variables (`--tu-primary: #C3002F`) และ Mobile-first Responsive Design
+- **JavaScript (Vanilla ES6+):** ควบคุม DOM, Event Handling, และเรียกใช้ REST API ผ่าน `fetch`
+- **Reverse Proxy:** Nginx (เสิร์ฟ static files และ reverse proxy คำขอ `/api/*` ไปยัง Backend)
 
 ---
 
@@ -19,39 +18,36 @@
 
 ```text
 frontend/
-├── pages/                    # ไฟล์หน้า HTML แต่ละหน้า
+├── pages/                    # หน้าเว็บ HTML
 │   ├── index.html            # หน้าเข้าสู่ระบบ (Login)
-│   ├── courses.html          # หน้ารายการวิชาทั้งหมด (Course Catalog)
-│   ├── course-detail.html    # หน้ารายละเอียดวิชา รีวิว และ Section Matching
-│   ├── write-review.html     # หน้าฟอร์มเขียนรีวิวรายวิชา
-│   └── profile.html          # หน้าโปรไฟล์ผู้ใช้และตั้งค่า Preferences
-│
-├── css/                      # สไตล์ชีทแยกตามการใช้งาน
-│   ├── main.css              # Global tokens, reset, typography และ Topbar component
-│   ├── login.css             # สไตล์เฉพาะหน้า Login
-│   ├── courses.css           # สไตล์หน้ารายการวิชาและการค้นหา/ตัวกรอง
-│   ├── course-detail.css     # สไตล์หน้าคะแนนรีวิว สถิติ และ Accordion sections
-│   ├── write-review.css      # สไตล์ฟอร์ม กรอกคะแนน และ Tag inputs
-│   └── profile.css           # สไตล์หน้าโปรไฟล์ผู้ใช้
-│
-├── src/                      # รูปภาพ โลโก้ และไอคอนต่างๆ
-├── app.js                    # API client และฟังก์ชันส่วนกลาง (apiRequest, requireAuth, logout ฯลฯ)
-└── README.md                 # เอกสารแนะนำ Frontend เบื้องต้น
+│   ├── courses.html          # หน้ารายการวิชาทั้งหมดและการค้นหา (Course Catalog)
+│   ├── course-detail.html    # หน้ารายละเอียดวิชา รีวิว และ Section Match Score
+│   ├── write-review.html     # หน้าฟอร์มเขียนรีวิว ให้คะแนน 5 ด้าน และโหมด Anonymous
+│   ├── preference.html       # หน้าตั้งค่าความชอบในการเรียน (Learning Preferences)
+│   └── profile.html          # หน้าโปรไฟล์ผู้ใช้และออกจากระบบ
+├── css/                      # สไตล์ชีทแยกตามแต่ละหน้าเว็บ
+├── src/                      # รูปภาพ โลโก้ และไอคอน
+├── app.js                    # API client และฟังก์ชันส่วนกลาง (apiRequest, requireAuth, Topbar)
+└── nginx.conf.template       # การตั้งค่า Nginx สำหรับ Reverse Proxy บน Docker
 ```
 
 ---
 
-## วิธีการรัน Frontend สำหรับพัฒนา (Local Development)
+## วิธีการรัน Frontend
 
-Frontend ตัวนี้สร้างด้วย Vanilla HTML/CSS/JS บริสุทธิ์ จึงสามารถรันได้ทันทีโดยไม่ต้องติดตั้ง Node.js หรือ `npm install`
+### วิธีที่ 1: รันทั้งระบบผ่าน Docker Compose (แนะนำ)
+จาก root ของ repository:
+```bash
+docker compose --env-file .env up --build
+```
+เปิด Browser ที่ **`http://localhost:3000`** (Nginx จะ proxy `/api` ไปยัง Backend อัตโนมัติ จึงไม่ต้องตั้งค่า CORS)
 
-### วิธีที่ 1: ใช้ VS Code Live Server (แนะนำ)
-1. ติดตั้งส่วนขยาย **Live Server** ใน VS Code
-2. คลิกขวาที่ไฟล์ [`pages/index.html`](file:///C:/uni/CSTU-NEXUS/frontend/pages/index.html)
-3. เลือก **"Open with Live Server"**
+### วิธีที่ 2: ใช้ VS Code Live Server (สำหรับ Local Dev)
+1. ติดตั้ง Extension **Live Server** ใน VS Code
+2. คลิกขวาที่ไฟล์ `frontend/pages/index.html` → เลือก **"Open with Live Server"**
+3. หน้าเว็บจะเปิดที่ `http://localhost:5500/pages/index.html`
 
-### วิธีที่ 2: ใช้ Python Simple HTTP Server
-เปิด Terminal เข้ามาที่โฟลเดอร์ `frontend/`:
+### วิธีที่ 3: ใช้ Python Simple HTTP Server
 ```bash
 cd frontend
 python -m http.server 5500
@@ -60,62 +56,25 @@ python -m http.server 5500
 
 ---
 
-## รัน Frontend และ Backend ด้วย Docker Compose
+## ความสัมพันธ์ระหว่างหน้าเว็บและ Use Cases
 
-จาก root ของ repository ให้เตรียม `.env` แล้วรัน:
-
-```bash
-docker compose --env-file .env up -d --build
-```
-
-เปิดเว็บที่ `http://localhost:3000` หรือ `http://localhost:3000/pages/index.html`
-
-Frontend container ใช้ Nginx เสิร์ฟไฟล์ static และ reverse proxy path `/api` ไปยัง Backend service (`backend:8080`) ภายใน Docker network ทำให้ Browser เรียก API แบบ same-origin และไม่ต้องรู้จัก hostname ภายใน Docker
-
-ตัวแปรที่ปรับได้ใน `.env`:
-
-| ตัวแปร | ค่าเริ่มต้น | หน้าที่ |
-|---|---|---|
-| `FRONTEND_PORT` | `3000` | พอร์ตที่เปิดให้ Browser เข้าถึง Frontend |
-| `FRONTEND_TARGET` | `production` | Docker build target: `development` หรือ `production` |
-
-เมื่อใช้ local server ที่พอร์ตอื่น ค่า API จะใช้ `http://<frontend-host>:8080/api` อัตโนมัติ หรือกำหนด `window.CSTU_API_BASE_URL` ก่อนโหลด `app.js` เพื่อ override
-
----
-
-## ความสัมพันธ์ระหว่างหน้าเว็บและ Use Cases (U1–U5)
-
-| หน้าเว็บ | Use Case ที่เกี่ยวข้อง | REST API ที่เชื่อมต่อ | บทบาทหน้าที่ |
+| หน้าเว็บ | Use Case | REST API ที่เชื่อมต่อ | บทบาทหน้าที่ |
 |---|:---:|---|---|
-| [`index.html`](file:///c:/uni/CSTU-NEXUS/frontend/pages/index.html) | **U2** | `POST /api/auth/login` | เข้าสู่ระบบด้วย TU Authentication และรับ Session Cookie |
-| [`courses.html`](file:///c:/uni/CSTU-NEXUS/frontend/pages/courses.html) | **U4** | `GET /api/courses?keyword=&year=` | ค้นหาและคัดกรองรายวิชาตามชั้นปี |
-| [`course-detail.html`](file:///c:/uni/CSTU-NEXUS/frontend/pages/course-detail.html) | **U1, U3, U4** | `GET /api/courses/{id}`<br>`GET /api/courses/{id}/reviews`<br>`GET /api/courses/{id}/reviews/eligibility` | แสดงข้อมูลเซกชัน อาจารย์ผู้สอน ประวัติรีวิวจากรุ่นพี่ และเช็คสิทธิ์ปุ่มเขียนรีวิว |
-| [`write-review.html`](file:///c:/uni/CSTU-NEXUS/frontend/pages/write-review.html) | **U3, U5** | `GET /api/courses/{id}/reviews/eligibility`<br>`POST /api/courses/{id}/reviews` | ตรวจสอบสิทธิ์ชั้นปี และส่งฟอร์มรีวิววิชาแยกตาม Section |
-| [`profile.html`](file:///c:/uni/CSTU-NEXUS/frontend/pages/profile.html) | **U2** | `GET /api/auth/me`<br>`POST /api/auth/logout` | แสดงข้อมูลโปรไฟล์นักศึกษา และออกจากระบบ |
-
-> 📖 **ลำดับการทำงานและ Interaction:** ดูแผนผัง [Sequence Diagrams ฉบับสมบูรณ์ (U1–U5)](../docs/sequence-diagrams.md)
+| `pages/index.html` | **U2** | `POST /api/auth/login` | เข้าสู่ระบบด้วย TU Authentication และรับ Session Cookie |
+| `pages/courses.html` | **U4** | `GET /api/courses?keyword=&year=` | ค้นหาและคัดกรองรายวิชาตามชั้นปี |
+| `pages/course-detail.html` | **U1, U3, U4, U7** | `GET /api/courses/{id}`<br>`GET /api/courses/{id}/reviews`<br>`GET /api/courses/{id}/reviews/eligibility`<br>`GET /api/courses/{id}/sections/{secId}/match-score` | แสดงรายละเอียดวิชา, รายชื่อเซกชัน, สถิติรีวิว, Match Score %, และตรวจสอบสิทธิ์เขียนรีวิว |
+| `pages/write-review.html` | **U3, U5, U6** | `GET /api/courses/{id}/reviews/eligibility`<br>`POST /api/courses/{id}/reviews` | ตรวจสอบสิทธิ์ชั้นปี และส่งฟอร์มรีวิวพร้อมเกณฑ์ 5 ด้าน และตัวเลือกปิดบังตัวตน |
+| `pages/preference.html` | **U7** | `GET /api/users/preferences`<br>`PUT /api/users/preferences` | โหลดและบันทึกความชอบในการเรียน 5 ด้านของผู้ใช้ |
+| `pages/profile.html` | **U2** | `GET /api/auth/me`<br>`POST /api/auth/logout` | แสดงข้อมูลโปรไฟล์นักศึกษา และออกจากระบบ |
 
 ---
 
-## Login, Profile, Courses และ Reviews API Contract
+## การตั้งค่า API Base URL สำหรับ Local Development
 
-หน้าเว็บเรียก Backend จริงผ่าน Session Cookie แบบ HttpOnly (ปลอดภัย ไม่มีเก็บ token ลง local storage):
-
-- เมื่อเปิด Frontend ผ่าน Docker ค่า API เริ่มต้นคือ same-origin `/api` ซึ่ง Nginx จะ proxy ไปยัง Backend ไม่ว่าตั้ง host port เป็น `3000`, `3001` หรือพอร์ตอื่น ส่วน VS Code Live Server ที่พอร์ต `5500`/`5501` จะใช้ `http://<frontend-host>:8080/api`; override ได้ด้วย `window.CSTU_API_BASE_URL` **ก่อน** โหลด `app.js`
-- `POST /api/auth/login` (U2): รับ `{ "username": "6800000000", "password": "..." }` ยืนยันผ่าน TU AD Verify และสร้าง HttpOnly Session
-- `GET /api/auth/me` (U2, U3): คืนข้อมูลผู้ใช้และชั้นปีปัจจุบัน (`currentYear`) เพื่อตรวจสิทธิ์ก่อนเปิดฟอร์มรีวิว
-- `POST /api/auth/logout` (U2): ยกเลิก Session ฝั่ง Backend
-- `GET /api/courses` (U4): ดึงรายการวิชา รองรับ Query Parameters `keyword` และ `year`
-- `GET /api/courses/{id}` (U4): ดึงข้อมูลรายละเอียดวิชาและรายการ Section พร้อมอาจารย์ผู้สอน
-- `GET /api/courses/{id}/reviews` (U1): อ่านประวัติรีวิว รองรับ Query Parameter `sectionId` (คืนค่า `reviewText`, `reviewerYear`, `createdAt`)
-- `GET /api/courses/{id}/reviews/eligibility` (U3): ตรวจสอบว่าผู้ใช้มีสิทธิ์รีวิววิชานี้หรือไม่ (`studentYear > recommendedYear` และยังไม่เคยรีวิว)
-- `POST /api/courses/{id}/reviews` (U5): ส่งข้อมูลรีวิวใหม่ `{ "sectionId": "...", "reviewText": "..." }`
-- Frontend ใช้ `sessionStorage` เก็บเพียงสถานะนำทาง ไม่เก็บรหัสผ่านหรือ Application Key
-- ค่า `year` คำนวณจากเลขสองหลักแรกของรหัสนักศึกษาเทียบกับปี พ.ศ. ปัจจุบัน (เช่น รหัสขึ้นต้น `68` ในปี พ.ศ. 2569 คือชั้นปี 2)
-
-ตัวอย่างตั้ง API URL สำหรับ local development (วางก่อน `<script src="../app.js"></script>` ในหน้า):
+กรณีเปิดหน้าเว็บผ่าน Live Server (พอร์ต 5500) สามารถระบุ URL ชี้ไปยัง Backend Spring Boot (พอร์ต 8080) ได้โดยใส่ Script ไว้ก่อนโหลด `app.js`:
 
 ```html
 <script>window.CSTU_API_BASE_URL = "http://localhost:8080/api";</script>
+<script src="../app.js"></script>
 ```
-ตั้ง `TU_API_APPLICATION_KEY` ในไฟล์ `.env` หรือ environment ของ **backend เท่านั้น** ก่อนรัน Spring Boot ดูขั้นตอนใน [คู่มือ Backend](../backend/README.md) ห้ามนำ Application Key ไปใส่ใน `app.js`, HTML หรือ commit ลง Git
+*(หากรันผ่าน Docker Compose บนพอร์ต 3000 ระบบจะใช้ same-origin `/api` อัตโนมัติ)*
