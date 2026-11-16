@@ -438,6 +438,7 @@ sequenceDiagram
 - **Endpoint / Storage:** Frontend local save via `localStorage` key `cstu_preferences`; ใช้ในภายหลังเพื่อคำนวณ Match Score กับ Section
 - **คำอธิบาย:** นักศึกษาเปิดหน้ากำหนดความชอบในการเรียน โดยเลือกค่าใน 5 มิติหลัก: แนวทางการสอน, สัดส่วนการวัดผล, ความเร็วในการสอน, รูปแบบงาน, และปริมาณงาน พร้อมตรวจสอบค่าที่เลือกก่อนบันทึกลง storage เพื่อใช้ในระบบแนะนำ Section ต่อไป
 
+```mermaid
 sequenceDiagram
     autonumber
     actor Student as TU Student
@@ -479,23 +480,7 @@ sequenceDiagram
         View-->>Student: 17. แสดงข้อความ "บันทึกเสร็จสิ้น"
     end
     deactivate View
-
-    opt นักศึกษาเปิดใช้งานระบบ Match Score / Recommendation ภายหลัง
-        Student->>View: 18. เปิดหน้าแนะนำ Section หรือดูผล Match Score
-        View->>Ctrl: 19. loadStudentPreferences()
-        activate Ctrl
-        Ctrl->>Store: 20. getItem("cstu_preferences")
-        activate Store
-        Store-->>Ctrl: 21. return preference values
-        deactivate Store
-        Ctrl->>Match: 22. calculateMatchScore(preferences, sectionReviews)
-        activate Match
-        Match-->>Ctrl: 23. return matchPercentage
-        deactivate Match
-        Ctrl-->>View: 24. renderRecommendedSections(matchPercentage)
-        deactivate Ctrl
-        View-->>Student: 25. แสดง Section ที่เหมาะสมตามความชอบและปริมาณงาน
-    end
+```
 
 #### ลักษณะข้อมูลความชอบที่บันทึก
 - **แนวทางการสอน (`teachingApproach`)**: 1-3 (เน้นทฤษฎี → เน้นปฏิบัติ)

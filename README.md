@@ -33,7 +33,6 @@
 | **Sequence Diagrams** | [docs/architecture/sequence-diagrams.md](docs/architecture/sequence-diagrams.md) | แผนภาพลำดับการทำงาน U1–U9 ทั้งหมด |
 | **Database & ER Mapping** | [docs/architecture/entity-database-table-mapping.md](docs/architecture/entity-database-table-mapping.md) | แผนผัง ER Diagram, ตารางฐานข้อมูล, API-DAO Mapping, และสิทธิ์ |
 | **API Specifications** | [docs/api/](docs/api/) | ข้อกำหนด API สำหรับการตั้งค่าความชอบ, Match Score และรีวิวแบบปิดบังตัวตน |
-| **Recommended Diagrams** | [docs/architecture/recommended-diagrams.md](docs/architecture/recommended-diagrams.md) | แผนภาพแนะนำเพิ่มเติม (Component, Activity, และ State Machine Diagrams) |
 | **Documentation Index** | [docs/README.md](docs/README.md) | สารบัญรวมเอกสารทั้งหมดจัดหมวดหมู่อย่างเป็นระเบียบ |
 
 ---

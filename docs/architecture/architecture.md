@@ -108,7 +108,7 @@ sequenceDiagram
     alt ตรวจสอบผ่าน (เป็นนักศึกษา CSTU)
         TuSvc-->>Back: 6. ข้อมูล AuthUser พร้อมคำนวณชั้นปี
         Back->>Session: 7. บันทึก AuthUser ลงใน Session
-        Back-->>Front: 8. 200 OK (Set-Cookie: JSESSIONID; HttpOnly; SameSite=Lax)
+        Back-->>Front: 8. 200 OK (Set-Cookie: JSESSIONID, HttpOnly, SameSite=Lax)
         Front-->>Student: 9. นำทางเข้าสู่หน้า Courses
     else ตรวจสอบไม่ผ่าน / ไม่ใช่นักศึกษา CSTU
         Back-->>Front: 8. 401 Unauthorized หรือ 403 Forbidden

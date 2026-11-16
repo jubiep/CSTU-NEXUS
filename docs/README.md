@@ -16,8 +16,7 @@ docs/
 │   ├── architecture.md        # สถาปัตยกรรมระบบ 3-Tier, BCE Pattern, Security, และ Deployment
 │   ├── use-case-and-class-diagrams.md # แผนภาพ Use Case Diagram และ Design Class Diagram (BCE)
 │   ├── sequence-diagrams.md   # Sequence Diagrams ทุก Use Case (U1–U9)
-│   ├── entity-database-table-mapping.md # ER Diagram, Database Table Mapping & API-DAO
-│   └── recommended-diagrams.md # แผนภาพแนะนำเพิ่มเติม (Component, Activity, และ State Machine)
+│   └── entity-database-table-mapping.md # ER Diagram, Database Table Mapping & API-DAO
 │
 ├── api/                       # เอกสารข้อกำหนดและสัญญาของ REST APIs (API Specifications)
 │   ├── preferences-api.md     # Learning Preferences API (GET / PUT)
@@ -51,7 +50,6 @@ docs/
 * [Use Case & Class Diagrams](architecture/use-case-and-class-diagrams.md) — แผนภาพ Use Case Diagram (U1–U9) และ Design Class Diagram ตามแพตเทิร์น BCE
 * [Sequence Diagrams](architecture/sequence-diagrams.md) — แผนภาพลำดับการทำงานและ Interaction Flow U1 ถึง U9
 * [Entity & Database Table Mapping](architecture/entity-database-table-mapping.md) — แผนภาพ ER Diagram, โครงสร้างตาราง PostgreSQL, และ Data Access Object (DAO) Mapping
-* [Recommended UML Diagrams](architecture/recommended-diagrams.md) — แผนภาพแนะนำเพิ่มเติมสำหรับส่งอาจารย์ (Component Diagram, Activity Diagrams สำหรับ Match Score และ Eligibility Check, และ State Machine Diagrams)
 
 ### 3. ข้อกำหนด API (API Specifications)
 * [Learning Preferences API](api/preferences-api.md) — ข้อกำหนดและ Schema ของ API จัดการความชอบในการเรียน 5 ด้าน
