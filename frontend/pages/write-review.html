@@ -426,6 +426,36 @@
         const currentStudentId = (user && user.studentId) || "";
         const isAnonymous = document.getElementById("review-anonymous").checked;
         const dimensionScores = typeof normalizeRatings === "function" ? normalizeRatings(ratings) : {};
+        const storedKey = `cstu_reviews_${code}`;
+        let localReviewId = null;
+        try {
+          const currentLocal = JSON.parse(localStorage.getItem(storedKey) || "[]");
+          const newReviewItem = {
+            id: Date.now(),
+            courseId: code,
+            sectionNumber: section || "",
+            sectionId: sectionId || null,
+            ...(isAnonymous ? {} : { studentId: currentStudentId }),
+            isAnonymous,
+            anonymous: isAnonymous,
+            year: (user && user.year) || 2,
+            date: new Date().toLocaleDateString("th-TH", { day: "numeric", month: "numeric", year: "numeric" }).replace(/\//g, "-"),
+            tags: selectedTags.length > 0 ? selectedTags : ["เน้นทฤษฎี"],
+            ratings: ratings,
+            scores: dimensionScores,
+            text: text,
+            comment: text
+          };
+          localReviewId = newReviewItem.id;
+          currentLocal.unshift(newReviewItem);
+          localStorage.setItem(storedKey, JSON.stringify(currentLocal));
+          if (currentStudentId) {
+            localStorage.setItem(`cstu_reviewed_${code}_${currentStudentId}`, "true");
+          }
+        } catch (storageErr) {
+          console.warn("Could not save to localStorage:", storageErr);
+        }
+
         submitBtn.disabled = true;
         submitBtn.textContent = "กำลังส่ง...";
 
@@ -460,31 +490,17 @@
             });
           }
 
+          // Backend บันทึกแล้ว: ลบสำเนาชั่วคราวใน localStorage เพื่อไม่ให้รีวิวขึ้นซ้ำ 2 อัน
           try {
-            const storedKey = `cstu_reviews_${code}`;
-            const currentLocal = JSON.parse(localStorage.getItem(storedKey) || "[]");
-            currentLocal.unshift({
-              id: Date.now(),
-              courseId: code,
-              sectionNumber: section || "",
-              sectionId: sectionId || null,
-              ...(isAnonymous ? {} : { studentId: currentStudentId }),
-              isAnonymous,
-              anonymous: isAnonymous,
-              year: (user && user.year) || 2,
-              date: new Date().toLocaleDateString("th-TH", { day: "numeric", month: "numeric", year: "numeric" }).replace(/\//g, "-"),
-              tags: selectedTags,
-              ratings,
-              scores: dimensionScores,
-              text,
-              comment: text
-            });
-            localStorage.setItem(storedKey, JSON.stringify(currentLocal));
-            if (currentStudentId) {
-              localStorage.setItem(`cstu_reviewed_${code}_${currentStudentId}`, "true");
-            }
+            const remaining = JSON.parse(localStorage.getItem(storedKey) || "[]")
+              .filter(item => item.id !== localReviewId);
+            localStorage.setItem(storedKey, JSON.stringify(remaining));
           } catch (storageErr) {
-            console.warn("Could not save successful review to localStorage:", storageErr);
+            console.warn("Could not clean up temporary review:", storageErr);
+          }
+
+          if (currentStudentId) {
+            localStorage.setItem(`cstu_reviewed_${code}_${currentStudentId}`, "true");
           }
           alreadyReviewed = true;
           document.getElementById("success-modal").classList.add("show");

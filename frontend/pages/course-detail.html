@@ -73,7 +73,7 @@
             <div id="match-score-details-list" class="match-score-details-list"></div>
           </details>
           <p id="match-score-explanation" class="match-score-explanation"></p>
-          <p class="match-score-disclaimer">คะแนนคำนวณจากข้อมูล Preferences และรีวิวของ Section ใช้ประกอบการตัดสินใจได้ แต่ไม่ใช่การรับประกันผลการเรียน</p>
+          <p class="match-score-disclaimer">คำนวณจาก Preferences และรีวิวของ Section ใช้ประกอบการตัดสินใจเท่านั้น</p>
         </div>
       </section>
 
@@ -465,7 +465,9 @@
       level.textContent = result.level || "";
       progress.setAttribute("aria-valuenow", String(score));
       progressFill.style.width = `${score}%`;
-      progressFill.dataset.level = score >= 80 ? "high" : score >= 60 ? "medium" : "low";
+      // ตั้งระดับสีที่ตัวกล่องสรุป เพื่อให้ตัวเลขและหลอดใช้สีเดียวกัน (เขียว/เหลือง/แดง)
+      document.querySelector(".match-score-summary").dataset.level =
+        score >= 80 ? "high" : score >= 60 ? "medium" : "low";
       coverage.textContent = `อ้างอิง ${result.sectionReviewCount} รีวิว · ใช้ข้อมูลได้ ${result.availableFactorCount}/${result.totalFactorCount} ด้าน (${result.coveragePercentage}%)`;
       document.getElementById("match-score-explanation").textContent = result.explanation || "";
 
@@ -665,10 +667,23 @@
       const mergeReviewsWithoutDuplicates = (preferred, fallback) => {
         const merged = [];
         const seenStudents = new Set();
+        const seenSignatures = new Set();
         [...preferred, ...fallback].forEach(review => {
           const studentId = String(review.studentId || review.authorStudentId || "").trim();
           if (studentId && seenStudents.has(studentId)) return;
           if (studentId) seenStudents.add(studentId);
+
+          // รีวิวแบบปกปิดไม่มี studentId จึงใช้ลายเซ็นจาก Section + ชั้นปี + ข้อความแทน
+          // ป้องกันสำเนาใน localStorage ซ้ำกับรีวิวที่ Backend ส่งกลับมา
+          if (!studentId) {
+            const signature = [
+              String(review.sectionNumber || review.sectionId || "").split("_").pop(),
+              String(review.reviewerYear || review.year || ""),
+              String(review.text || review.comment || "").trim()
+            ].join("|");
+            if (seenSignatures.has(signature)) return;
+            seenSignatures.add(signature);
+          }
           merged.push(review);
         });
         return merged;
