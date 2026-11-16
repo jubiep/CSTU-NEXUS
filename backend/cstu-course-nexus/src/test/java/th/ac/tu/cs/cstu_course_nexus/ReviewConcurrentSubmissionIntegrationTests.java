@@ -1,6 +1,7 @@
 package th.ac.tu.cs.cstu_course_nexus;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.doReturn;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
@@ -95,6 +96,55 @@ class ReviewConcurrentSubmissionIntegrationTests {
         } finally {
             executor.shutdownNow();
         }
+    }
+
+    @Test
+    void validU6ScoresPersistAllFiveDimensions() throws Exception {
+        MvcResult result = mockMvc.perform(post("/api/courses/{id}/reviews", COURSE_ID)
+                        .session(session)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"sectionId":"RV11_TEST_SEC01","reviewText":"U6 score persistence",
+                                 "teachingMethodScore":0.0,"evaluationScore":50.0,
+                                 "teachingSpeedScore":100.0,"assignmentStyleScore":50.0,
+                                 "workloadScore":0.0}
+                                """))
+                .andReturn();
+
+        assertEquals(201, result.getResponse().getStatus());
+        var savedScores = jdbcTemplate.queryForMap(
+                "SELECT teaching_method_score, evaluation_score, teaching_speed_score, assignment_style_score, workload_score, review_text FROM review WHERE course_id = ? AND user_id = ?",
+                COURSE_ID, USER_ID);
+        assertEquals(0.0, ((Number) savedScores.get("teaching_method_score")).doubleValue());
+        assertEquals(50.0, ((Number) savedScores.get("evaluation_score")).doubleValue());
+        assertEquals(100.0, ((Number) savedScores.get("teaching_speed_score")).doubleValue());
+        assertEquals(50.0, ((Number) savedScores.get("assignment_style_score")).doubleValue());
+        assertEquals(0.0, ((Number) savedScores.get("workload_score")).doubleValue());
+        assertEquals("U6 score persistence", savedScores.get("review_text"));
+    }
+
+    @Test
+    void partialU6ScoresPersistNullForUnsureDimensions() throws Exception {
+        MvcResult result = mockMvc.perform(post("/api/courses/{id}/reviews", COURSE_ID)
+                        .session(session)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"sectionId":"RV11_TEST_SEC01","reviewText":"U6 partial score persistence",
+                                 "teachingMethodScore":100.0,"evaluationScore":null,
+                                 "teachingSpeedScore":null,"assignmentStyleScore":0.0,
+                                 "workloadScore":null}
+                                """))
+                .andReturn();
+
+        assertEquals(201, result.getResponse().getStatus());
+        var savedScores = jdbcTemplate.queryForMap(
+                "SELECT teaching_method_score, evaluation_score, teaching_speed_score, assignment_style_score, workload_score FROM review WHERE course_id = ? AND user_id = ?",
+                COURSE_ID, USER_ID);
+        assertEquals(100.0, ((Number) savedScores.get("teaching_method_score")).doubleValue());
+        assertEquals(0.0, ((Number) savedScores.get("assignment_style_score")).doubleValue());
+        assertNull(savedScores.get("evaluation_score"));
+        assertNull(savedScores.get("teaching_speed_score"));
+        assertNull(savedScores.get("workload_score"));
     }
 
     private int submitTogether(CountDownLatch ready, CountDownLatch start) throws Exception {
