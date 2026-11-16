@@ -523,14 +523,25 @@ button:disabled,
 .match-score-section {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  margin: 0 8px 24px;
+  gap: 16px;
+  margin: 0 0 20px;
+}
+
+/* ระยะห่างระหว่างกล่อง เท่ากับ .review-list (16px) */
+#match-score-content {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+#match-score-content[hidden] {
+  display: none;
 }
 
 .match-score-state {
   margin: 8px 0;
-  color: #6b7280;
-  font-size: 13px;
+  color: var(--gray-400);
+  font-size: 14px;
   text-align: center;
 }
 
@@ -546,6 +557,18 @@ button:disabled,
   background: #fff;
   color: #c3002f;
   cursor: pointer;
+}
+
+.match-score-summary {
+  --match-color: #62bd45; /* เขียว: 80-100 */
+}
+
+.match-score-summary[data-level="medium"] {
+  --match-color: #f0bd2c; /* เหลือง: 60-79 */
+}
+
+.match-score-summary[data-level="low"] {
+  --match-color: #d73b4d; /* แดง: 0-59 */
 }
 
 .match-score-summary,
@@ -568,7 +591,7 @@ button:disabled,
 
 .match-score-value,
 .match-score-percent {
-  color: #62bd45;
+  color: var(--match-color);
   font-size: clamp(34px, 11vw, 52px);
   font-weight: 800;
   line-height: 1.1;
@@ -594,16 +617,8 @@ button:disabled,
   width: 0;
   height: 100%;
   border-radius: inherit;
-  background: #62bd45;
-  transition: width .25s ease;
-}
-
-.match-score-progress span[data-level="medium"] {
-  background: #f0bd2c;
-}
-
-.match-score-progress span[data-level="low"] {
-  background: #d73b4d;
+  background: var(--match-color);
+  transition: width .25s ease, background-color .25s ease;
 }
 
 .match-score-coverage,
@@ -629,10 +644,32 @@ button:disabled,
 }
 
 .match-score-details summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
   color: #202020;
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
+  list-style: none;
+}
+
+.match-score-details summary::-webkit-details-marker {
+  display: none;
+}
+
+/* ใช้ไอคอน chevron ชุดเดียวกับปุ่มเลือก Section */
+.match-score-details summary::after {
+  content: "";
+  flex: 0 0 14px;
+  width: 14px;
+  height: 14px;
+  background: url("../src/chevron-down-icon.png") center / contain no-repeat;
+}
+
+.match-score-details[open] summary::after {
+  background-image: url("../src/chevron-up-icon.png");
 }
 
 .match-score-details-list {

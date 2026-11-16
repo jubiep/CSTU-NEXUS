@@ -342,7 +342,7 @@
         { name: "workload", label: "ปริมาณงาน" }
       ];
 
-      // Form Validation: ตรวจสอบว่าเลือกครบทั้ง 5 หัวข้อหรือยัง เพื่อเปิด/ปิดปุ่มส่ง
+      // ตรวจความครบถ้วนตอน submit; เปิดปุ่มไว้เพื่อให้ผู้ใช้เห็น form-error
       function validateFormCompletion() {
         const submitBtn = document.querySelector(".btn-submit-review");
         if (!submitBtn) return false;
@@ -356,7 +356,7 @@
           return checked && checked.value;
         });
 
-        submitBtn.disabled = !isComplete;
+        submitBtn.disabled = false;
         return isComplete;
       }
 
@@ -406,29 +406,29 @@
           errEl.textContent = "กรุณาเลือกการประเมินให้ครบทุกหมวดหมู่";
           errEl.style.display = "block";
           errEl.scrollIntoView({ behavior: "smooth", block: "center" });
-          if (submitBtn) submitBtn.disabled = true;
           return;
         }
 
-        // ต้องมีข้อความรีวิวก่อนส่ง
+        const hasActualRating = Object.values(ratings).some(value => value !== "ไม่แน่ใจ");
+        if (!hasActualRating) {
+          errEl.textContent = "กรุณาเลือกการประเมินจริงอย่างน้อย 1 หัวข้อ";
+          errEl.style.display = "block";
+          errEl.scrollIntoView({ behavior: "smooth", block: "center" });
+          return;
+        }
+
+        // ส่งข้อความตามที่กรอก รวมถึงค่าว่าง เพื่อให้ Backend ตอบ validation 400
         const textarea = document.getElementById("review-text");
         const text = textarea ? textarea.value.trim() : "";
-        if (!text) {
-          errEl.textContent = "กรุณากรอกข้อความรีวิวก่อนส่ง";
-          errEl.style.display = "block";
-          if (textarea) textarea.focus();
-          return;
-        }
         errEl.style.display = "none";
 
-        // บันทึกรีวิวพร้อมแท็กและคะแนนสเกล 0-1 ไว้ใน localStorage เพื่อแสดงผลทันทีในหน้ารายละเอียดวิชา
+        // Prepare local review data; persist it only after the API succeeds.
         const currentStudentId = (user && user.studentId) || "";
         const isAnonymous = document.getElementById("review-anonymous").checked;
         const dimensionScores = typeof normalizeRatings === "function" ? normalizeRatings(ratings) : {};
         // ประกาศนอก try เพื่อให้ใช้ลบสำเนาใน localStorage หลังส่งขึ้น Backend สำเร็จได้
         const localReviewId = Date.now();
         try {
-          const storedKey = `cstu_reviews_${code}`;
           const currentLocal = JSON.parse(localStorage.getItem(storedKey) || "[]");
           const newReviewItem = {
             id: localReviewId,
@@ -447,6 +447,7 @@
             text: text,
             comment: text
           };
+          localReviewId = newReviewItem.id;
           currentLocal.unshift(newReviewItem);
           localStorage.setItem(storedKey, JSON.stringify(currentLocal));
           if (currentStudentId) {
@@ -488,6 +489,15 @@
                 isAnonymous
               }),
             });
+          }
+
+          // Backend บันทึกแล้ว: ลบสำเนาชั่วคราวใน localStorage เพื่อไม่ให้รีวิวขึ้นซ้ำ 2 อัน
+          try {
+            const remaining = JSON.parse(localStorage.getItem(storedKey) || "[]")
+              .filter(item => item.id !== localReviewId);
+            localStorage.setItem(storedKey, JSON.stringify(remaining));
+          } catch (storageErr) {
+            console.warn("Could not clean up temporary review:", storageErr);
           }
 
           if (currentStudentId) {
